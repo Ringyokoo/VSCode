@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Draggable Rectangles</title>
+    <style>
+        body {
+            -ms-user-select: none;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin-top: 20px;
+            margin-left: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 200px;
+            margin-bottom: 20px;
+        }
+
+        label,
+        input {
+            margin-bottom: 10px;
+        }
+
+        /* скрываем все input[type="radio"], расположенные в .tab */
+        .tab>input[type="radio"] {
+            display: none;
+        }
+
+        /* скрываем все .tab-content */
+        .tab-content {
+            display: none;
+        }
+
+        /* отображаем только тот контент, который соответствует отмеченной радоикнопки */
+        #tab-btn-1:checked~#content-1,
+        #tab-btn-2:checked~#content-2,
+        #tab-btn-3:checked~#content-3 {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Необычные случаи 700 700 450 200; 400 400 140 120 -->
+    <form id="canvasForm">
+        <label for="canvasWidth">Ширина:</label>
+        <input type="number" id="canvasWidth" value="700" required>
+        <label for="canvasHeight">Высота:</label>
+        <input type="number" id="canvasHeight" value="700" required>
+        <label for="rectWidth">Ширина прямоугольника:</label>
+        <input type="number" id="rectWidth" value="140" required>
+        <label for="rectHeight">Высота прямоугольника:</label>
+        <input type="number" id="rectHeight" value="120" required>
+        <label for="inentM">Минимальный отступ:</label>
+        <input type="number" id="inentM" value="10" required>
+        <label for="minLayer">Количество слоев</label>
+        <input type="number" id="minLayer" value="10" required>
+        <button type="button" id='plus'>+</button>
+        <!-- <button type="button" id='dob'>Добавить прямоугольник</button> -->
+        <button type="submit">Apply</button>
+    </form>
+
+    <button type="button" id="Layer1"> Слой 1</button>
+    <button type="button" id="Layer2"> Слой 2</button>
+
+    <div class="tab">
+        <input checked id="tab-btn-1" name="tab-btn" type="radio" value="">
+        <label for="tab-btn-1">Вкладка 1</label>
+        <input id="tab-btn-2" name="tab-btn" type="radio" value="">
+        <label for="tab-btn-2">Вкладка 2</label>
+        <input id="tab-btn-3" name="tab-btn" type="radio" value="">
+        <label for="tab-btn-3">Вкладка 3</label>
+        <div class="tab-content" id="content-1">
+            Содержимое 1...
+        </div>
+        <div class="tab-content" id="content-2">
+            Содержимое 2...
+        </div>
+        <div class="tab-content" id="content-3">
+            Содержимое 3...
+        </div>
+    </div>
+
+    <canvas id="myCanvas" width="800" height="800"></canvas>
+    <ul>
+        <li><strike>Стрелки 2 слева не по центру</strike></li>
+        <li><strike>Проверка на квадраты (менять стрелочки)</strike></li>
+        <li><strike>Проверка на кладку диагональную (высота среди широты) (440 420 140 120 6)</strike></li>
+        <li><strike>Менять местами при кладке при доп горизонт, допВерт</strike></li>
+        <li>Перенести все в центр</li>
+        <li><strike>Добавить отступы</strike></li>
+        <li>Запрет выхода за пределы поля</li>
+        <!-- <li></li> -->
+        <li><strike>Исправить функции getRectangles и getRectNextLevel положить в отдельную функцию проверки и
+                присвоение
+                отступов</strike></li>
+        <li>Добавить просмотр слоев (через массив rectangles) </li>
+        <li>Сохранять измененный слой руками и спрашивать при нажатии на дополнительный слой (либо на переход в другой
+            слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</li>
+        <li>Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы + добавить в
+            форму массу)</li>
+        <li>Добавить возможность перемещения нескольких объектов (выделять их, разобрать код из test.html) (?)</li>
+        <li>Приятный интерфейс</li>
+    </ul>
+
+    <script>
+        "use strict";
+
+        //Собирать все слои при нажатии на apply. При этом создавать вкладки со слоями (кнопки), где будут обтображаться все слои, их можно будет править и задавать эти исправления на другие слои например на чет или нечет. 1. Собрать все слои и отобразить их вместе. + 2. Сохронять все слои (под ними тоже, но в будущем сделать кнопку отключения всех предыдущих прямоугольников). 3. Добавить кнопку перемещения прямуокгоьников 
+
+        const form = document.getElementById('canvasForm');
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+        let selectedRectangle;
+
+        let centerX, centerY, predelX, predelY;
+        let rectWidth, rectHeight, rectCount;
+        let rectangles = [];
+        let inent;
+        let level = 1;
+        let layerNum = 0;
+        let testArr = [];
+        let arrText = ['↑', '→', '↓', '←'];
+        let dragOffsetY, dragOffsetX;
+        let rgbColor = ``;
+
+        function float2int(value) {
+            return value | 0;
+        }
+
+        function getInent(cPR) { // Нужно сделать только для новых прямоугольников, а старые не трогать, веротянее всего надо убрать большую часть глобальных переменных и поработать с аргументами :(
+            let inentYArr = [];
+            let inentXArr = [];
+            let otherColumn = rectangles[cPR].column;
+            let otherRow = -1;
+            // console.log(rectangles.at(-1).row, rectangles.at(-1).column)
+            for (let i = cPR; i < rectangles.length - 1; i++) {
+
+                if (rectangles[i + 1].column != otherColumn) {
+                    otherColumn = rectangles[i + 1].column;
+                    inentYArr.push(float2int((canvasHeight.value / 2 - rectangles[i].y - inent - rectangles[i].height / 2) / (rectangles[i].row + 2)));
+                    // console.log(rectangles[i].y, rectangles[i].column, rectangles[i].row, predelY,(predelY - rectangles[i].y) / (rectangles[i].row + 1))
+                }
+                if (otherRow != rectangles[i].row && rectangles[i].column == rectangles.at(-1).column) {
+
+                    inentXArr.push(float2int((canvasWidth.value / 2 - rectangles[i].x - inent - rectangles[i].width / 2) / (rectangles[i].column + 2)));
+                    // console.log(rectangles[i].x, rectangles[i].column, rectangles[i].row, canvasWidth.value / 2 - rectangles[i].x - rectangles[i].width / 2)
+                }
+            }
+            inentYArr.push(float2int((canvasHeight.value / 2 - rectangles.at(-1).y - inent - rectangles.at(-1).height / 2) / (rectangles.at(-1).row + 2)));
+            inentXArr.push(float2int((canvasWidth.value / 2 - rectangles.at(-1).x - inent - rectangles.at(-1).width / 2) / (rectangles.at(-1).column + 2)));
+
+            // console.log(inentYArr)
+            for (let i = cPR; i < rectangles.length; i++) {
+                rectangles[i].x += inentXArr[rectangles[i].row] * (rectangles[i].column + 1);
+                rectangles[i].y += inentYArr[rectangles[i].column] * (rectangles[i].row + 1);
+            }
+
+
+        }
+
+        function getCoord(arr) {
+            let countPastRec = rectangles.length; // Исправить 
+            let coordinateX = 0;
+            let coordinateY = 0;
+            let text = arrText[2];
+            let arrLength = arr.length;
+            arr = arr[0].map((_, colIndex) => arr.map(row => row[colIndex]));
+
+
+            for (let i = 0; i < arr.length; i++) {
+                text = arrText[2];
+                if (!rectangles?.at(-1)?.isLastlayer) {
+                    rgbColor = `rgb(${getRandomInt(255)} ${getRandomInt(255)} ${getRandomInt(255)} / 30%)`;
+                    // countPastRec = rectangles.length;
+                }
+
+                for (let j = 0; j < arr[i].length; j++) {
+                    if (arr[i][j] == 2) {
+                        changeWidthHeight();
+                        if (i == 0) {
+                            text = arrText[1];
+                        } else {
+                            text = arrText[3]
+                        }
+
+                    } else {
+                        if (j == 0) {
+                            text = arrText[2];
+                        } else {
+                            text = arrText[0]
+                        }
+                    }
+                    if (i != 0) {
+                        // Проверки (когда не все фигуры в одном положении, то расставить так чтобы не было лишних отступов)
+                        // console.log((i * arrLength) + (j + 1) - arrLength - 1 + countPastRec)
+                        if (rectangles[(i * arrLength) + (j + 1) - arrLength - 1 + countPastRec].width > rectWidth) {
+                            coordinateX = rectangles[(i * arrLength) + (j + 1) - arrLength - 1 + countPastRec].x + rectangles[(i * arrLength) + (j + 1) - arrLength - 1 + countPastRec].width - Math.floor(rectangles[(i * arrLength) + (j + 1) - arrLength - 1 + countPastRec].width - rectWidth) / 2;
+                        } else if (rectangles[(i * arrLength) + (j + 1) - arrLength - 1 + countPastRec].width < rectWidth) {
+                            coordinateX = rectangles[(i * arrLength) + (j + 1) - arrLength - 1 + countPastRec].x + rectangles[(i * arrLength) + (j + 1) - arrLength - 1 + countPastRec].width + Math.floor(rectWidth - rectangles[(i * arrLength) + (j + 1) - arrLength - 1 + countPastRec].width) / 2;
+                        } else {
+                            coordinateX = rectangles[(i * arrLength) + (j + 1) - arrLength - 1 + countPastRec].x + rectangles[(i * arrLength) + (j + 1) - arrLength - 1 + countPastRec].width;
+
+                        }
+
+
+                    } else {
+                        coordinateX = -(centerX - rectWidth / 2); // Базовый случай, когда все повернуты в 1 сторону
+                    }
+
+                    if (j == 0) {
+                        coordinateY = -(centerY - rectHeight / 2);
+                    } else {
+                        if (rectangles.at(-1).height > rectHeight) {
+                            coordinateY = rectangles.at(-1).y + rectangles.at(-1).height - Math.floor(rectangles.at(-1).height - rectHeight) / 2;
+                        } else if (rectangles.at(-1).height < rectHeight) {
+                            coordinateY = rectangles.at(-1).y + rectangles.at(-1).height + Math.floor(rectHeight - rectangles.at(-1).height) / 2;
+                        } else {
+                            coordinateY = rectangles.at(-1).y + rectangles.at(-1).height;  // Базовый случай, когда все повернуты в 1 сторону
+                        }
+                    }
+                    // if (Math.abs(coordinateX + inent) <= (centerX - rectWidth / 2) && Math.abs(coordinateY + inent) <= (centerY - rectHeight / 2)) {
+                    let a = { x: coordinateX + inent, y: coordinateY + inent, width: rectWidth, height: rectHeight, isDragging: false, isLastlayer: true, color: rgbColor, text: text, column: i, row: j, layer: level };
+                    rectangles.push(a);
+                    // } else{
+                    // console.log(i, j)
+                    //    arr[i].splice(j, 1);
+                    //    arrLength -= 1;
+                    //    break
+                    // }
+
+                    if (arr[i][j] == 2) {
+                        changeWidthHeight();
+                    }
+                }
+
+            }
+
+            rectangles = rectangles.filter((r) => (Math.abs(r.x) <= (centerX - r.width / 2) && Math.abs(r.y) <= (centerY - r.height / 2)));
+            getInent(countPastRec);
+            // console.log(rectangles)
+
+        }
+
+
+        function changeWidthHeight() {
+            let dop = rectWidth;
+            rectWidth = rectHeight;
+            rectHeight = dop;
+            predelX = centerX - rectWidth / 2;
+            predelY = centerY - rectHeight / 2;
+            // turn += 90;
+        }
+
+        let bullArr = [];
+
+        function findNumberOfRectangles(canvasWidth, canvasHeight) {
+            let plusHoriz = false;
+            let plusVert = false;
+            let max_horizontal = Math.floor((canvasWidth - inent) / (rectWidth + inent));
+            let lengthRect = max_horizontal * rectWidth;
+            let max_vertical = Math.floor((canvasHeight - inent) / (rectHeight + inent));
+            let widthRect = max_vertical * rectHeight;
+
+
+            if (lengthRect + rectHeight <= canvasWidth) {
+                plusHoriz = true;
+            }
+
+            if (widthRect + rectWidth <= canvasHeight) {
+
+                plusVert = true;
+            }
+            bullArr.push([plusHoriz, plusVert])
+            let square = lengthRect * widthRect;
+            if (max_horizontal != 0 && max_vertical != 0) {
+                testArr.push([max_horizontal, max_vertical]);
+            } else {
+                alert('Не подходящие параметры')
+            }
+
+        }
+
+
+        function evenLayer(canvasWidth, canvasHeight) {
+            changeWidthHeight();
+            findNumberOfRectangles(canvasWidth, canvasHeight);
+            changeWidthHeight();
+            let inentBetX, inentBetY;
+            let matrixRectangles = [];
+            for (let i = 0; i < testArr[1][1]; i++) {
+                let dopArr = [];
+
+                for (let j = 0; j < testArr[1][0]; j++) {
+                    dopArr.push(2);
+                }
+                matrixRectangles.push(dopArr);
+            }
+
+
+
+            if (bullArr[1][0]) {
+                for (let i = 0; i < matrixRectangles.length; i++) {
+                    matrixRectangles[i].splice(i, 0, 1);
+                }
+            }
+
+            if (bullArr[1][1]) {
+                let dopArr = [];
+                while (dopArr.length != matrixRectangles[0].length) {
+                    dopArr.push(2);
+                }
+                matrixRectangles.push(dopArr);
+                for (let i = 0; i < matrixRectangles.length; i++) {
+                    matrixRectangles[i].pop();
+                    matrixRectangles[i].splice(i, 0, 1);
+                }
+            }
+            // console.log(matrixRectangles)
+            getCoord(matrixRectangles);
+
+
+        }
+
+
+
+        function oddLayer(canvasWidth, canvasHeight) {
+            let matrixRectangles = [];
+            centerX = Math.floor(canvasWidth / 2);
+            centerY = Math.floor(canvasHeight / 2);
+            findNumberOfRectangles(canvasWidth, canvasHeight);
+            for (let i = 0; i < testArr[0][1]; i++) {
+                let dopArr = [];
+
+                for (let j = 0; j < testArr[0][0]; j++) {
+                    dopArr.push(1);
+                }
+                matrixRectangles.push(dopArr);
+            }
+            console.log(matrixRectangles)
+
+            if (bullArr[0][0]) {
+                for (let i = 0; i < matrixRectangles.length; i++) {
+                    matrixRectangles[i].splice(i, 0, 2);
+                }
+            }
+
+            if (bullArr[0][1]) {
+                let dopArr = [];
+                while (dopArr.length != matrixRectangles[0].length) {
+                    dopArr.push(1);
+                }
+                matrixRectangles.push(dopArr);
+                for (let i = 0; i < matrixRectangles.length; i++) {
+                    matrixRectangles[i].pop();
+                    matrixRectangles[i].splice(i, 0, 2);
+                }
+            }
+
+            getCoord(matrixRectangles);
+
+        }
+
+
+
+
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            rectangles = [];
+            bullArr = [];
+            testArr = [];
+            level = 1;
+
+            const canvasWidth = parseInt(document.getElementById('canvasWidth').value);
+            const canvasHeight = parseInt(document.getElementById('canvasHeight').value);
+            inent = Number(document.getElementById('inentM').value);
+            rectWidth = parseInt(document.getElementById('rectWidth').value);
+            rectHeight = parseInt(document.getElementById('rectHeight').value);
+            rectWidth = parseInt(document.getElementById('rectWidth').value);
+            let layer = parseInt(document.getElementById('minLayer').value);
+
+            // Показ всех слоев одновременно
+            for (let i = 0; i < layer; i++) {
+                for (let i = 0; i < rectangles.length; i++) {
+                    rectangles[i].isLastlayer = false;
+                }
+
+                // getRectangles(canvasWidth, canvasHeight);
+                if (level % 2 == 0) {
+                    evenLayer(canvasWidth, canvasHeight);
+                    level += 1;
+                } else {
+                    oddLayer(canvasWidth, canvasHeight);
+                    level += 1;
+                }
+            }
+            // oddLayer(canvasWidth, canvasHeight);
+            drawRectangles();
+        });
+
+        function createButton(quantity){
+            for(let i = 0; i < quantity; i++){
+                
+            }
+
+        }
+
+
+        function drawPallet() {
+            const canvasWidth = parseInt(document.getElementById('canvasWidth').value);
+            const canvasHeight = parseInt(document.getElementById('canvasHeight').value);
+            ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
+            //  ctx.translate(canvas.width / 2, canvas.height / 2);
+        }
+        Layer1.addEventListener('click', function (event) {
+            layerNum = 1;
+            drawLayer();
+        });
+
+        Layer2.addEventListener('click', function (event) {
+            layerNum = 2;
+            drawLayer();
+        });
+
+
+
+        // const element = document.querySelector('button')
+
+        // element.addEventListener('click', function (event) {
+
+        //     const canvasWidth = parseInt(document.getElementById('canvasWidth').value);
+        //     const canvasHeight = parseInt(document.getElementById('canvasHeight').value);
+        //     level += 1;
+        //     for (let i = 0; i < rectangles.length; i++) {
+        //         rectangles[i].isLastlayer = false;
+        //     }
+
+        //     // getRectangles(canvasWidth, canvasHeight);
+        //     if (level % 2 == 0) {
+        //         evenLayer(canvasWidth, canvasHeight);
+        //     } else {
+        //         oddLayer(canvasWidth, canvasHeight);
+        //     }
+        //     // getRectNextLevel();
+
+        //     drawRectangles();
+        // });
+
+        function drawLayer() {
+            let startLayer = -1;
+            let endLayer = -1;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i < rectangles.length; i++) {
+                rectangles[i].isLastlayer = false;
+                if (rectangles[i].layer == layerNum && startLayer == -1) {
+                    startLayer = i;
+                }
+                if (rectangles[i].layer == layerNum + 1 && endLayer == -1) {
+                    endLayer = i;
+                }
+            }
+
+            for (let i = startLayer; i < endLayer; i++) {
+                rectangles[i].isLastlayer = true;
+            }
+            rectangles.slice(0, endLayer).forEach(drawRectangle);
+        }
+
+
+        function drawRectangle(rect) {
+            ctx.beginPath();
+            drawPallet();
+            drawNumbers(rect);
+            drawArrow(rect);
+            ctx.rect(centerX + rect.x - rect.width / 2, centerY + rect.y - rect.height / 2, rect.width, rect.height);
+            ctx.fillStyle = rect.color;
+            ctx.fill();
+            if (!rect.isLastlayer) {
+                ctx.strokeStyle = rect.color;
+            } else {
+                ctx.strokeStyle = 'black'
+            }
+
+            ctx.stroke();
+        }
+
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * max);
+        }
+
+
+        function drawNumbers(rect) {
+            ctx.font = "15px arial";
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
+            if (!rect.isLastlayer) {
+                ctx.fillStyle = rect.color;
+            } else {
+                ctx.fillStyle = 'black'
+            }
+
+            let text = (rect.x).toString() + ', ' + (-rect.y).toString();
+            ctx.fillText(text, centerX + rect.x, centerY + rect.y);
+        }
+
+        function drawArrow(rect) {
+            ctx.font = "24px arial";
+            ctx.textBaseline = "middle";
+            if (!rect.isLastlayer) {
+                ctx.fillStyle = rect.color;
+            } else {
+                ctx.fillStyle = 'black'
+            }
+            if (rect.text == '↑') {
+                ctx.fillText(rect.text, centerX + rect.x - Math.floor(rect.width / 2) + 15, rect.y + centerY - Math.floor(rect.height / 2) + 15);
+                ctx.fillText(rect.text, centerX + rect.x + Math.floor(rect.width / 2) - 15, rect.y + centerY - Math.floor(rect.height / 2) + 15);
+            } else if (rect.text == '→') {
+                ctx.fillText(rect.text, centerX + rect.x + Math.floor(rect.width / 2) - 15, rect.y + centerY - Math.floor(rect.height / 2) + 15);
+                ctx.fillText(rect.text, centerX + rect.x + Math.floor(rect.width / 2) - 15, rect.y + centerY + Math.floor(rect.height / 2) - 15);
+
+            } else if (rect.text == '←') {
+                ctx.fillText(rect.text, centerX + rect.x - Math.floor(rect.width / 2) + 15, rect.y + centerY - Math.floor(rect.height / 2) + 15);
+                ctx.fillText(rect.text, centerX + rect.x - Math.floor(rect.width / 2) + 15, rect.y + centerY + Math.floor(rect.height / 2) - 15);
+
+            } else {
+                ctx.fillText(rect.text, centerX + rect.x - Math.floor(rect.width / 2) + 15, rect.y + centerY + Math.floor(rect.height / 2) - 15);
+                ctx.fillText(rect.text, centerX + rect.x + Math.floor(rect.width / 2) - 15, rect.y + centerY + Math.floor(rect.height / 2) - 15);
+
+            }
+
+        }
+
+        function drawRectangles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            rectangles.forEach(drawRectangle);
+        }
+
+
+
+        function getMousePos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        function isInsideRect(mousePos, rect) {
+            return mousePos.x > centerX + rect.x - rect.width / 2 &&
+                mousePos.x < centerX + rect.x + rect.width / 2 &&
+                mousePos.y > centerY + rect.y - rect.height / 2 &&
+                mousePos.y < centerY + rect.y + rect.height / 2;
+        }
+
+
+
+        canvas.addEventListener('mousedown', function (evt) {
+
+            const mousePos = getMousePos(canvas, evt);
+            rectangles.forEach(rect => {
+                if (isInsideRect(mousePos, rect) && rect.isLastlayer) {
+                    selectedRectangle = rect;
+                    dragOffsetX = mousePos.x - (centerX + rect.x);
+                    dragOffsetY = mousePos.y - (centerY + rect.y);
+                    rect.isDragging = true;
+                }
+            });
+            if (evt.button === 1) {
+                evt.preventDefault();
+                let dop = selectedRectangle.height;
+                selectedRectangle.height = selectedRectangle.width;
+                selectedRectangle.width = dop;
+                selectedRectangle.isDragging = false;
+                if (arrText.indexOf(selectedRectangle.text) + 1 < arrText.length) {
+                    selectedRectangle.text = arrText[arrText.indexOf(selectedRectangle.text) + 1];
+                } else {
+                    selectedRectangle.text = arrText[0];
+                }
+
+                drawRectangles();
+
+            }
+        });
+
+        canvas.addEventListener('mousemove', function (evt) {
+            if (selectedRectangle && selectedRectangle.isDragging) {
+                const mousePos = getMousePos(canvas, evt);
+                selectedRectangle.x = mousePos.x - centerX - dragOffsetX;
+                selectedRectangle.y = mousePos.y - centerY - dragOffsetY;
+                drawLayer();
+            }
+        });
+
+        canvas.addEventListener('mouseup', function () {
+            if (selectedRectangle) {
+                selectedRectangle.isDragging = false;
+                selectedRectangle = null;
+            }
+        });
+
+        // Инициализация при загрузке
+        form.dispatchEvent(new Event('submit'));
+    </script>
+</body>
+
+</html>
