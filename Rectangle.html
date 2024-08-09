@@ -25,27 +25,51 @@
             margin-bottom: 20px;
         }
 
-        label,
-        input {
-            margin-bottom: 10px;
+        .tab {
+            display: flex;
+            flex-wrap: wrap;
         }
 
-        /* скрываем все input[type="radio"], расположенные в .tab */
         .tab>input[type="radio"] {
             display: none;
         }
 
-        /* скрываем все .tab-content */
         .tab-content {
             display: none;
+            width: 100%;
+            margin-top: 1rem;
         }
 
-        /* отображаем только тот контент, который соответствует отмеченной радоикнопки */
-        #tab-btn-1:checked~#content-1,
+        /* #tab-btn-1:checked~#content-1,
         #tab-btn-2:checked~#content-2,
         #tab-btn-3:checked~#content-3 {
             display: block;
+        } */
+
+        .tab>label {
+            display: block;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
+            text-decoration: none;
+            color: #0d6efd;
+            border: 0;
+            border-radius: 0.375rem;
+            background: 0 0;
         }
+
+        .tab>input[type="radio"]:checked+label {
+            cursor: default;
+            color: #fff;
+            background-color: #0d6efd;
+        }
+
+        /* отображаем только тот контент, который соответствует отмеченной радоикнопки */
+        /* #tab-btn-1:checked~#content-1,
+        #tab-btn-2:checked~#content-2,
+        #tab-btn-3:checked~#content-3 {
+            display: block;
+        } */
     </style>
 </head>
 
@@ -69,26 +93,10 @@
         <button type="submit">Apply</button>
     </form>
 
-    <button type="button" id="Layer1"> Слой 1</button>
-    <button type="button" id="Layer2"> Слой 2</button>
-
     <div class="tab">
-        <input checked id="tab-btn-1" name="tab-btn" type="radio" value="">
-        <label for="tab-btn-1">Вкладка 1</label>
-        <input id="tab-btn-2" name="tab-btn" type="radio" value="">
-        <label for="tab-btn-2">Вкладка 2</label>
-        <input id="tab-btn-3" name="tab-btn" type="radio" value="">
-        <label for="tab-btn-3">Вкладка 3</label>
-        <div class="tab-content" id="content-1">
-            Содержимое 1...
-        </div>
-        <div class="tab-content" id="content-2">
-            Содержимое 2...
-        </div>
-        <div class="tab-content" id="content-3">
-            Содержимое 3...
-        </div>
     </div>
+
+    <button type="button" id="save">Save</button>
 
     <canvas id="myCanvas" width="800" height="800"></canvas>
     <ul>
@@ -103,9 +111,9 @@
         <li><strike>Исправить функции getRectangles и getRectNextLevel положить в отдельную функцию проверки и
                 присвоение
                 отступов</strike></li>
-        <li>Добавить просмотр слоев (через массив rectangles) </li>
+        <li><strike>Добавить просмотр слоев (через массив rectangles)</strike> </li> +++
         <li>Сохранять измененный слой руками и спрашивать при нажатии на дополнительный слой (либо на переход в другой
-            слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</li>
+            слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</li> +-
         <li>Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы + добавить в
             форму массу)</li>
         <li>Добавить возможность перемещения нескольких объектов (выделять их, разобрать код из test.html) (?)</li>
@@ -114,7 +122,7 @@
 
     <script>
         "use strict";
-
+        // Вероятне можно было сделать это с помощью div, (подумать об этом если это решение лучше, то переделать, если это не займет много времни. Пока оставляем все как есть)
         //Собирать все слои при нажатии на apply. При этом создавать вкладки со слоями (кнопки), где будут обтображаться все слои, их можно будет править и задавать эти исправления на другие слои например на чет или нечет. 1. Собрать все слои и отобразить их вместе. + 2. Сохронять все слои (под ними тоже, но в будущем сделать кнопку отключения всех предыдущих прямоугольников). 3. Добавить кнопку перемещения прямуокгоьников 
 
         const form = document.getElementById('canvasForm');
@@ -163,6 +171,8 @@
             for (let i = cPR; i < rectangles.length; i++) {
                 rectangles[i].x += inentXArr[rectangles[i].row] * (rectangles[i].column + 1);
                 rectangles[i].y += inentYArr[rectangles[i].column] * (rectangles[i].row + 1);
+                rectangles[i].xAuto  = rectangles[i].x;
+                rectangles[i].yAuto = rectangles[i].y;
             }
 
 
@@ -229,7 +239,7 @@
                         }
                     }
                     // if (Math.abs(coordinateX + inent) <= (centerX - rectWidth / 2) && Math.abs(coordinateY + inent) <= (centerY - rectHeight / 2)) {
-                    let a = { x: coordinateX + inent, y: coordinateY + inent, width: rectWidth, height: rectHeight, isDragging: false, isLastlayer: true, color: rgbColor, text: text, column: i, row: j, layer: level };
+                    let a = { x: coordinateX + inent, y: coordinateY + inent, width: rectWidth, height: rectHeight, isDragging: false, isLastlayer: true, color: rgbColor, text: text, column: i, row: j, layer: level, xAuto: 0, yAuto: 0 };
                     rectangles.push(a);
                     // } else{
                     // console.log(i, j)
@@ -346,7 +356,7 @@
                 }
                 matrixRectangles.push(dopArr);
             }
-            console.log(matrixRectangles)
+            // console.log(matrixRectangles)
 
             if (bullArr[0][0]) {
                 for (let i = 0; i < matrixRectangles.length; i++) {
@@ -381,6 +391,12 @@
             testArr = [];
             level = 1;
 
+            let child = tab.lastElementChild;
+            while (child) {
+                tab.removeChild(child);
+                child = tab.lastElementChild;
+            }
+
             const canvasWidth = parseInt(document.getElementById('canvasWidth').value);
             const canvasHeight = parseInt(document.getElementById('canvasHeight').value);
             inent = Number(document.getElementById('inentM').value);
@@ -404,15 +420,66 @@
                     level += 1;
                 }
             }
+
+            createButton(layer);
+            // console.log(rectangles)
             // oddLayer(canvasWidth, canvasHeight);
-            drawRectangles();
+            layerNum = layer;
+            drawLayer();
         });
 
-        function createButton(quantity){
-            for(let i = 0; i < quantity; i++){
-                
+
+        const tab = document.querySelector('.tab');
+        function createButton(quantity) {
+
+            for (let i = 1; i <= quantity; i++) {
+                // <input checked id="tab-btn-1" name="tab-btn" type="radio" value="">
+                // <label for="tab-btn-1">Вкладка 1</label>
+                const button = document.createElement('input');
+                button.setAttribute('type', 'radio');
+                button.setAttribute("checked", "");
+                button.name = "tab-bth";
+                button.id = `tab-bth-${i}`;
+                button.classList.add('btn');
+                button.addEventListener('click', () => {
+                    for(let i = 0; i < rectangles.length; i++){
+                        rectangles[i].x = rectangles[i].xAuto;
+                        
+                        rectangles[i].y = rectangles[i].yAuto;
+                    }
+                    layerNum = i;
+                    drawLayer();
+                })
+                tab.appendChild(button);
+                const label = document.createElement('label');
+                label.setAttribute("for", `tab-bth-${i}`);
+                label.innerHTML = `Слой ${i}`
+                tab.appendChild(label);
             }
 
+        }
+
+        function drawLayer() {
+            let startLayer = -1;
+            let endLayer = -1;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i < rectangles.length; i++) {
+                rectangles[i].isLastlayer = false;
+                // console.log(layerNum);
+                if (rectangles[i].layer == layerNum && startLayer == -1) {
+                    startLayer = i;
+                }
+                if (rectangles[i].layer == layerNum + 1 && endLayer == -1) {
+                    endLayer = i;
+                }
+            }
+
+            for (let i = startLayer; i < ((endLayer == -1) ? rectangles.length : endLayer); i++) {
+                // if (!rectangles[i].isLastlayer)
+                rectangles[i].isLastlayer = true;
+            }
+            // console.log(startLayer, endLayer, rectangles.length)
+            rectangles.slice(0, ((endLayer == -1) ? rectangles.length : endLayer)).forEach(drawRectangle);
         }
 
 
@@ -422,16 +489,13 @@
             ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
             //  ctx.translate(canvas.width / 2, canvas.height / 2);
         }
-        Layer1.addEventListener('click', function (event) {
-            layerNum = 1;
-            drawLayer();
-        });
 
-        Layer2.addEventListener('click', function (event) {
-            layerNum = 2;
-            drawLayer();
+        save.addEventListener('click', () => {
+            for(let i = 0; i < rectangles.length; i++){
+                rectangles[i].xAuto = rectangles[i].x;
+                rectangles[i].yAuto = rectangles[i].y;
+            }
         });
-
 
 
         // const element = document.querySelector('button')
@@ -456,25 +520,7 @@
         //     drawRectangles();
         // });
 
-        function drawLayer() {
-            let startLayer = -1;
-            let endLayer = -1;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (var i = 0; i < rectangles.length; i++) {
-                rectangles[i].isLastlayer = false;
-                if (rectangles[i].layer == layerNum && startLayer == -1) {
-                    startLayer = i;
-                }
-                if (rectangles[i].layer == layerNum + 1 && endLayer == -1) {
-                    endLayer = i;
-                }
-            }
 
-            for (let i = startLayer; i < endLayer; i++) {
-                rectangles[i].isLastlayer = true;
-            }
-            rectangles.slice(0, endLayer).forEach(drawRectangle);
-        }
 
 
         function drawRectangle(rect) {
@@ -482,7 +528,14 @@
             drawPallet();
             drawNumbers(rect);
             drawArrow(rect);
-            ctx.rect(centerX + rect.x - rect.width / 2, centerY + rect.y - rect.height / 2, rect.width, rect.height);
+            // if (rect.xDragging != -100000 || rect.yDragging != -100000) {
+            //     ctx.rect(centerX + rect.xDragging - rect.width / 2, centerY + rect.yDragging - rect.height / 2, rect.width, rect.height);
+            //     rect.xDragging = -100000;
+            //     rect.yDragging = -100000
+            // } else {
+                ctx.rect(centerX + rect.x - rect.width / 2, centerY + rect.y - rect.height / 2, rect.width, rect.height);
+            // }
+
             ctx.fillStyle = rect.color;
             ctx.fill();
             if (!rect.isLastlayer) {
@@ -587,7 +640,7 @@
                     selectedRectangle.text = arrText[0];
                 }
 
-                drawRectangles();
+                drawLayer();
 
             }
         });
@@ -595,6 +648,8 @@
         canvas.addEventListener('mousemove', function (evt) {
             if (selectedRectangle && selectedRectangle.isDragging) {
                 const mousePos = getMousePos(canvas, evt);
+                // selectedRectangle.xAuto = selectedRectangle.x;
+                // selectedRectangle.yAuto = selectedRectangle.y;
                 selectedRectangle.x = mousePos.x - centerX - dragOffsetX;
                 selectedRectangle.y = mousePos.y - centerY - dragOffsetY;
                 drawLayer();
