@@ -64,7 +64,7 @@
             background-color: #0d6efd;
         }
 
-        .saveQuestion {
+        #saveQuestion {
             border: 1px solid black;
             padding: 30px;
             width: max-content;
@@ -83,15 +83,15 @@
     <!-- Необычные случаи 700 700 450 200; 400 400 140 120 -->
     <form id="canvasForm">
         <label for="canvasWidth">Ширина:</label>
-        <input type="number" id="canvasWidth" value="700" required>
+        <input type="number" id="canvasWidth" value="600" required>
         <label for="canvasHeight">Высота:</label>
-        <input type="number" id="canvasHeight" value="700" required>
+        <input type="number" id="canvasHeight" value="600" required>
         <label for="rectWidth">Ширина прямоугольника:</label>
         <input type="number" id="rectWidth" value="140" required>
         <label for="rectHeight">Высота прямоугольника:</label>
-        <input type="number" id="rectHeight" value="120" required>
+        <input type="number" id="rectHeight" value="180" required>
         <label for="inentM">Минимальный отступ:</label>
-        <input type="number" id="inentM" value="50" required>
+        <input type="number" id="inentM" value="30" required>
         <label for="minLayer">Количество слоев</label>
         <input type="number" id="minLayer" value="2" required>
         <button type="button" id='plus'>+</button>
@@ -110,7 +110,7 @@
         <li><strike>Проверка на квадраты (менять стрелочки)</strike></li>
         <li><strike>Проверка на кладку диагональную (высота среди широты) (440 420 140 120 6)</strike></li>
         <li><strike>Менять местами при кладке при доп горизонт, допВерт</strike></li>
-        <li><strike>Перенести все в центр</strike></li> + 
+        <li><strike>Перенести все в центр</strike></li> +
         <li><strike>Добавить отступы</strike></li>
         <li><strike>Запрет выхода за пределы поля</strike></li> +
         <!-- <li></li> -->
@@ -120,16 +120,17 @@
         <li><strike>Добавить просмотр слоев (через массив rectangles)</strike> </li>
         <li>Сохранять измененный слой руками и спрашивать при нажатии на дополнительный слой (либо на переход в другой
             слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</li> +-
+        <li>Изменение масштаба либо окна (canvas) при изменении паллета</li>
         <li>Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы + добавить в
             форму массу)</li>
         <li>Добавить возможность перемещения нескольких объектов (выделять их, разобрать код из test.html) (?)</li>
         <li>Приятный интерфейс</li>
     </ul>
 
-    <div class="saveQuestion">
+    <div id="saveQuestion">
         <p>Сохранить изменения?</p>
-        <button type="input">Да</button>
-        <button type="input">Нет</button>
+        <button type="button" id="notSave">Нет</button>
+        <!-- <button type="button" id="save">Да</button> -->
     </div>
 
     <script>
@@ -152,8 +153,8 @@
         let arrText = ['↑', '→', '↓', '←'];
         let dragOffsetY, dragOffsetX;
         let rgbColor = ``;
-        let dopCenterX = ( parseInt(document.getElementById('myCanvas').width) - parseInt(document.getElementById('canvasWidth').value)) / 2;
-        let dopCenterY = (parseInt(document.getElementById('myCanvas').height) -  parseInt(document.getElementById('canvasHeight').value)) / 2;
+        let dopCenterX = (parseInt(document.getElementById('myCanvas').width) - parseInt(document.getElementById('canvasWidth').value)) / 2;
+        let dopCenterY = (parseInt(document.getElementById('myCanvas').height) - parseInt(document.getElementById('canvasHeight').value)) / 2;
         // let dopCenterX = 0;
         // let dopCenterY = 0;
 
@@ -161,7 +162,7 @@
             return value | 0; // Побитывая операция
         }
 
-        function getInent(cPR) { 
+        function getInent(cPR) {
             let inentYArr = [];
             let inentXArr = [];
             let otherColumn = rectangles[cPR].column;
@@ -184,9 +185,10 @@
             inentXArr.push(float2int((canvasWidth.value / 2 - rectangles.at(-1).x - inent - rectangles.at(-1).width / 2) / (rectangles.at(-1).column + 2)));
 
             // console.log(inentYArr)
+            // console.log(inentXArr)
             for (let i = cPR; i < rectangles.length; i++) {
-                rectangles[i].x += ((inentXArr[rectangles[i].row] < inent) ?  inent : inentXArr[rectangles[i].row] * (rectangles[i].column + 1)) + dopCenterX;
-                rectangles[i].y += ((inentYArr[rectangles[i].column] < inent) ? inent : inentYArr[rectangles[i].column] * (rectangles[i].row + 1)) + dopCenterY;
+                rectangles[i].x += ((inentXArr[rectangles[i].row] < 0) ? 0 : inentXArr[rectangles[i].row] * (rectangles[i].column + 1));
+                rectangles[i].y += ((inentYArr[rectangles[i].column] < 0) ? 0 : inentYArr[rectangles[i].column] * (rectangles[i].row + 1));
                 rectangles[i].xAuto = rectangles[i].x;
                 rectangles[i].yAuto = rectangles[i].y;
             }
@@ -240,11 +242,11 @@
 
 
                     } else {
-                        coordinateX = -(centerX - rectWidth / 2); // Базовый случай, когда все повернуты в 1 сторону
+                        coordinateX = -(centerX - rectWidth / 2) + dopCenterX; // Базовый случай, когда все повернуты в 1 сторону
                     }
 
                     if (j == 0) {
-                        coordinateY = -(centerY - rectHeight / 2);
+                        coordinateY = -(centerY - rectHeight / 2) + dopCenterY;
                     } else {
                         if (rectangles.at(-1).height > rectHeight) {
                             coordinateY = rectangles.at(-1).y + rectangles.at(-1).height - Math.floor(rectangles.at(-1).height - rectHeight) / 2;
@@ -255,7 +257,7 @@
                         }
                     }
                     // if (Math.abs(coordinateX + inent) <= (centerX - rectWidth / 2) && Math.abs(coordinateY + inent) <= (centerY - rectHeight / 2)) {
-                    let a = { x: coordinateX + inent , y: coordinateY + inent  , width: rectWidth, height: rectHeight, isDragging: false, isLastlayer: true, color: rgbColor, text: text, column: i, row: j, layer: level, xAuto: 0, yAuto: 0 };
+                    let a = { x: coordinateX + inent, y: coordinateY + inent, width: rectWidth, height: rectHeight, isDragging: false, isLastlayer: true, color: rgbColor, text: text, column: i, row: j, layer: level, xAuto: 0, yAuto: 0 };
                     rectangles.push(a);
                     // } else{
                     // console.log(i, j)
@@ -270,9 +272,19 @@
                 }
 
             }
-            getInent(countPastRec);
-            rectangles = rectangles.filter((r) => (Math.abs(r.x) <= (centerX - r.width / 2 + dopCenterX) && Math.abs(r.y) <= (centerY - r.height / 2 +dopCenterY)));
-            // 
+
+            // getInent(countPastRec);
+            // console.log(rectangles.length, rectangles)
+            rectangles = rectangles.filter((r) => (Math.abs(r.x) + inent <= (centerX - r.width / 2 + dopCenterX) && Math.abs(r.y) + inent <= (centerY - r.height / 2 + dopCenterY)));
+           
+            console.log(rectangles)
+            // console.log()
+
+            //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            //Исправить ошибку (600б 600 140 180 30 2) с отключенным getInput работает, но случай не стандартный, надо доделать, также исправить getInent чтобы работала и с этим случаем тоже. Потому что как-то неправильно передается массив с прямоугольнирками пишет нужное кол-во а внутри больше.
+
+            // getInent(countPastRec);
+
             // console.log(rectangles)
 
         }
@@ -361,7 +373,7 @@
 
         function oddLayer(canvasWidth, canvasHeight) {
             let matrixRectangles = [];
-            centerX = Math.floor(canvasWidth / 2) ;
+            centerX = Math.floor(canvasWidth / 2);
             centerY = Math.floor(canvasHeight / 2);
             findNumberOfRectangles(canvasWidth, canvasHeight);
             for (let i = 0; i < testArr[0][1]; i++) {
@@ -464,6 +476,7 @@
                         rectangles[i].y = rectangles[i].yAuto;
                     }
                     layerNum = i;
+                    // confirm('Save iz')
                     drawLayer();
                 })
                 tab.appendChild(button);
@@ -503,7 +516,7 @@
             const canvasWidth = parseInt(document.getElementById('canvasWidth').value);
             const canvasHeight = parseInt(document.getElementById('canvasHeight').value);
             // ctx.strokeRect( 0, 0, canvasWidth, canvasHeight);
-            ctx.strokeRect( dopCenterX, dopCenterY, canvasWidth, canvasHeight);
+            ctx.strokeRect(dopCenterX, dopCenterY, canvasWidth, canvasHeight);
             //  ctx.translate(canvas.width / 2, canvas.height / 2);
         }
 
@@ -545,7 +558,7 @@
             drawPallet();
             drawNumbers(rect);
             drawArrow(rect);
-           
+
             // if (rect.xDragging != -100000 || rect.yDragging != -100000) {
             //     ctx.rect(centerX + rect.xDragging - rect.width / 2, centerY + rect.yDragging - rect.height / 2, rect.width, rect.height);
             //     rect.xDragging = -100000;
@@ -667,18 +680,18 @@
         canvas.addEventListener('mousemove', function (evt) {
             if (selectedRectangle && selectedRectangle.isDragging) {
                 const mousePos = getMousePos(canvas, evt);
-                if ((mousePos.x - centerX - dragOffsetX) > 0){
-                    selectedRectangle.x = ( (mousePos.x - centerX - dragOffsetX) > (centerX - selectedRectangle.width / 2 + dopCenterX)) ? (centerX - selectedRectangle.width / 2 + dopCenterX) : mousePos.x - centerX - dragOffsetX;
-                } else{
-                    selectedRectangle.x = ( (mousePos.x - centerX - dragOffsetX) < -(centerX - selectedRectangle.width / 2 - dopCenterX)) ? -(centerX - selectedRectangle.width / 2 - dopCenterX) : mousePos.x - centerX - dragOffsetX;
+                if ((mousePos.x - centerX - dragOffsetX) > 0) {
+                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) > (centerX - selectedRectangle.width / 2 + dopCenterX)) ? (centerX - selectedRectangle.width / 2 + dopCenterX) : mousePos.x - centerX - dragOffsetX;
+                } else {
+                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) < -(centerX - selectedRectangle.width / 2 - dopCenterX)) ? -(centerX - selectedRectangle.width / 2 - dopCenterX) : mousePos.x - centerX - dragOffsetX;
                 }
 
-                if ((mousePos.y - centerY - dragOffsetY) > 0){
-                    selectedRectangle.y = ( (mousePos.y - centerY - dragOffsetY) > (centerY - selectedRectangle.height / 2 + dopCenterY)) ? (centerY - selectedRectangle.height / 2 + dopCenterY) : mousePos.y - centerY - dragOffsetY;
-                } else{
-                    selectedRectangle.y = ( (mousePos.y - centerY - dragOffsetY) < -(centerY - selectedRectangle.height / 2 - dopCenterY)) ? -(centerY - selectedRectangle.height / 2 - dopCenterY) : mousePos.y - centerY - dragOffsetY;
+                if ((mousePos.y - centerY - dragOffsetY) > 0) {
+                    selectedRectangle.y = ((mousePos.y - centerY - dragOffsetY) > (centerY - selectedRectangle.height / 2 + dopCenterY)) ? (centerY - selectedRectangle.height / 2 + dopCenterY) : mousePos.y - centerY - dragOffsetY;
+                } else {
+                    selectedRectangle.y = ((mousePos.y - centerY - dragOffsetY) < -(centerY - selectedRectangle.height / 2 - dopCenterY)) ? -(centerY - selectedRectangle.height / 2 - dopCenterY) : mousePos.y - centerY - dragOffsetY;
                 }
-                
+
                 // selectedRectangle.y = mousePos.y - centerY - dragOffsetY;
                 drawLayer();
             }
