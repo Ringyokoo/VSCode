@@ -87,11 +87,11 @@
         <label for="canvasHeight">Высота:</label>
         <input type="number" id="canvasHeight" value="600" required>
         <label for="rectWidth">Ширина прямоугольника:</label>
-        <input type="number" id="rectWidth" value="140" required>
+        <input type="number" id="rectWidth" value="190" required>
         <label for="rectHeight">Высота прямоугольника:</label>
-        <input type="number" id="rectHeight" value="180" required>
+        <input type="number" id="rectHeight" value="120" required>
         <label for="inentM">Минимальный отступ:</label>
-        <input type="number" id="inentM" value="30" required>
+        <input type="number" id="inentM" value="10" required>
         <label for="minLayer">Количество слоев</label>
         <input type="number" id="minLayer" value="2" required>
         <button type="button" id='plus'>+</button>
@@ -172,17 +172,17 @@
 
                 if (rectangles[i + 1].column != otherColumn) {
                     otherColumn = rectangles[i + 1].column;
-                    inentYArr.push(float2int((canvasHeight.value / 2 - rectangles[i].y - inent - rectangles[i].height / 2) / (rectangles[i].row + 2)));
+                    inentYArr.push(float2int((canvasHeight.value / 2 - rectangles[i].y - inent - rectangles[i].height / 2 + dopCenterY) / (rectangles[i].row + 2)));
                     // console.log(rectangles[i].y, rectangles[i].column, rectangles[i].row, predelY,(predelY - rectangles[i].y) / (rectangles[i].row + 1))
                 }
                 if (otherRow != rectangles[i].row && rectangles[i].column == rectangles.at(-1).column) {
 
-                    inentXArr.push(float2int((canvasWidth.value / 2 - rectangles[i].x - inent - rectangles[i].width / 2) / (rectangles[i].column + 2)));
+                    inentXArr.push(float2int((canvasWidth.value / 2 - rectangles[i].x - inent - rectangles[i].width / 2 + dopCenterX) / (rectangles[i].column + 2)));
                     // console.log(rectangles[i].x, rectangles[i].column, rectangles[i].row, canvasWidth.value / 2 - rectangles[i].x - rectangles[i].width / 2)
                 }
             }
-            inentYArr.push(float2int((canvasHeight.value / 2 - rectangles.at(-1).y - inent - rectangles.at(-1).height / 2) / (rectangles.at(-1).row + 2)));
-            inentXArr.push(float2int((canvasWidth.value / 2 - rectangles.at(-1).x - inent - rectangles.at(-1).width / 2) / (rectangles.at(-1).column + 2)));
+            inentYArr.push(float2int((canvasHeight.value / 2 - rectangles.at(-1).y - inent - rectangles.at(-1).height / 2 + dopCenterY) / (rectangles.at(-1).row + 2)));
+            inentXArr.push(float2int((canvasWidth.value / 2 - rectangles.at(-1).x - inent - rectangles.at(-1).width / 2 + dopCenterX) / (rectangles.at(-1).column + 2)));
 
             // console.log(inentYArr)
             // console.log(inentXArr)
@@ -273,16 +273,30 @@
 
             }
 
-            // getInent(countPastRec);
+            getInent(countPastRec);
             // console.log(rectangles.length, rectangles)
-            rectangles = rectangles.filter((r) => (Math.abs(r.x) + inent <= (centerX - r.width / 2 + dopCenterX) && Math.abs(r.y) + inent <= (centerY - r.height / 2 + dopCenterY)));
+
+            // let dopArr =  rectangles.filter((r) => (Math.abs(r.x) + inent <= (centerX - r.width / 2 + dopCenterX) && Math.abs(r.y) + inent <= (centerY - r.height / 2 + dopCenterY)));
+            // if (dopArr.length != rectangles.length){
+            //     // console.log('jhkh')
+                let dopArr1 = rectangles.filter((r) => (Math.abs(r.x) + inent > (centerX - r.width / 2 + dopCenterX) || Math.abs(r.y) + inent > (centerY - r.height / 2 + dopCenterY)));
+            //     console.log(dopArr1)
+            //     for(let i = 0; i < dopArr1.length; i++){
+            //         console.log(dopArr1[i].row, dopArr1[i].column)
+            //     }
+            //     rectangles = dopArr
+                
+            // }
+            // (countPastRec != 0) ? countPastRec -= dopArr1.length: 0;
+            // console.log(countPastRec)
+            // rectangles = rectangles.filter((r) => (Math.abs(r.x) + inent <= (centerX - r.width / 2 + dopCenterX) && Math.abs(r.y) + inent <= (centerY - r.height / 2 + dopCenterY)));
            
-            console.log(rectangles)
+            // console.log(rectangles)
             // console.log()
 
             //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            //Исправить ошибку (600б 600 140 180 30 2) с отключенным getInput работает, но случай не стандартный, надо доделать, также исправить getInent чтобы работала и с этим случаем тоже. Потому что как-то неправильно передается массив с прямоугольнирками пишет нужное кол-во а внутри больше.
-
+            //Исправить ошибку (600 600 140 180 30 2) с отключенным getInput работает, но случай не стандартный, надо доделать, также исправить getInent чтобы работала и с этим случаем тоже. Потому что как-то неправильно передается массив с прямоугольнирками пишет нужное кол-во а внутри больше.
+            // Испраивть 600 600 190 120 10 2
             // getInent(countPastRec);
 
             // console.log(rectangles)
@@ -305,27 +319,28 @@
             let plusHoriz = false;
             let plusVert = false;
             let max_horizontal = Math.floor((canvasWidth - inent) / (rectWidth + inent));
-            let lengthRect = max_horizontal * rectWidth;
+            let lengthRect = max_horizontal * (rectWidth + inent) + inent;
             let max_vertical = Math.floor((canvasHeight - inent) / (rectHeight + inent));
-            let widthRect = max_vertical * rectHeight;
+            let widthRect = max_vertical * (rectHeight + inent) + inent;
 
 
-            if (lengthRect + rectHeight <= canvasWidth) {
+            if (lengthRect + rectHeight + inent <= canvasWidth) {
                 plusHoriz = true;
+                // console.log(max_horizontal, lengthRect, rectHeight, inent, canvasWidth)
             }
 
-            if (widthRect + rectWidth <= canvasHeight) {
+            if (widthRect + rectWidth + inent <= canvasHeight) {
 
                 plusVert = true;
             }
             bullArr.push([plusHoriz, plusVert])
-            let square = lengthRect * widthRect;
+           
             if (max_horizontal != 0 && max_vertical != 0) {
                 testArr.push([max_horizontal, max_vertical]);
             } else {
                 alert('Не подходящие параметры')
             }
-
+            // console.log(testArr)
         }
 
 
@@ -346,30 +361,44 @@
 
 
 
+            // if (bullArr[1][0]) {
+            //     for (let i = 0; i < matrixRectangles.length; i++) {
+            //         matrixRectangles[i].splice(i, 0, 1);
+            //     }
+            // }
+
+            // if (bullArr[1][1]) {
+            //     let dopArr = [];
+            //     while (dopArr.length != matrixRectangles[0].length) {
+            //         dopArr.push(2);
+            //     }
+            //     matrixRectangles.push(dopArr);
+            //     for (let i = 0; i < matrixRectangles.length; i++) {
+            //         matrixRectangles[i].pop();
+            //         matrixRectangles[i].splice(i, 0, 1);
+            //     }
+            // }
+           
+
             if (bullArr[1][0]) {
                 for (let i = 0; i < matrixRectangles.length; i++) {
-                    matrixRectangles[i].splice(i, 0, 1);
+                    matrixRectangles[i].push(1);
                 }
+            }
+            if (bullArr[1][1]){
+                let dopArr =[]
+                for (let i = 0; i < matrixRectangles[0].length; i++) {
+                    dopArr.push(1);
+                }
+                matrixRectangles.push(dopArr)
             }
 
-            if (bullArr[1][1]) {
-                let dopArr = [];
-                while (dopArr.length != matrixRectangles[0].length) {
-                    dopArr.push(2);
-                }
-                matrixRectangles.push(dopArr);
-                for (let i = 0; i < matrixRectangles.length; i++) {
-                    matrixRectangles[i].pop();
-                    matrixRectangles[i].splice(i, 0, 1);
-                }
-            }
-            // console.log(matrixRectangles)
             getCoord(matrixRectangles);
 
 
         }
 
-
+        //Проблема в том что у меня неверно выстраиваются матрицы, когда dopHoriz and dopVert
 
         function oddLayer(canvasWidth, canvasHeight) {
             let matrixRectangles = [];
@@ -384,26 +413,40 @@
                 }
                 matrixRectangles.push(dopArr);
             }
-            // console.log(matrixRectangles)
+            
+            // if (bullArr[0][0]) {
+            //     for (let i = 0; i < matrixRectangles.length; i++) {
+            //         matrixRectangles[i].splice(i, 0, 2);
+            //     }
+            // }
+
+            // if (bullArr[0][1]) {
+            //     let dopArr = [];
+            //     while (dopArr.length != matrixRectangles[0].length) {
+            //         dopArr.push(1);
+            //     }
+            //     matrixRectangles.push(dopArr);
+            //     for (let i = 0; i < matrixRectangles.length; i++) {
+            //         matrixRectangles[i].pop();
+            //         matrixRectangles[i].splice(i, 0, 2);
+            //     }
+            // }
 
             if (bullArr[0][0]) {
                 for (let i = 0; i < matrixRectangles.length; i++) {
-                    matrixRectangles[i].splice(i, 0, 2);
+                    matrixRectangles[i].push(2);
                 }
             }
-
-            if (bullArr[0][1]) {
-                let dopArr = [];
-                while (dopArr.length != matrixRectangles[0].length) {
-                    dopArr.push(1);
+            console.log(bullArr)
+            if (bullArr[0][1]){
+                let dopArr =[]
+                for (let i = 0; i < matrixRectangles[0].length; i++) {
+                    dopArr.push(2);
                 }
-                matrixRectangles.push(dopArr);
-                for (let i = 0; i < matrixRectangles.length; i++) {
-                    matrixRectangles[i].pop();
-                    matrixRectangles[i].splice(i, 0, 2);
-                }
+                matrixRectangles.push(dopArr)
             }
-
+        
+           
             getCoord(matrixRectangles);
 
         }
