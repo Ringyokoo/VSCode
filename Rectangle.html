@@ -87,13 +87,13 @@
         <label for="canvasHeight">Высота:</label>
         <input type="number" id="canvasHeight" value="600" required>
         <label for="rectWidth">Ширина прямоугольника:</label>
-        <input type="number" id="rectWidth" value="190" required>
+        <input type="number" id="rectWidth" value="145" required>
         <label for="rectHeight">Высота прямоугольника:</label>
-        <input type="number" id="rectHeight" value="120" required>
+        <input type="number" id="rectHeight" value="30" required>
         <label for="inentM">Минимальный отступ:</label>
         <input type="number" id="inentM" value="10" required>
         <label for="minLayer">Количество слоев</label>
-        <input type="number" id="minLayer" value="2" required>
+        <input type="number" id="minLayer" value="1" required>
         <button type="button" id='plus'>+</button>
         <!-- <button type="button" id='dob'>Добавить прямоугольник</button> -->
         <button type="submit">Apply</button>
@@ -203,7 +203,7 @@
             let text = arrText[2];
             let arrLength = arr.length;
             arr = arr[0].map((_, colIndex) => arr.map(row => row[colIndex]));
-
+            console.log(arr)
 
             for (let i = 0; i < arr.length; i++) {
                 text = arrText[2];
@@ -213,6 +213,9 @@
                 }
 
                 for (let j = 0; j < arr[i].length; j++) {
+                    if (arr[i][j] == undefined) {
+                        continue
+                    }
                     if (arr[i][j] == 2) {
                         changeWidthHeight();
                         if (i == 0) {
@@ -256,15 +259,10 @@
                             coordinateY = rectangles.at(-1).y + rectangles.at(-1).height;  // Базовый случай, когда все повернуты в 1 сторону
                         }
                     }
-                    // if (Math.abs(coordinateX + inent) <= (centerX - rectWidth / 2) && Math.abs(coordinateY + inent) <= (centerY - rectHeight / 2)) {
+                    
                     let a = { x: coordinateX + inent, y: coordinateY + inent, width: rectWidth, height: rectHeight, isDragging: false, isLastlayer: true, color: rgbColor, text: text, column: i, row: j, layer: level, xAuto: 0, yAuto: 0 };
                     rectangles.push(a);
-                    // } else{
-                    // console.log(i, j)
-                    //    arr[i].splice(j, 1);
-                    //    arrLength -= 1;
-                    //    break
-                    // }
+                    
 
                     if (arr[i][j] == 2) {
                         changeWidthHeight();
@@ -273,8 +271,8 @@
 
             }
 
-            getInent(countPastRec);
-            // console.log(rectangles.length, rectangles)
+            // getInent(countPastRec);
+            console.log(rectangles.length, rectangles)
 
             // let dopArr =  rectangles.filter((r) => (Math.abs(r.x) + inent <= (centerX - r.width / 2 + dopCenterX) && Math.abs(r.y) + inent <= (centerY - r.height / 2 + dopCenterY)));
             // if (dopArr.length != rectangles.length){
@@ -292,9 +290,7 @@
             // rectangles = rectangles.filter((r) => (Math.abs(r.x) + inent <= (centerX - r.width / 2 + dopCenterX) && Math.abs(r.y) + inent <= (centerY - r.height / 2 + dopCenterY)));
            
             // console.log(rectangles)
-            // console.log()
-
-            //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            //  ----------------------------------------------------------------------------------------------------------------------------------------------------------
             //Исправить ошибку (600 600 140 180 30 2) с отключенным getInput работает, но случай не стандартный, надо доделать, также исправить getInent чтобы работала и с этим случаем тоже. Потому что как-то неправильно передается массив с прямоугольнирками пишет нужное кол-во а внутри больше.
             // Испраивть 600 600 190 120 10 2
             // getInent(countPastRec);
@@ -316,8 +312,8 @@
         let bullArr = [];
 
         function findNumberOfRectangles(canvasWidth, canvasHeight) {
-            let plusHoriz = false;
-            let plusVert = false;
+            let plusHoriz = 0;
+            let plusVert = 0;
             let max_horizontal = Math.floor((canvasWidth - inent) / (rectWidth + inent));
             let lengthRect = max_horizontal * (rectWidth + inent) + inent;
             let max_vertical = Math.floor((canvasHeight - inent) / (rectHeight + inent));
@@ -325,8 +321,12 @@
 
 
             if (lengthRect + rectHeight + inent <= canvasWidth) {
-                plusHoriz = true;
-                // console.log(max_horizontal, lengthRect, rectHeight, inent, canvasWidth)
+                plusHoriz++;
+                while(lengthRect + (rectHeight + inent) * (plusHoriz + 1) <= canvasWidth){
+                    plusHoriz++;
+                    
+                }
+                // console.log(lengthRect + (rectHeight + inent) * (3), plusHoriz)
             }
 
             if (widthRect + rectWidth + inent <= canvasHeight) {
@@ -385,14 +385,16 @@
                     matrixRectangles[i].push(1);
                 }
             }
+            
             if (bullArr[1][1]){
+                console.log(testArr)
                 let dopArr =[]
-                for (let i = 0; i < matrixRectangles[0].length; i++) {
+                for (let i = 0; i < testArr[1][1]; i++) {
                     dopArr.push(1);
                 }
                 matrixRectangles.push(dopArr)
             }
-
+            // console.log(matrixRectangles)
             getCoord(matrixRectangles);
 
 
@@ -433,19 +435,23 @@
             // }
 
             if (bullArr[0][0]) {
-                for (let i = 0; i < matrixRectangles.length; i++) {
+                console.log(bullArr[0][0])
+                for (let i = 0; i < testArr[0][0]; i++) {
+                   for(let j = 0; j < bullArr[0][0]; j++){
                     matrixRectangles[i].push(2);
+                   }
+                    
                 }
             }
-            console.log(bullArr)
+            
             if (bullArr[0][1]){
                 let dopArr =[]
-                for (let i = 0; i < matrixRectangles[0].length; i++) {
+                for (let i = 0; i < testArr[0][1]; i++) {
                     dopArr.push(2);
                 }
                 matrixRectangles.push(dopArr)
             }
-        
+            // console.log(matrixRectangles)
            
             getCoord(matrixRectangles);
 
