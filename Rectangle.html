@@ -87,7 +87,7 @@
         <label for="inentM">Минимальный отступ:</label>
         <input type="number" id="inentM" value="10" required>
         <label for="minLayer">Количество слоев</label>
-        <input type="number" id="minLayer" value="3" required>
+        <input type="number" id="minLayer" value="1" required>
         <button type="button" id='plus'>+</button>
         <!-- <button type="button" id='dob'>Добавить прямоугольник</button> -->
         <button type="submit">Apply</button>
@@ -104,6 +104,7 @@
 
         <li><strike>Проверка на кладку диагональную (высота среди широты) (440 420 140 120 6)</strike></li>
         <li><strike>Менять местами при кладке при доп горизонт, допВерт</strike></li>
+        <li>Поворот окна</li>
         <li>Сохранять измененный слой руками и спрашивать при нажатии на дополнительный слой (либо на переход в другой
             слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</li> +-
         <li>Изменение масштаба либо окна (canvas) при изменении паллета</li>
@@ -149,38 +150,20 @@
         }
 
         function getInent(arr1Layer) {
-            let inentYArr = [];
-            let inentXArr = [];
-            let otherColumn = arr1Layer[0].column;
-            let otherRow = -1;
-            // console.log(rectangles.at(-1).row, rectangles.at(-1).column)
-            for (let i = 0; i < arr1Layer.length - 1; i++) {
-
-                if (arr1Layer[i + 1].column != otherColumn) {
-                    otherColumn = arr1Layer[i + 1].column;
-                    inentYArr.push(float2int((canvasHeight.value / 2 - arr1Layer[i].y - inent - arr1Layer[i].height / 2 + dopCenterY) / (arr1Layer[i].row + 2)));
-                    // console.log(arr1Layer[i].y, arr1Layer[i].column, arr1Layer[i].row, predelY,(predelY - arr1Layer[i].y) / (arr1Layer[i].row + 1))
-                }
-                if (otherRow != arr1Layer[i].row && arr1Layer[i].column == arr1Layer.at(-1).column) {
-
-                    inentXArr.push(float2int((canvasWidth.value / 2 - arr1Layer[i].x - inent - arr1Layer[i].width / 2 + dopCenterX) / (arr1Layer[i].column + 2)));
-                    // console.log(arr1Layer[i].x, arr1Layer[i].column, arr1Layer[i].row, canvasWidth.value / 2 - arr1Layer[i].x - arr1Layer[i].width / 2)
+            let dopArr = arr1Layer.filter(item => item.width != rectWidth);
+            let otherRow = dopArr[0].row;
+            let count = 0;
+            for(let i = 0; i < dopArr.length; i++){
+                if(dopArr[i + 1].row != otherRow){
+                    otherRow = dopArr[i + 1].row;
+                    count -= i;
                 }
             }
-            inentYArr.push(float2int((canvasHeight.value / 2 - arr1Layer.at(-1).y - inent - arr1Layer.at(-1).height / 2 + dopCenterY) / (arr1Layer.at(-1).row + 2)));
-            inentXArr.push(float2int((canvasWidth.value / 2 - arr1Layer.at(-1).x - inent - arr1Layer.at(-1).width / 2 + dopCenterX) / (arr1Layer.at(-1).column + 2)));
-
-            // console.log(inentYArr)
-            // console.log(inentXArr)
-            for (let i = 0; i < arr1Layer.length; i++) {
-                arr1Layer[i].x += ((inentXArr[arr1Layer[i].row] < 0) ? 0 : inentXArr[arr1Layer[i].row] * (arr1Layer[i].column + 1));
-                arr1Layer[i].y += ((inentYArr[arr1Layer[i].column] < 0) ? 0 : inentYArr[arr1Layer[i].column] * (arr1Layer[i].row + 1));
-                arr1Layer[i].xAuto = arr1Layer[i].x;
-                arr1Layer[i].yAuto = arr1Layer[i].y;
-            }
-
+            // console.log(arr1Layer.filter(item => item.width != rectWidth && item.row == 0))
 
         }
+
+        
 
         function getCoord(arr) {
             // let countPastRec = rectangles.length; // Исправить 
@@ -224,9 +207,9 @@
                         let rightIndex = arr1Layer.findIndex(item => ((flagAddVert) ? item.column == i - 1 && item.width == rectWidth : item.column == i - 1))
 
                         if (arr1Layer[rightIndex].width > rectWidth) {
-                            coordinateX = arr1Layer[rightIndex].x + arr1Layer[rightIndex].width - Math.floor(arr1Layer[rightIndex].width - rectWidth) / 2;
+                            coordinateX = arr1Layer[rightIndex].x + arr1Layer[rightIndex].width - Math.floor((arr1Layer[rightIndex].width - rectWidth) / 2);
                         } else if (arr1Layer[rightIndex].width < rectWidth) {
-                            coordinateX = arr1Layer[rightIndex].x + arr1Layer[rightIndex].width + Math.floor(rectWidth - arr1Layer[rightIndex].width) / 2;
+                            coordinateX = arr1Layer[rightIndex].x + arr1Layer[rightIndex].width + Math.floor((rectWidth - arr1Layer[rightIndex].width) / 2);
                         } else {
                             coordinateX = arr1Layer[rightIndex].x + arr1Layer[rightIndex].width;
                             // console.log((i * arrLength))
@@ -241,20 +224,22 @@
                         coordinateY = float2int(-(centerY - rectHeight / 2) + dopCenterY);
                     } else {
                         let rightIndex = arr1Layer.findIndex(item => ((flagAddHoriz) ? item.row == j - 1 && item.width == rectWidth : item.row == j - 1))
-
-
+                        
                         if (arr1Layer[rightIndex].height > rectHeight) {
-                            coordinateY = arr1Layer[rightIndex].y + arr1Layer[rightIndex].height - Math.floor(arr1Layer[rightIndex].height - rectHeight) / 2;
+                            coordinateY = arr1Layer[rightIndex].y + arr1Layer[rightIndex].height - Math.floor((arr1Layer[rightIndex].height - rectHeight) / 2);
                         } else if (arr1Layer[rightIndex].height < rectHeight) {
-                            coordinateY = arr1Layer[rightIndex].y + arr1Layer[rightIndex].height + Math.floor(rectHeight - arr1Layer[rightIndex].height) / 2;
+                            coordinateY = arr1Layer[rightIndex].y + arr1Layer[rightIndex].height + Math.floor((rectHeight - arr1Layer[rightIndex].height) / 2);
                         } else {
                             coordinateY = arr1Layer[rightIndex].y + arr1Layer[rightIndex].height;
                         }
+                        
                     }
 
                     let a = { x: coordinateX + inent, y: coordinateY + inent, width: rectWidth, height: rectHeight, isDragging: false, isLastlayer: true, color: rgbColor, text: text, column: i, row: j, layer: level, xAuto: coordinateX + inent, yAuto: coordinateY + inent };
                     arr1Layer.push(a);
-
+                    // if (arr[i][j] == 2 && !arr[i+1][j]) {
+                       
+                    // }
 
                     if (arr[i][j] == 2) {
                         changeWidthHeight();
@@ -266,7 +251,8 @@
             // getInent(arr1Layer);
 
             // rectangles = rectangles.filter((r) => (Math.abs(r.x) + inent <= (centerX - r.width / 2 - dopCenterX) && Math.abs(r.y) + inent <= (centerY - r.height / 2 - dopCenterY)));
-      
+            
+            getInent(arr1Layer);
             rectangles.push(...arr1Layer);
          
             flagAddHoriz = false;
@@ -615,10 +601,10 @@
                     rect.isDragging = true;
                 }
             });
-            if (evt.button === 1) {
+            if (evt.button === 1 && selectedRectangle) {
                 evt.preventDefault();
                 let dop = selectedRectangle.height;
-                selectedRectangle.height = selectedRectangle.width;
+                selectedRectangle.height = selectedRectangle?.width;
                 selectedRectangle.width = dop;
                 selectedRectangle.isDragging = false;
                 if (arrText.indexOf(selectedRectangle.text) + 1 < arrText.length) {
