@@ -148,22 +148,50 @@
         function float2int(value) {
             return value | 0; // Побитывая операция
         }
-
-        function getInent(arr1Layer) {
-            let dopArr = arr1Layer.filter(item => item.width != rectWidth);
-            let otherRow = dopArr[0].row;
-            let count = 0;
-            for(let i = 0; i < dopArr.length; i++){
-                if(dopArr[i + 1].row != otherRow){
-                    otherRow = dopArr[i + 1].row;
-                    count -= i;
-                }
-            }
-            // console.log(arr1Layer.filter(item => item.width != rectWidth && item.row == 0))
-
+        function filterAndSortElements(arr, widthProp, sortProp) {
+            return arr
+                .filter(item => item.width !== widthProp)
+                .sort((a, b) => a[sortProp] - b[sortProp]);
+        }
+        
+        function calculateSpacing(lastElement, element, widthOrHeightProp, positionProp, startIndex, endIndex) {
+            const totalGap = lastElement[positionProp] + float2int(lastElement[widthOrHeightProp] / 2)
+                - (element[positionProp] + float2int(element[widthOrHeightProp] / 2));
+            return float2int(totalGap / (endIndex - startIndex));
         }
 
-        
+        function updateElementPositions(arr1Layer, widthOrHeightProp, rowOrColumnProp, positionProp) {
+            // Найдите последний элемент с нужной шириной
+            const normalLastRec = arr1Layer.findLast(item => item.width === rectWidth);
+
+            // Отфильтруйте и отсортируйте элементы
+            const filteredAndSortedElements = filterAndSortElements(arr1Layer, rectWidth, rowOrColumnProp);
+
+            if (filteredAndSortedElements.length === 0) return; // Если нет элементов для обработки
+
+            let currentRowOrColumnValue = filteredAndSortedElements[0][rowOrColumnProp];
+            let startIndexOfCurrentGroup = 0;
+
+            // Обработайте элементы по группам
+            for (let i = 0; i < filteredAndSortedElements.length; i++) {
+                if (filteredAndSortedElements[i + 1]?.[rowOrColumnProp] !== currentRowOrColumnValue) {
+                    
+                    const currentGroup = filteredAndSortedElements.slice(startIndexOfCurrentGroup + 1, i + 1);
+                    const spacing = calculateSpacing(normalLastRec, filteredAndSortedElements[i], widthOrHeightProp, positionProp, startIndexOfCurrentGroup, i);
+
+                    currentGroup.forEach((item, index) => {
+                        const arrIndex = arr1Layer.indexOf(item);
+                        arr1Layer[arrIndex][positionProp] += spacing * (index + 1);
+                    });
+
+                    startIndexOfCurrentGroup = i + 1;
+                    currentRowOrColumnValue = filteredAndSortedElements[i + 1]?.[rowOrColumnProp];
+                }
+            }
+        }
+
+
+
 
         function getCoord(arr) {
             // let countPastRec = rectangles.length; // Исправить 
@@ -172,6 +200,7 @@
             let text = arrText[2];
             let arrLength = arr.length;
             let arr1Layer = [];
+            let listRowDopRec = [];
             // arr = arr[0].map((_, colIndex) => arr.map(row => row[colIndex]));
             // console.log(arr)
 
@@ -224,7 +253,7 @@
                         coordinateY = float2int(-(centerY - rectHeight / 2) + dopCenterY);
                     } else {
                         let rightIndex = arr1Layer.findIndex(item => ((flagAddHoriz) ? item.row == j - 1 && item.width == rectWidth : item.row == j - 1))
-                        
+
                         if (arr1Layer[rightIndex].height > rectHeight) {
                             coordinateY = arr1Layer[rightIndex].y + arr1Layer[rightIndex].height - Math.floor((arr1Layer[rightIndex].height - rectHeight) / 2);
                         } else if (arr1Layer[rightIndex].height < rectHeight) {
@@ -232,13 +261,13 @@
                         } else {
                             coordinateY = arr1Layer[rightIndex].y + arr1Layer[rightIndex].height;
                         }
-                        
+
                     }
 
                     let a = { x: coordinateX + inent, y: coordinateY + inent, width: rectWidth, height: rectHeight, isDragging: false, isLastlayer: true, color: rgbColor, text: text, column: i, row: j, layer: level, xAuto: coordinateX + inent, yAuto: coordinateY + inent };
                     arr1Layer.push(a);
                     // if (arr[i][j] == 2 && !arr[i+1][j]) {
-                       
+
                     // }
 
                     if (arr[i][j] == 2) {
@@ -248,13 +277,15 @@
 
             }
 
-            // getInent(arr1Layer);
-
             // rectangles = rectangles.filter((r) => (Math.abs(r.x) + inent <= (centerX - r.width / 2 - dopCenterX) && Math.abs(r.y) + inent <= (centerY - r.height / 2 - dopCenterY)));
-            
-            getInent(arr1Layer);
+            if (flagAddVert) {
+                updateElementPositions(arr1Layer, 'width', 'row', 'x');
+            }
+            if (flagAddHoriz) {
+                updateElementPositions(arr1Layer, 'height', 'column', 'y');
+            }
             rectangles.push(...arr1Layer);
-         
+
             flagAddHoriz = false;
             flagAddVert = false;
         }
@@ -425,7 +456,7 @@
                     oddLayer(canvasWidth, canvasHeight);
                     level += 1;
                 }
-                
+
             }
 
             createButton(layer);
