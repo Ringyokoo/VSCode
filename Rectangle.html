@@ -118,13 +118,13 @@
         <label for="canvasHeight">Высота:</label>
         <input type="number" id="canvasHeight" value="600" required>
         <label for="rectWidth">Ширина прямоугольника:</label>
-        <input type="number" id="rectWidth" value="145" required>
+        <input type="number" id="rectWidth" value="310" required>
         <label for="rectHeight">Высота прямоугольника:</label>
         <input type="number" id="rectHeight" value="30" required>
         <label for="inentM">Минимальный отступ:</label>
         <input type="number" id="inentM" value="10" required>
         <label for="minLayer">Количество слоев</label>
-        <input type="number" id="minLayer" value="3" required>
+        <input type="number" id="minLayer" value="1" required>
         <button type="button" id='plus'>↻</button>
         <!-- <button type="button" id='dob'>Добавить прямоугольник</button> -->
         <button type="submit">Apply</button>
@@ -140,18 +140,20 @@
         <li><strike>Проверка на кладку диагональную (высота среди широты) (440 420 140 120 6)</strike></li>
         <li><strike>Менять местами при кладке при доп горизонт, допВерт</strike></li>
         <li><strike>Поворот окна</strike></li>
-        <li><strike>Сохранять измененный слой руками и спрашивать при нажатии на дополнительный слой (либо на переход в другой
-            слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</strike></li> +-
+        <li><strike>Сохранять измененный слой руками и спрашивать при нажатии на дополнительный слой (либо на переход в
+                другой
+                слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</strike></li> +-
         <li>Изменение масштаба либо окна (canvas) при изменении паллета</li>
         <li>Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы + добавить в
             форму массу)</li>
         <li>Добавить возможность перемещения нескольких объектов (выделять их, разобрать код из test.html) (?)</li>
         <li>Приятный интерфейс</li>
         <li>700 700 450 200 10</li>
-        <li>600 600 140 120 10</li>
-        <li>600 600 145 15 10</li>
-        <li>600 600 300 30 10</li>
-        <li>600 600 450 30 10</li>
+        <li>600 600 140 120 10 ---</li>
+        <li>600 600 145 15 10 ---</li>
+        <li>600 600 310 30 10</li>
+        <li>600 600 450 30 10 спрашивать вопрос про укладку по устойчивости или по максимальной вместимости</li>
+        <li>600 600 286 120 10</li>
     </ul>
 
     <div id="saveQuestion" class="modal">
@@ -244,16 +246,20 @@
                 return float2int(-(center - rectSize / 2) + dopCenter);
             }
 
-            const rightIndex = arr1Layer.findIndex(item =>
+            let rightIndex = arr1Layer.findIndex(item =>
                 (flagAdd ? item[isVertical ? 'column' : 'row'] === (isVertical ? i - 1 : j - 1) && item[rectProp] === rectSize : item[isVertical ? 'column' : 'row'] === (isVertical ? i - 1 : j - 1))
             );
+
+            if(layingSquare && j != 0){
+                rightIndex = arr1Layer.findLastIndex(item => item[isVertical ? 'column' : 'row'] === (isVertical ? i - 1 : j - 1) );
+            }
 
             const rightItem = arr1Layer[rightIndex];
             if (!rightItem) return 0;
 
-            if (rightItem[rectProp] > rectSize) {
+            if (rightItem[rectProp] > rectSize ) {
                 return rightItem[coordProp] + rightItem[rectProp] - Math.floor((rightItem[rectProp] - rectSize) / 2);
-            } else if (rightItem[rectProp] < rectSize) {
+            } else if (rightItem[rectProp] < rectSize ) {
                 return rightItem[coordProp] + rightItem[rectProp] + Math.floor((rectSize - rightItem[rectProp]) / 2);
             } else {
                 return rightItem[coordProp] + rightItem[rectProp];
@@ -264,9 +270,11 @@
         function determineText(arr, i, j, arrText) {
             if (arr[i][j] === 2) {
                 changeWidthHeight();
-                return (i === 0) ? arrText[1] : arrText[3];
+
             }
-            return (j === 0) ? arrText[2] : arrText[0];
+            return (parseInt(document.getElementById('rectWidth').value) != rectWidth) ?
+                (i === 0) ? arrText[1] : arrText[3] :
+                (j === 0) ? arrText[2] : arrText[0];
         }
 
         // Основная функция
@@ -301,7 +309,10 @@
                         row: j,
                         layer: level,
                         xAuto: coordinateX + inent,
-                        yAuto: coordinateY + inent
+                        yAuto: coordinateY + inent,
+                        widthAuto: rectWidth,
+                        heightAuto: rectHeight,
+                        textAuto: text
                     };
 
                     arr1Layer.push(item);
@@ -322,6 +333,7 @@
 
             flagAddHoriz = false;
             flagAddVert = false;
+            layingSquare = false;
         }
 
 
@@ -390,11 +402,11 @@
             return numRectangles;
 
         }
-        function createBaseMatrix(numRows, numCols) {
-            return Array(numRows).fill().map(() => Array(numCols).fill(1));
+        function createBaseMatrix(numRows, numCols, number) {
+            return Array(numRows).fill().map(() => Array(numCols).fill(number));
         }
 
-
+        let layingSquare = false;
         function oddLayer(canvasWidth, canvasHeight) {
             // let matrixRectangles = [];
             centerX = Math.floor(canvasWidth / 2) + dopCenterX;
@@ -402,9 +414,8 @@
             let numRectangles = findNumberOfRectangles(canvasWidth, canvasHeight);
 
 
-            let differenceValues = float2int(Math.max(rectHeight, rectWidth) / Math.min(rectHeight, rectWidth));
-            // console.log(differenceValues)
-            let matrixRectangles = createBaseMatrix(numRectangles.horizontal, numRectangles.vertical);
+
+            let matrixRectangles = createBaseMatrix(numRectangles.horizontal, numRectangles.vertical, 1);
 
             let matrixLenght = matrixRectangles.length;
             // Для дополнительных горизонтальных (если одинаковое кол-во столбцов обычных и дополнительных (+1)) распределение по столбцам
@@ -425,23 +436,64 @@
             }
             // Для дополнительных вертикальных (если одинаковое кол-во столбцов обычных и дополнительных (+1)) распределение по рядам
             if (numRectangles.dopVert.vertical) {
-                flagAddVert = true;
-                matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
-                matrixLenght = matrixRectangles.length;
-                for (let i = 0; i < numRectangles.dopVert.vertical; i++) {
+                //Кладка квадратом
+                if (numRectangles.dopVert.horizontal == 1 && numRectangles.vertical == 1 && (numRectangles.dopVert.vertical > 2 || numRectangles.horizontal > 2)) {
+                    layingSquare = true;
+                    let differenceValues = numRectangles.horizontal - float2int(Math.max(rectHeight + inent, rectWidth + inent) / Math.min(rectHeight + inent, rectWidth + inent));
 
-                    let dopArr = Array(numRectangles.dopVert.horizontal).fill(2);
-                    let dopArr1 = Array(numRectangles.horizontal - numRectangles.dopVert.horizontal).fill(0);
+                    let dopArr = Array(differenceValues).fill(2);
 
-                    if (numRectangles.vertical > numRectangles.dopVert.vertical) {
-                        matrixRectangles.splice((i + 1) + matrixRectangles.length - matrixLenght, 0, dopArr.concat(dopArr1));
+                    for (let k = 0; k < numRectangles.horizontal - differenceValues; k++) {
+                        matrixRectangles.pop();
                     }
-                    else {
-                        matrixRectangles.splice((i) + matrixRectangles.length - matrixLenght, 0, dopArr.concat(dopArr1));
+
+                    for (let k = 0; k < matrixRectangles.length; k++) {
+                        matrixRectangles[k].push(...Array(differenceValues - 1).fill(0));
                     }
+
+                    matrixRectangles.splice(0, 0, dopArr);
+
+                    matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
+                    for (let k = 1; k < matrixRectangles.length; k++) {
+                        matrixRectangles[k].splice(matrixRectangles[k].length-numRectangles.dopVert.horizontal , numRectangles.dopVert.horizontal,...Array(numRectangles.dopVert.horizontal).fill(2));
+                    }
+                    dopArr = matrixRectangles[0].slice().reverse()
+                    console.log(matrixRectangles[0].slice().reverse())
+                    matrixRectangles.splice(matrixRectangles.length , 0, dopArr);
+                    console.log(matrixRectangles);
+                    matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
+                    // console.log(matrixRectangles);
+
+                    
+                   
+                }
+                //Кладка по столбцам, рядам
+                else {
+
+
+                    flagAddVert = true;
+                    matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
+                    matrixLenght = matrixRectangles.length;
+                    for (let i = 0; i < numRectangles.dopVert.vertical; i++) {
+
+                        let dopArr = Array(numRectangles.dopVert.horizontal).fill(2);
+                        let dopArr1 = Array(numRectangles.horizontal - numRectangles.dopVert.horizontal).fill(0);
+
+                        if (numRectangles.vertical > numRectangles.dopVert.vertical) {
+                            matrixRectangles.splice((i + 1) + matrixRectangles.length - matrixLenght, 0, dopArr.concat(dopArr1));
+                        }
+                        else {
+                            matrixRectangles.splice((i) + matrixRectangles.length - matrixLenght, 0, dopArr.concat(dopArr1));
+                        }
+
+                    }
+                    // matrixRectangles = [[1, 1, 1, 1, 1, 1, 2]];
+                    matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
 
                 }
-                matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
+
+                // newArr = newArr[0].map((_, colIndex) => newArr.map(row => row[colIndex]));
+                // console.log(newArr)
             }
             getCoord(matrixRectangles);
 
@@ -463,6 +515,7 @@
                 rect.y = newY;
                 rect.height = newHeight;
                 rect.width = newWidth;
+                rect.text = (arrText.indexOf(rect.text) == arrText.length - 1) ? arrText[0] : arrText[arrText.indexOf(rect.text) + 1];
             });
 
             drawLayer();
@@ -584,6 +637,10 @@
             for (let i = 0; i < rectangles.length; i++) {
                 rectangles[i].xAuto = rectangles[i].x;
                 rectangles[i].yAuto = rectangles[i].y;
+                rectangles[i].widthAuto = rectangles[i].width;
+                rectangles[i].heightAuto = rectangles[i].height;
+                rectangles[i].textAuto = rectangles[i].text;
+
             }
             saveQuestion.style.display = 'none'; // Закрываем модальное окно
             switchLayer()
@@ -594,7 +651,11 @@
             for (let i = 0; i < rectangles.length; i++) {
                 rectangles[i].x = rectangles[i].xAuto;
                 rectangles[i].y = rectangles[i].yAuto;
+                rectangles[i].width = rectangles[i].widthAuto;
+                rectangles[i].height = rectangles[i].heightAuto;
+                rectangles[i].text = rectangles[i].textAuto;
             }
+
             saveQuestion.style.display = 'none'; // Закрываем модальное окно
             switchLayer()
         });
