@@ -88,7 +88,7 @@
         <input type="number" id="inentM" value="10" required>
         <label for="minLayer">Количество слоев</label>
         <input type="number" id="minLayer" value="1" required>
-        <button type="button" id='plus'>+</button>
+        <button type="button" id='plus'>↻</button>
         <!-- <button type="button" id='dob'>Добавить прямоугольник</button> -->
         <button type="submit">Apply</button>
     </form>
@@ -104,7 +104,7 @@
 
         <li><strike>Проверка на кладку диагональную (высота среди широты) (440 420 140 120 6)</strike></li>
         <li><strike>Менять местами при кладке при доп горизонт, допВерт</strike></li>
-        <li>Поворот окна</li>
+        <li><strike>Поворот окна</strike></li>
         <li>Сохранять измененный слой руками и спрашивать при нажатии на дополнительный слой (либо на переход в другой
             слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</li> +-
         <li>Изменение масштаба либо окна (canvas) при изменении паллета</li>
@@ -153,7 +153,7 @@
                 .filter(item => item.width !== widthProp)
                 .sort((a, b) => a[sortProp] - b[sortProp]);
         }
-        
+
         function calculateSpacing(lastElement, element, widthOrHeightProp, positionProp, startIndex, endIndex) {
             const totalGap = lastElement[positionProp] + float2int(lastElement[widthOrHeightProp] / 2)
                 - (element[positionProp] + float2int(element[widthOrHeightProp] / 2));
@@ -175,7 +175,7 @@
             // Обработайте элементы по группам
             for (let i = 0; i < filteredAndSortedElements.length; i++) {
                 if (filteredAndSortedElements[i + 1]?.[rowOrColumnProp] !== currentRowOrColumnValue) {
-                    
+
                     const currentGroup = filteredAndSortedElements.slice(startIndexOfCurrentGroup + 1, i + 1);
                     const spacing = calculateSpacing(normalLastRec, filteredAndSortedElements[i], widthOrHeightProp, positionProp, startIndexOfCurrentGroup, i);
 
@@ -190,94 +190,85 @@
             }
         }
 
+        // Универсальная функция для вычисления координат
+        function calculateCoordinate(arr1Layer, i, j, rectSize, isVertical, flagAdd) {
+            const center = isVertical ? centerX : centerY;
+            const dopCenter = isVertical ? dopCenterX : dopCenterY;
+            const rectProp = isVertical ? 'width' : 'height';
+            const coordProp = isVertical ? 'x' : 'y';
 
+            if ((isVertical && i === 0) || (!isVertical && j === 0)) {
+                return float2int(-(center - rectSize / 2) + dopCenter);
+            }
 
+            const rightIndex = arr1Layer.findIndex(item =>
+                (flagAdd ? item[isVertical ? 'column' : 'row'] === (isVertical ? i - 1 : j - 1) && item[rectProp] === rectSize : item[isVertical ? 'column' : 'row'] === (isVertical ? i - 1 : j - 1))
+            );
 
+            const rightItem = arr1Layer[rightIndex];
+            if (!rightItem) return 0;
+
+            if (rightItem[rectProp] > rectSize) {
+                return rightItem[coordProp] + rightItem[rectProp] - Math.floor((rightItem[rectProp] - rectSize) / 2);
+            } else if (rightItem[rectProp] < rectSize) {
+                return rightItem[coordProp] + rightItem[rectProp] + Math.floor((rectSize - rightItem[rectProp]) / 2);
+            } else {
+                return rightItem[coordProp] + rightItem[rectProp];
+            }
+        }
+
+        // Функция для обновления текста на основе условий
+        function determineText(arr, i, j, arrText) {
+            if (arr[i][j] === 2) {
+                changeWidthHeight();
+                return (i === 0) ? arrText[1] : arrText[3];
+            }
+            return (j === 0) ? arrText[2] : arrText[0];
+        }
+
+        // Основная функция
         function getCoord(arr) {
-            // let countPastRec = rectangles.length; // Исправить 
             let coordinateX = 0;
             let coordinateY = 0;
-            let text = arrText[2];
-            let arrLength = arr.length;
             let arr1Layer = [];
-            let listRowDopRec = [];
-            // arr = arr[0].map((_, colIndex) => arr.map(row => row[colIndex]));
-            // console.log(arr)
+            let text = arrText[2];
 
             for (let i = 0; i < arr.length; i++) {
-                text = arrText[2];
                 if (!arr1Layer?.at(-1)?.isLastlayer) {
                     rgbColor = `rgb(${getRandomInt(255)} ${getRandomInt(255)} ${getRandomInt(255)} / 30%)`;
-                    // countPastRec = rectangles.length;
                 }
 
                 for (let j = 0; j < arr[i].length; j++) {
-                    if (arr[i][j] == 0) {
-                        continue
-                    }
-                    if (arr[i][j] == 2) {
-                        changeWidthHeight();
-                        if (i == 0) {
-                            text = arrText[1];
-                        } else {
-                            text = arrText[3]
-                        }
+                    if (arr[i][j] === 0) continue;
 
-                    } else {
-                        if (j == 0) {
-                            text = arrText[2];
-                        } else {
-                            text = arrText[0]
-                        }
-                    }
-                    if (i != 0) {
-                        // Проверки (когда не все фигуры в одном положении, то расставить так чтобы не было лишних отступов)
-                        // let rightIndex = (arr[i].length * (i - 1)) + j + countPastRec
-                        let rightIndex = arr1Layer.findIndex(item => ((flagAddVert) ? item.column == i - 1 && item.width == rectWidth : item.column == i - 1))
+                    text = determineText(arr, i, j, arrText);
+                    coordinateX = calculateCoordinate(arr1Layer, i, j, rectWidth, true, flagAddVert);
+                    coordinateY = calculateCoordinate(arr1Layer, i, j, rectHeight, false, flagAddHoriz);
 
-                        if (arr1Layer[rightIndex].width > rectWidth) {
-                            coordinateX = arr1Layer[rightIndex].x + arr1Layer[rightIndex].width - Math.floor((arr1Layer[rightIndex].width - rectWidth) / 2);
-                        } else if (arr1Layer[rightIndex].width < rectWidth) {
-                            coordinateX = arr1Layer[rightIndex].x + arr1Layer[rightIndex].width + Math.floor((rectWidth - arr1Layer[rightIndex].width) / 2);
-                        } else {
-                            coordinateX = arr1Layer[rightIndex].x + arr1Layer[rightIndex].width;
-                            // console.log((i * arrLength))
-                        }
+                    const item = {
+                        x: coordinateX + inent,
+                        y: coordinateY + inent,
+                        width: rectWidth,
+                        height: rectHeight,
+                        isDragging: false,
+                        isLastlayer: true,
+                        color: rgbColor,
+                        text: text,
+                        column: i,
+                        row: j,
+                        layer: level,
+                        xAuto: coordinateX + inent,
+                        yAuto: coordinateY + inent
+                    };
 
+                    arr1Layer.push(item);
 
-                    } else {
-                        coordinateX = float2int(-(centerX - rectWidth / 2) + dopCenterX);
-                    }
-
-                    if (j == 0) {
-                        coordinateY = float2int(-(centerY - rectHeight / 2) + dopCenterY);
-                    } else {
-                        let rightIndex = arr1Layer.findIndex(item => ((flagAddHoriz) ? item.row == j - 1 && item.width == rectWidth : item.row == j - 1))
-
-                        if (arr1Layer[rightIndex].height > rectHeight) {
-                            coordinateY = arr1Layer[rightIndex].y + arr1Layer[rightIndex].height - Math.floor((arr1Layer[rightIndex].height - rectHeight) / 2);
-                        } else if (arr1Layer[rightIndex].height < rectHeight) {
-                            coordinateY = arr1Layer[rightIndex].y + arr1Layer[rightIndex].height + Math.floor((rectHeight - arr1Layer[rightIndex].height) / 2);
-                        } else {
-                            coordinateY = arr1Layer[rightIndex].y + arr1Layer[rightIndex].height;
-                        }
-
-                    }
-
-                    let a = { x: coordinateX + inent, y: coordinateY + inent, width: rectWidth, height: rectHeight, isDragging: false, isLastlayer: true, color: rgbColor, text: text, column: i, row: j, layer: level, xAuto: coordinateX + inent, yAuto: coordinateY + inent };
-                    arr1Layer.push(a);
-                    // if (arr[i][j] == 2 && !arr[i+1][j]) {
-
-                    // }
-
-                    if (arr[i][j] == 2) {
+                    if (arr[i][j] === 2) {
                         changeWidthHeight();
                     }
                 }
-
             }
 
-            // rectangles = rectangles.filter((r) => (Math.abs(r.x) + inent <= (centerX - r.width / 2 - dopCenterX) && Math.abs(r.y) + inent <= (centerY - r.height / 2 - dopCenterY)));
             if (flagAddVert) {
                 updateElementPositions(arr1Layer, 'width', 'row', 'x');
             }
@@ -289,6 +280,7 @@
             flagAddHoriz = false;
             flagAddVert = false;
         }
+
 
 
         function changeWidthHeight() {
@@ -355,10 +347,13 @@
             return numRectangles;
 
         }
+        function createBaseMatrix(numRows, numCols) {
+            return Array(numRows).fill().map(() => Array(numCols).fill(1));
+        }
 
 
         function oddLayer(canvasWidth, canvasHeight) {
-            let matrixRectangles = [];
+            // let matrixRectangles = [];
             centerX = Math.floor(canvasWidth / 2) + dopCenterX;
             centerY = Math.floor(canvasHeight / 2) + dopCenterY;
             let numRectangles = findNumberOfRectangles(canvasWidth, canvasHeight);
@@ -366,10 +361,7 @@
 
             let differenceValues = float2int(Math.max(rectHeight, rectWidth) / Math.min(rectHeight, rectWidth));
             // console.log(differenceValues)
-            for (let i = 0; i < numRectangles.horizontal; i++) {
-
-                matrixRectangles.push(Array(numRectangles.vertical).fill(1));
-            }
+            let matrixRectangles = createBaseMatrix(numRectangles.horizontal, numRectangles.vertical);
 
             let matrixLenght = matrixRectangles.length;
             // Для дополнительных горизонтальных (если одинаковое кол-во столбцов обычных и дополнительных (+1)) распределение по столбцам
@@ -412,6 +404,31 @@
 
         }
 
+        function rotateRectangles(rectangles, centerX, centerY) {
+            // Создаём новый массив для хранения повернутых прямоугольников
+            let rotatedRectangles = rectangles.filter(item => item.layer == layerNum).map(rect => {
+                // Вычисляем новые координаты
+                let newX = -rect.y;
+                let newY = rect.x;
+
+                // Обновляем размеры
+                let newWidth = rect.height;
+                let newHeight = rect.width;
+
+                // Присваиваем новые значения прямоугольника
+                rect.x = newX;
+                rect.y = newY;
+                rect.height = newHeight;
+                rect.width = newWidth;
+            });
+
+            drawLayer();    
+        }
+
+        plus.addEventListener('click',  evt => {
+            
+            rotateRectangles(rectangles, centerX, centerY);
+        });
 
 
 
