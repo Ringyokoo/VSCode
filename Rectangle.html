@@ -58,17 +58,54 @@
             background-color: #0d6efd;
         }
 
-        #saveQuestion {
-            border: 1px solid black;
-            padding: 30px;
-            width: max-content;
-            margin-left: auto;
-            margin-right: auto;
-            position: fixed;
-            z-index: 9999;
-            top: 50%;
-            left: 50%;
+
+
+        /* Modal styles */
+        .modal {
             display: none;
+            /* Скрыть модальное окно по умолчанию */
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Полупрозрачный фон */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #a4b4a8;
+        }
+
+        button:active {
+            background-color: #86978a;
+        }
+
+        button#saveConfirm {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        button#saveCancel {
+            background-color: #f44336;
+            color: white;
         }
     </style>
 </head>
@@ -87,7 +124,7 @@
         <label for="inentM">Минимальный отступ:</label>
         <input type="number" id="inentM" value="10" required>
         <label for="minLayer">Количество слоев</label>
-        <input type="number" id="minLayer" value="1" required>
+        <input type="number" id="minLayer" value="3" required>
         <button type="button" id='plus'>↻</button>
         <!-- <button type="button" id='dob'>Добавить прямоугольник</button> -->
         <button type="submit">Apply</button>
@@ -96,8 +133,6 @@
     <div class="tab">
     </div>
 
-    <button type="button" id="save">Save</button>
-
     <canvas id="myCanvas" width="800" height="800"></canvas>
     <ul>
 
@@ -105,19 +140,26 @@
         <li><strike>Проверка на кладку диагональную (высота среди широты) (440 420 140 120 6)</strike></li>
         <li><strike>Менять местами при кладке при доп горизонт, допВерт</strike></li>
         <li><strike>Поворот окна</strike></li>
-        <li>Сохранять измененный слой руками и спрашивать при нажатии на дополнительный слой (либо на переход в другой
-            слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</li> +-
+        <li><strike>Сохранять измененный слой руками и спрашивать при нажатии на дополнительный слой (либо на переход в другой
+            слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</strike></li> +-
         <li>Изменение масштаба либо окна (canvas) при изменении паллета</li>
         <li>Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы + добавить в
             форму массу)</li>
         <li>Добавить возможность перемещения нескольких объектов (выделять их, разобрать код из test.html) (?)</li>
         <li>Приятный интерфейс</li>
+        <li>700 700 450 200 10</li>
+        <li>600 600 140 120 10</li>
+        <li>600 600 145 15 10</li>
+        <li>600 600 300 30 10</li>
+        <li>600 600 450 30 10</li>
     </ul>
 
-    <div id="saveQuestion">
-        <p>Сохранить изменения?</p>
-        <button type="button" id="notSave">Нет</button>
-        <!-- <button type="button" id="save">Да</button> -->
+    <div id="saveQuestion" class="modal">
+        <div class="modal-content">
+            <p>Вы уверены, что хотите переключить слой? Изменения будут потеряны.</p>
+            <button id="saveConfirm">Сохранить</button>
+            <button id="saveCancel">Отмена</button>
+        </div>
     </div>
 
     <script>
@@ -182,6 +224,7 @@
                     currentGroup.forEach((item, index) => {
                         const arrIndex = arr1Layer.indexOf(item);
                         arr1Layer[arrIndex][positionProp] += spacing * (index + 1);
+                        arr1Layer[arrIndex][positionProp + 'Auto'] = arr1Layer[arrIndex][positionProp];
                     });
 
                     startIndexOfCurrentGroup = i + 1;
@@ -422,11 +465,11 @@
                 rect.width = newWidth;
             });
 
-            drawLayer();    
+            drawLayer();
         }
 
-        plus.addEventListener('click',  evt => {
-            
+        plus.addEventListener('click', evt => {
+
             rotateRectangles(rectangles, centerX, centerY);
         });
 
@@ -485,6 +528,12 @@
 
 
         const tab = document.querySelector('.tab');
+        const saveQuestion = document.getElementById('saveQuestion');
+        const saveConfirm = document.getElementById('saveConfirm');
+        const saveCancel = document.getElementById('saveCancel');
+
+        let pendingSwitch = null;
+
         function createButton(quantity) {
 
             for (let i = 1; i <= quantity; i++) {
@@ -497,14 +546,17 @@
                 button.id = `tab-bth-${i}`;
                 button.classList.add('btn');
                 button.addEventListener('click', () => {
-                    for (let i = 0; i < rectangles.length; i++) {
-                        rectangles[i].x = rectangles[i].xAuto;
 
-                        rectangles[i].y = rectangles[i].yAuto;
+                    if (hasUnsavedChanges()) {
+                        pendingSwitch = i; // Запоминаем слой, на который нужно переключиться
+                        saveQuestion.style.display = 'flex';
+
+                    } else {
+                        layerNum = i;
+                        drawLayer();
                     }
-                    layerNum = i;
-                    // confirm('Save iz')
-                    drawLayer();
+
+
                 })
                 tab.appendChild(button);
                 const label = document.createElement('label');
@@ -514,6 +566,38 @@
             }
 
         }
+        function switchLayer() {
+            if (pendingSwitch !== null) {
+                layerNum = pendingSwitch; // Переключаемся на запомненный слой
+                drawLayer();
+                pendingSwitch = null; // Сбрасываем запомненный слой
+            }
+        }
+
+        function hasUnsavedChanges() {
+            return rectangles.some(rectangle =>
+                rectangle.x !== rectangle.xAuto || rectangle.y !== rectangle.yAuto
+            );
+        }
+
+        saveConfirm.addEventListener('click', () => {
+            for (let i = 0; i < rectangles.length; i++) {
+                rectangles[i].xAuto = rectangles[i].x;
+                rectangles[i].yAuto = rectangles[i].y;
+            }
+            saveQuestion.style.display = 'none'; // Закрываем модальное окно
+            switchLayer()
+
+        });
+
+        saveCancel.addEventListener('click', () => {
+            for (let i = 0; i < rectangles.length; i++) {
+                rectangles[i].x = rectangles[i].xAuto;
+                rectangles[i].y = rectangles[i].yAuto;
+            }
+            saveQuestion.style.display = 'none'; // Закрываем модальное окно
+            switchLayer()
+        });
 
         function drawLayer() {
             let startLayer = -1;
@@ -546,13 +630,6 @@
             ctx.strokeRect(dopCenterX, dopCenterY, canvasWidth, canvasHeight);
             //  ctx.translate(canvas.width / 2, canvas.height / 2);
         }
-
-        save.addEventListener('click', () => {
-            for (let i = 0; i < rectangles.length; i++) {
-                rectangles[i].xAuto = rectangles[i].x;
-                rectangles[i].yAuto = rectangles[i].y;
-            }
-        });
 
 
         function drawRectangle(rect) {
