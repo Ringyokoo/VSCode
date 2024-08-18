@@ -342,7 +342,7 @@
 
             for (let i = 0; i < arr.length; i++) {
                 if (!arr1Layer?.at(-1)?.isLastlayer) {
-                    rgbColor = `rgb(${getRandomInt(255)} ${getRandomInt(255)} ${getRandomInt(255)} / 30%)`;
+                    rgbColor = `rgb(${getRandomInt(255)} ${getRandomInt(255)} ${getRandomInt(255)} / 50%)`;
                 }
 
                 for (let j = 0; j < arr[i].length; j++) {
@@ -368,7 +368,8 @@
                         yAuto: coordinateY + inent,
                         widthAuto: rectWidth,
                         heightAuto: rectHeight,
-                        textAuto: text
+                        textAuto: text,
+                        colorAuto: rgbColor
                     };
 
                     arr1Layer.push(item);
@@ -633,9 +634,50 @@
 
             drawLayer();
         }
+        function invertColor(rgbColor) {
+            // Извлечение R, G, B из строки
+            let [r, g, b] = rgbColor.match(/\d+/g).map(Number);
+
+            // Инвертирование цвета
+            let invertedR = 255 - r;
+            let invertedG = 255 - g;
+            let invertedB = 255 - b;
+
+            // Возвращаем инвертированный цвет
+            return `rgb(${invertedR} ${invertedG} ${invertedB} / 50%)`;
+        }
 
         plus.addEventListener('click', evt => {
-            // rotateRectangles(rectangles, centerX, centerY);
+            let lastRectangleLayerIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
+            let lastRectangleLayer = rectangles[lastRectangleLayerIndex];
+
+            // При добавлении нового прямоугольника возвращать цвет прошлого.
+            lastRectangleLayer.color = rectangles[lastRectangleLayerIndex - 1].color;
+
+
+            const item = {
+                x: 0,
+                y: 0,
+                width: lastRectangleLayer.width,
+                height: lastRectangleLayer.height,
+                isDragging: false,
+                isLastlayer: true,
+                color: invertColor(lastRectangleLayer.color),
+                text: lastRectangleLayer.text,
+                column: lastRectangleLayer.column,
+                row: lastRectangleLayer.row,
+                layer: lastRectangleLayer.layer,
+                xAuto: 0,
+                yAuto: 0,
+                widthAuto: lastRectangleLayer.widthAuto,
+                heightAuto: lastRectangleLayer.heightAuto,
+                textAuto: lastRectangleLayer.textAuto,
+                colorAuto: lastRectangleLayer.colorAuto
+            };
+
+            rectangles.splice(lastRectangleLayerIndex + 1, 0, item);
+
+            drawLayer();
         });
 
         rotate.addEventListener('click', evt => {
@@ -748,30 +790,42 @@
                 rectangle.x !== rectangle.xAuto || rectangle.y !== rectangle.yAuto
             );
         }
+        function updateDataRectangles(){
+            const filteredRectangles = rectangles.filter(rectangle => rectangle.layer === layerNum);
+            
+            // Обновляем свойства для отфильтрованных элементов
+            filteredRectangles.forEach(rectangle => {
+                rectangle.xAuto = rectangle.x;
+                rectangle.yAuto = rectangle.y;
+                rectangle.widthAuto = rectangle.width;
+                rectangle.heightAuto = rectangle.height;
+                rectangle.textAuto = rectangle.text;
+                rectangle.color = rectangle.colorAuto;
+            });
+        }
+
+        function returnDataRectangles(){
+            const filteredRectangles = rectangles.filter(rectangle => rectangle.layer === layerNum);
+            
+            filteredRectangles.forEach(rectangle => {
+                rectangle.x = rectangle.xAuto;
+                rectangle.y = rectangle.yAuto;
+                rectangle.width = rectangle.widthAuto;
+                rectangle.height = rectangle.heightAuto;
+                rectangle.text = rectangle.textAuto;
+                rectangle.color = rectangle.colorAuto;
+            });
+        }
 
         saveConfirm.addEventListener('click', () => {
-            for (let i = 0; i < rectangles.length; i++) {
-                rectangles[i].xAuto = rectangles[i].x;
-                rectangles[i].yAuto = rectangles[i].y;
-                rectangles[i].widthAuto = rectangles[i].width;
-                rectangles[i].heightAuto = rectangles[i].height;
-                rectangles[i].textAuto = rectangles[i].text;
-
-            }
+            updateDataRectangles();
             saveQuestion.style.display = 'none'; // Закрываем модальное окно
             switchLayer()
 
         });
 
         saveCancel.addEventListener('click', () => {
-            for (let i = 0; i < rectangles.length; i++) {
-                rectangles[i].x = rectangles[i].xAuto;
-                rectangles[i].y = rectangles[i].yAuto;
-                rectangles[i].width = rectangles[i].widthAuto;
-                rectangles[i].height = rectangles[i].heightAuto;
-                rectangles[i].text = rectangles[i].textAuto;
-            }
-
+            returnDataRectangles();
             saveQuestion.style.display = 'none'; // Закрываем модальное окно
             switchLayer()
         });
