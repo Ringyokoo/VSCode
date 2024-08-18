@@ -124,7 +124,7 @@
         <label for="inentM">Минимальный отступ:</label>
         <input type="number" id="inentM" value="10" required>
         <label for="minLayer">Количество слоев</label>
-        <input type="number" id="minLayer" value="1" required>
+        <input type="number" id="minLayer" value="2" required>
         <button type="button" id='plus'>↻</button>
         <!-- <button type="button" id='dob'>Добавить прямоугольник</button> -->
         <button type="submit">Apply</button>
@@ -150,10 +150,10 @@
         <li>Приятный интерфейс</li>
         <li>700 700 450 200 10</li>
         <li>600 600 140 120 10 ---</li>
-        <li>600 600 145 15 10 ---</li>
-        <li>600 600 310 30 10</li>
+        <li>600 600 145 20 10 Кладка рядами столбцами</li>
+        <li>600 600 310 30 10 Кладка квадратом</li>
         <li>600 600 450 30 10 спрашивать вопрос про укладку по устойчивости или по максимальной вместимости</li>
-        <li>600 600 286 120 10</li>
+        <li>600 600 286 120 10 Кладка квадратом</li>
     </ul>
 
     <div id="saveQuestion" class="modal">
@@ -250,16 +250,35 @@
                 (flagAdd ? item[isVertical ? 'column' : 'row'] === (isVertical ? i - 1 : j - 1) && item[rectProp] === rectSize : item[isVertical ? 'column' : 'row'] === (isVertical ? i - 1 : j - 1))
             );
 
-            if(layingSquare && j != 0){
-                rightIndex = arr1Layer.findLastIndex(item => item[isVertical ? 'column' : 'row'] === (isVertical ? i - 1 : j - 1) );
+            if ((layingSquareVert || layingSquareHoriz) && j != 0) {
+                rightIndex = arr1Layer.findLastIndex(item => item[isVertical ? 'column' : 'row'] === (isVertical ? i - 1 : j - 1));
             }
+
+            
+            if (layingSquareHoriz && i == countDopHorizHoriz + 1) {
+                let rightIndexX = 1;
+                if (isVertical) {
+                    let rightItemX = arr1Layer[rightIndexX];
+                    if (!rightItemX) return 0;
+
+                    if (rightItemX[rectProp] > rectSize) {
+                        return rightItemX[coordProp] + rightItemX[rectProp] - Math.floor((rightItemX[rectProp] - rectSize) / 2);
+                    } else if (rightItemX[rectProp] < rectSize) {
+                        return rightItemX[coordProp] + rightItemX[rectProp] + Math.floor((rectSize - rightItemX[rectProp]) / 2);
+                    } else {
+                        return rightItemX[coordProp] + rightItemX[rectProp];
+                    }
+                }
+
+            }
+
 
             const rightItem = arr1Layer[rightIndex];
             if (!rightItem) return 0;
 
-            if (rightItem[rectProp] > rectSize ) {
+            if (rightItem[rectProp] > rectSize) {
                 return rightItem[coordProp] + rightItem[rectProp] - Math.floor((rightItem[rectProp] - rectSize) / 2);
-            } else if (rightItem[rectProp] < rectSize ) {
+            } else if (rightItem[rectProp] < rectSize) {
                 return rightItem[coordProp] + rightItem[rectProp] + Math.floor((rectSize - rightItem[rectProp]) / 2);
             } else {
                 return rightItem[coordProp] + rightItem[rectProp];
@@ -333,7 +352,8 @@
 
             flagAddHoriz = false;
             flagAddVert = false;
-            layingSquare = false;
+            layingSquareVert = false;
+            layingSquareHoriz = false;
         }
 
 
@@ -406,7 +426,10 @@
             return Array(numRows).fill().map(() => Array(numCols).fill(number));
         }
 
-        let layingSquare = false;
+        let layingSquareHoriz = false;
+        let layingSquareVert = false;
+        let countDopHorizHoriz = 0;
+
         function oddLayer(canvasWidth, canvasHeight) {
             // let matrixRectangles = [];
             centerX = Math.floor(canvasWidth / 2) + dopCenterX;
@@ -420,27 +443,81 @@
             let matrixLenght = matrixRectangles.length;
             // Для дополнительных горизонтальных (если одинаковое кол-во столбцов обычных и дополнительных (+1)) распределение по столбцам
             if (numRectangles.dopHoriz.horizontal) {
-                flagAddHoriz = true;
-                for (let i = 0; i < numRectangles.dopHoriz.horizontal; i++) {
-
-                    let dopArr = Array(numRectangles.dopHoriz.vertical).fill(2);
-
-                    if (numRectangles.horizontal > numRectangles.dopHoriz.horizontal) {
-                        matrixRectangles.splice((i + 1) + matrixRectangles.length - matrixLenght, 0, dopArr);
+                //Кладка квадратом
+                if (numRectangles.dopHoriz.vertical == 1 && numRectangles.horizontal == 1 && (numRectangles.dopHoriz.horizontal > 2 || numRectangles.vertical > 2)) {
+                    layingSquareHoriz = true;
+                    countDopHorizHoriz = numRectangles.dopHoriz.horizontal; // поменять название
+                    console.log(countDopHorizHoriz)
+                    const rowsToRemove = numRectangles.vertical - countDopHorizHoriz;
+                    for (let k = 0; k < rowsToRemove; k++) {
+                        matrixRectangles.forEach(row => row.pop());
                     }
-                    else {
-                        matrixRectangles.splice(i + matrixRectangles.length - matrixLenght, 0, dopArr); // numRectangles.dopHoriz.horizontal
-                    }
+                    matrixRectangles[0].unshift(2);
 
+                    const additionalRows = createBaseMatrix(countDopHorizHoriz - 1, 1, 2).map(row => {
+                        // Добавляем нули в каждую строку
+                        row.push(...Array(countDopHorizHoriz).fill(0));
+                        return row;
+                    });
+
+                    matrixRectangles.push(...additionalRows);
+
+                    matrixRectangles.push(Array(countDopHorizHoriz).fill(1));
+                    matrixRectangles[matrixRectangles.length - 1].push(0);
+
+                    // Создайте копию массива, чтобы не изменять оригинал
+                    const reversedDopArr = additionalRows.map(arr => [...arr].reverse());
+                    if (reversedDopArr.length !== 0){
+                        matrixRectangles.push(...reversedDopArr);
+                        matrixRectangles.push(reversedDopArr[0]);
+                    }else{
+                        matrixRectangles.push(Array(countDopHorizHoriz).fill(0));
+                        matrixRectangles.at(-1).push(2);
+                    }
+                    
+                    
+
+
+                    //     matrixRectangles.splice(matrixRectangles.length, 0, dopArr);
+                    // matrixRectangles = [
+                    //     [2, 1, 1, 1, 1, 1, 1],
+                    //     [2, 0, 0, 0, 0, 0, 0],
+                    //     [2, 0, 0, 0, 0, 0, 0],
+                    //     [2, 0, 0, 0, 0, 0, 0],
+                    //     [2, 0, 0, 0, 0, 0, 0],
+                    //     [2, 0, 0, 0, 0, 0, 0],
+                    //     [1, 1, 1, 1, 1, 1, 0],
+                    //     [0, 0, 0, 0, 0, 0, 2],
+                    //     [0, 0, 0, 0, 0, 0, 2],
+                    //     [0, 0, 0, 0, 0, 0, 2],
+                    //     [0, 0, 0, 0, 0, 0, 2],
+                    //     [0, 0, 0, 0, 0, 0, 2],
+                    //     [0, 0, 0, 0, 0, 0, 2],
+                    // ]
+
+                }
+                else {
+                    flagAddHoriz = true;
+                    for (let i = 0; i < numRectangles.dopHoriz.horizontal; i++) {
+
+                        let dopArr = Array(numRectangles.dopHoriz.vertical).fill(2);
+
+                        if (numRectangles.horizontal > numRectangles.dopHoriz.horizontal) {
+                            matrixRectangles.splice((i + 1) + matrixRectangles.length - matrixLenght, 0, dopArr);
+                        }
+                        else {
+                            matrixRectangles.splice(i + matrixRectangles.length - matrixLenght, 0, dopArr); // numRectangles.dopHoriz.horizontal
+                        }
+
+                    }
                 }
             }
             // Для дополнительных вертикальных (если одинаковое кол-во столбцов обычных и дополнительных (+1)) распределение по рядам
             if (numRectangles.dopVert.vertical) {
                 //Кладка квадратом
                 if (numRectangles.dopVert.horizontal == 1 && numRectangles.vertical == 1 && (numRectangles.dopVert.vertical > 2 || numRectangles.horizontal > 2)) {
-                    layingSquare = true;
-                    let differenceValues = numRectangles.horizontal - float2int(Math.max(rectHeight + inent, rectWidth + inent) / Math.min(rectHeight + inent, rectWidth + inent));
-
+                    layingSquareVert = true;
+                    let differenceValues = numRectangles.dopVert.vertical; // поменять название
                     let dopArr = Array(differenceValues).fill(2);
 
                     for (let k = 0; k < numRectangles.horizontal - differenceValues; k++) {
@@ -455,17 +532,17 @@
 
                     matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
                     for (let k = 1; k < matrixRectangles.length; k++) {
-                        matrixRectangles[k].splice(matrixRectangles[k].length-numRectangles.dopVert.horizontal , numRectangles.dopVert.horizontal,...Array(numRectangles.dopVert.horizontal).fill(2));
+                        matrixRectangles[k].splice(matrixRectangles[k].length - numRectangles.dopVert.horizontal, numRectangles.dopVert.horizontal, ...Array(numRectangles.dopVert.horizontal).fill(2));
                     }
                     dopArr = matrixRectangles[0].slice().reverse()
-                    console.log(matrixRectangles[0].slice().reverse())
-                    matrixRectangles.splice(matrixRectangles.length , 0, dopArr);
-                    console.log(matrixRectangles);
-                    matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
-                    // console.log(matrixRectangles);
+                    // console.log(matrixRectangles[0].slice().reverse())
+                    matrixRectangles.splice(matrixRectangles.length, 0, dopArr);
 
-                    
-                   
+                    matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
+
+
+
+
                 }
                 //Кладка по столбцам, рядам
                 else {
@@ -495,6 +572,7 @@
                 // newArr = newArr[0].map((_, colIndex) => newArr.map(row => row[colIndex]));
                 // console.log(newArr)
             }
+            console.log(matrixRectangles);
             getCoord(matrixRectangles);
 
         }
