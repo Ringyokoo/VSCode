@@ -115,10 +115,10 @@
 <body>
     <!-- Необычные случаи 700 700 450 200; 400 400 140 120 -->
     <form id="canvasForm">
-        <label for="canvasWidth">Ширина:</label>
-        <input type="number" id="canvasWidth" value="600" required>
-        <label for="canvasHeight">Высота:</label>
-        <input type="number" id="canvasHeight" value="600" required>
+        <label for="palletWidth">Ширина:</label>
+        <input type="number" id="palletWidth" value="600" required>
+        <label for="palletHeight">Высота:</label>
+        <input type="number" id="palletHeight" value="600" required>
         <label for="rectWidth">Ширина прямоугольника:</label>
         <input type="number" id="rectWidth" value="310" required>
         <label for="rectHeight">Высота прямоугольника:</label>
@@ -193,12 +193,10 @@
         let arrText = ['↑', '→', '↓', '←'];
         let dragOffsetY, dragOffsetX;
         let rgbColor = ``;
-        let dopCenterX = (parseInt(document.getElementById('myCanvas').width) - parseInt(document.getElementById('canvasWidth').value)) / 2;
-        let dopCenterY = (parseInt(document.getElementById('myCanvas').height) - parseInt(document.getElementById('canvasHeight').value)) / 2;
         let flagAddVert = false;
         let flagAddHoriz = false;
-        // let dopCenterX = 0;
-        // let dopCenterY = 0;
+        let spacingCenterX = 0;
+        let spacingCenterY = 0;
 
         function float2int(value) {
             return value | 0; // Побитывая операция
@@ -249,12 +247,11 @@
         // Универсальная функция для вычисления координат
         function calculateCoordinate(arr1Layer, i, j, rectSize, isVertical, flagAdd) {
             const center = isVertical ? centerX : centerY;
-            const dopCenter = isVertical ? dopCenterX : dopCenterY;
             const rectProp = isVertical ? 'width' : 'height';
             const coordProp = isVertical ? 'x' : 'y';
 
             if ((isVertical && i === 0) || (!isVertical && j === 0)) {
-                return float2int(-(center - rectSize / 2) + dopCenter);
+                return float2int(-(center - rectSize / 2));
             }
 
             let rightIndex = arr1Layer.findIndex(item =>
@@ -310,20 +307,20 @@
         function centering(arr) {
             let maxX = -Infinity;
             let maxY = -Infinity;
-            let result = null;
 
-            //Берем прямоугольник с самой большой крайней правой нижней координатой
             arr.forEach(item => {
                 let itemX = item.x + float2int(item.width / 2) + inent
                 let itemY = item.y + float2int(item.height / 2) + inent
-                if (itemY > maxY || (itemY === maxY && itemX > maxX)) {
-                    maxX = itemX;
+                if (itemY > maxY) {
                     maxY = itemY;
-                    result = item;
+                }
+                if (itemX > maxX) {
+                    maxX = itemX;
                 }
             });
-            const gapXAxis = float2int((float2int(canvasWidth.value / 2) - maxX) / 2);
-            const gapYAxis = float2int((float2int(canvasHeight.value / 2) - maxY) / 2);
+
+            const gapXAxis = float2int((float2int(palletWidth.value / 2) - maxX) / 2);
+            const gapYAxis = float2int((float2int(palletHeight.value / 2) - maxY) / 2);
 
             arr.forEach(rect => {
                 rect.x += gapXAxis;
@@ -403,31 +400,31 @@
             [rectWidth, rectHeight] = [rectHeight, rectWidth];
         }
 
-        function findDopRectangles(canvasWidth, canvasHeight, lengthRect, widthRect) {
+        function findDopRectangles(palletWidth, palletHeight, lengthRect, widthRect) {
             let dopHoriz = { horizontal: 0, vertical: 0 };
             let dopVert = { horizontal: 0, vertical: 0 };
-            if (lengthRect + rectHeight + inent <= canvasWidth) {
+            if (lengthRect + rectHeight + inent <= palletWidth) {
                 dopHoriz.horizontal++;
-                while (lengthRect + (rectHeight + inent) * (dopHoriz.horizontal + 1) <= canvasWidth) {
+                while (lengthRect + (rectHeight + inent) * (dopHoriz.horizontal + 1) <= palletWidth) {
                     dopHoriz.horizontal++;
                 }
-                if (rectWidth + inent + inent <= canvasHeight) {
+                if (rectWidth + inent + inent <= palletHeight) {
                     dopHoriz.vertical++;
 
-                    while ((rectWidth + inent) * (dopHoriz.vertical + 1) + inent <= canvasHeight) {
+                    while ((rectWidth + inent) * (dopHoriz.vertical + 1) + inent <= palletHeight) {
                         dopHoriz.vertical++;
                     }
                 } else {
                     dopHoriz.horizontal = 0;
                 }
-            } else if (widthRect + rectWidth + inent <= canvasHeight) {
+            } else if (widthRect + rectWidth + inent <= palletHeight) {
                 dopVert.vertical++;
-                while (widthRect + (rectWidth + inent) * (dopVert.vertical + 1) <= canvasHeight) {
+                while (widthRect + (rectWidth + inent) * (dopVert.vertical + 1) <= palletHeight) {
                     dopVert.vertical++;
                 }
-                if (rectHeight + inent + inent <= canvasWidth) {
+                if (rectHeight + inent + inent <= palletWidth) {
                     dopVert.horizontal++;
-                    while ((rectHeight + inent) * (dopVert.horizontal + 1) + inent <= canvasWidth) {
+                    while ((rectHeight + inent) * (dopVert.horizontal + 1) + inent <= palletWidth) {
                         dopVert.horizontal++;
                     }
                 } else {
@@ -438,16 +435,16 @@
             return [dopHoriz, dopVert];
         }
 
-        function findNumberOfRectangles(canvasWidth, canvasHeight) {
+        function findNumberOfRectangles(palletWidth, palletHeight) {
             // let dopRectangles = {};
             let numRectangles = {};
 
-            let numHorizontal = Math.floor((canvasWidth - inent) / (rectWidth + inent));
+            let numHorizontal = Math.floor((palletWidth - inent) / (rectWidth + inent));
             let lengthRect = numHorizontal * (rectWidth + inent) + inent;
-            let numVertical = Math.floor((canvasHeight - inent) / (rectHeight + inent));
+            let numVertical = Math.floor((palletHeight - inent) / (rectHeight + inent));
             let widthRect = numVertical * (rectHeight + inent) + inent;
 
-            let [dopHoriz, dopVert] = findDopRectangles(canvasWidth, canvasHeight, lengthRect, widthRect)
+            let [dopHoriz, dopVert] = findDopRectangles(palletWidth, palletHeight, lengthRect, widthRect)
 
             if (numHorizontal != 0 && numVertical != 0) {
                 numRectangles = { horizontal: numHorizontal, vertical: numVertical, dopHoriz: dopHoriz, dopVert: dopVert };
@@ -466,11 +463,11 @@
         let layingSquareVert = false;
         let countDopHorizHoriz = 0;
 
-        function oddLayer(canvasWidth, canvasHeight) {
+        function oddLayer(palletWidth, palletHeight) {
             // let matrixRectangles = [];
-            centerX = Math.floor(canvasWidth / 2) + dopCenterX;
-            centerY = Math.floor(canvasHeight / 2) + dopCenterY;
-            let numRectangles = findNumberOfRectangles(canvasWidth, canvasHeight);
+            centerX = Math.floor(palletWidth / 2) ;
+            centerY = Math.floor(palletHeight / 2) ;
+            let numRectangles = findNumberOfRectangles(palletWidth, palletHeight);
 
 
 
@@ -690,20 +687,18 @@
         form.addEventListener('submit', function (event) {
             event.preventDefault();
             rectangles = [];
-            // dopRectangles = [];
-            // testArr = [];
-            dopCenterX = float2int((parseInt(document.getElementById('myCanvas').width) - parseInt(document.getElementById('canvasWidth').value)) / 2);
-            dopCenterY = float2int((parseInt(document.getElementById('myCanvas').height) - parseInt(document.getElementById('canvasHeight').value)) / 2);
+            spacingCenterX = float2int((parseInt(document.getElementById('myCanvas').width) - parseInt(document.getElementById('palletWidth').value) * scale) / 2);
+            spacingCenterY = float2int((parseInt(document.getElementById('myCanvas').height) - parseInt(document.getElementById('palletHeight').value) * scale) / 2);
+            ctx.setTransform(scale, 0, 0, scale, spacingCenterX, spacingCenterY);
             level = 1;
-
             let child = tab.lastElementChild;
             while (child) {
                 tab.removeChild(child);
                 child = tab.lastElementChild;
             }
 
-            const canvasWidth = parseInt(document.getElementById('canvasWidth').value);
-            const canvasHeight = parseInt(document.getElementById('canvasHeight').value);
+            const palletWidth = parseInt(document.getElementById('palletWidth').value);
+            const palletHeight = parseInt(document.getElementById('palletHeight').value);
             inent = Number(document.getElementById('inentM').value);
             rectWidth = parseInt(document.getElementById('rectWidth').value);
             rectHeight = parseInt(document.getElementById('rectHeight').value);
@@ -716,15 +711,15 @@
                     rectangles[i].isLastlayer = false;
                 }
 
-                // getRectangles(canvasWidth, canvasHeight);
+                // getRectangles(palletWidth, palletHeight);
                 if (level % 2 != 0) {
                     changeWidthHeight();
-                    oddLayer(canvasWidth, canvasHeight)
+                    oddLayer(palletWidth, palletHeight)
                     changeWidthHeight();
 
                     level += 1;
                 } else {
-                    oddLayer(canvasWidth, canvasHeight);
+                    oddLayer(palletWidth, palletHeight);
                     level += 1;
                 }
 
@@ -732,7 +727,7 @@
 
             createButton(layer);
             // console.log(rectangles)
-            // oddLayer(canvasWidth, canvasHeight);
+            // oddLayer(palletWidth, palletHeight);
             layerNum = layer;
             drawLayer();
         });
@@ -790,9 +785,9 @@
                 rectangle.x !== rectangle.xAuto || rectangle.y !== rectangle.yAuto
             );
         }
-        function updateDataRectangles(){
+        function updateDataRectangles() {
             const filteredRectangles = rectangles.filter(rectangle => rectangle.layer === layerNum);
-            
+
             // Обновляем свойства для отфильтрованных элементов
             filteredRectangles.forEach(rectangle => {
                 rectangle.xAuto = rectangle.x;
@@ -804,9 +799,9 @@
             });
         }
 
-        function returnDataRectangles(){
+        function returnDataRectangles() {
             const filteredRectangles = rectangles.filter(rectangle => rectangle.layer === layerNum);
-            
+
             filteredRectangles.forEach(rectangle => {
                 rectangle.x = rectangle.xAuto;
                 rectangle.y = rectangle.yAuto;
@@ -833,10 +828,10 @@
         function drawLayer() {
             let startLayer = -1;
             let endLayer = -1;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(-spacingCenterX, -spacingCenterY, canvas.width + spacingCenterX, canvas.height +spacingCenterY);
             for (var i = 0; i < rectangles.length; i++) {
                 rectangles[i].isLastlayer = false;
-                // console.log(layerNum);
+
                 if (rectangles[i].layer == layerNum && startLayer == -1) {
                     startLayer = i;
                 }
@@ -846,26 +841,24 @@
             }
 
             for (let i = startLayer; i < ((endLayer == -1) ? rectangles.length : endLayer); i++) {
-                // if (!rectangles[i].isLastlayer)
                 rectangles[i].isLastlayer = true;
             }
-            // console.log(startLayer, endLayer, rectangles.length)
+            
             rectangles.slice(0, ((endLayer == -1) ? rectangles.length : endLayer)).forEach(drawRectangle);
+            drawPallet();
+
         }
 
 
         function drawPallet() {
-            const canvasWidth = parseInt(document.getElementById('canvasWidth').value);
-            const canvasHeight = parseInt(document.getElementById('canvasHeight').value);
-            // ctx.strokeRect( 0, 0, canvasWidth, canvasHeight);
-            ctx.strokeRect(dopCenterX, dopCenterY, canvasWidth, canvasHeight);
-            //  ctx.translate(canvas.width / 2, canvas.height / 2);
+            const palletWidth = parseInt(document.getElementById('palletWidth').value);
+            const palletHeight = parseInt(document.getElementById('palletHeight').value);
+            ctx.strokeRect(0, 0, palletWidth, palletHeight);
         }
 
 
         function drawRectangle(rect) {
             ctx.beginPath();
-            drawPallet();
             drawNumbers(rect);
             drawArrow(rect);
 
@@ -932,8 +925,8 @@
         function getMousePos(canvas, evt) {
             const rect = canvas.getBoundingClientRect();
             return {
-                x: evt.clientX - rect.left,
-                y: evt.clientY - rect.top
+                x: (evt.clientX - rect.left) / scale - spacingCenterX / scale,
+                y: (evt.clientY - rect.top) / scale - spacingCenterY / scale
             };
         }
 
@@ -1009,15 +1002,15 @@
             if (selectedRectangle && selectedRectangle.isDragging) {
                 const mousePos = getMousePos(canvas, evt);
                 if ((mousePos.x - centerX - dragOffsetX) > 0) {
-                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) > (centerX - float2int(selectedRectangle.width / 2) - dopCenterX)) ? (centerX - float2int(selectedRectangle.width / 2) - dopCenterX) : mousePos.x - centerX - dragOffsetX;
+                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) > (centerX - float2int(selectedRectangle.width / 2) )) ? (centerX - float2int(selectedRectangle.width / 2)) : float2int(mousePos.x - centerX - dragOffsetX);
                 } else {
-                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) < -(centerX - float2int(selectedRectangle.width / 2) - dopCenterX)) ? -(centerX - float2int(selectedRectangle.width / 2) - dopCenterX) : mousePos.x - centerX - dragOffsetX;
+                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) < -(centerX - float2int(selectedRectangle.width / 2) )) ? -(centerX - float2int(selectedRectangle.width / 2)) : float2int(mousePos.x - centerX - dragOffsetX);
                 }
 
                 if ((mousePos.y - centerY - dragOffsetY) > 0) {
-                    selectedRectangle.y = ((mousePos.y - centerY - dragOffsetY) > (centerY - float2int(selectedRectangle.height / 2) - dopCenterY)) ? (centerY - float2int(selectedRectangle.height / 2) - dopCenterY) : mousePos.y - centerY - dragOffsetY;
+                    selectedRectangle.y = ((mousePos.y - centerY - dragOffsetY) > (centerY - float2int(selectedRectangle.height / 2))) ? (centerY - float2int(selectedRectangle.height / 2)) : float2int(mousePos.y - centerY - dragOffsetY);
                 } else {
-                    selectedRectangle.y = ((mousePos.y - centerY - dragOffsetY) < -(centerY - float2int(selectedRectangle.height / 2) - dopCenterY)) ? -(centerY - float2int(selectedRectangle.height / 2) - dopCenterY) : mousePos.y - centerY - dragOffsetY;
+                    selectedRectangle.y = ((mousePos.y - centerY - dragOffsetY) < -(centerY - float2int(selectedRectangle.height / 2))) ? -(centerY - float2int(selectedRectangle.height / 2)) : float2int(mousePos.y - centerY - dragOffsetY);
                 }
 
                 // selectedRectangle.y = mousePos.y - centerY - dragOffsetY;
@@ -1031,6 +1024,29 @@
                 selectedRectangle = null;
             }
         });
+
+        function setCanvasScale(scale) {
+            ctx.clearRect(-spacingCenterX, -spacingCenterY, canvas.width + spacingCenterX, canvas.height +spacingCenterY);
+            spacingCenterX = float2int((parseInt(document.getElementById('myCanvas').width) - parseInt(document.getElementById('palletWidth').value) * scale) / 2);
+            spacingCenterY = float2int((parseInt(document.getElementById('myCanvas').height) - parseInt(document.getElementById('palletHeight').value) * scale) / 2);
+            // Сбрасываем трансформацию и устанавливаем новый масштаб
+            ctx.setTransform(scale, 0, 0, scale, spacingCenterX, spacingCenterY);
+            drawLayer(); // Перерисовываем слой после изменения масштаба
+
+        }
+
+        let scale = 1;
+        document.addEventListener('keydown', evt => {
+            
+            if (evt.code === 'Minus') {
+                scale = Math.max(0.1, scale - 0.1); // Ограничиваем масштаб, чтобы не стало меньше 0.1
+                setCanvasScale(scale);
+            } else if (evt.code === 'Equal') {
+                scale += 0.1;
+                setCanvasScale(scale);
+            }
+        });
+
 
         // Инициализация при загрузке
         form.dispatchEvent(new Event('submit'));
