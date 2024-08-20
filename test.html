@@ -1,134 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canvas Rectangles</title>
+    <title>Canvas Rectangle Selector</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        .selection-box {
+            border: 1px dashed rgba(0, 0, 255, 0.7);
+            position: absolute;
+            background: rgba(0, 0, 255, 0.2);
+            pointer-events: none;
+        }
+    </style>
 </head>
-
 <body>
-
-    <canvas id="myCanvas" width="600" height="600" style="border:1px solid #000000;"></canvas>
-
+    <div style="position: relative;">
+        <canvas id="canvas" width="800" height="600"></canvas>
+        <div id="selectionBox" class="selection-box" style="display: none;"></div>
+    </div>
+    <button id="resetButton">Сбросить выделение</button>
     <script>
-        const inent = 10;  // Отступ между прямоугольниками
-        const rectWidth = 30;  // Ширина основного прямоугольника
-        const rectHeight = 145; // Высота основного прямоугольника
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const resetButton = document.getElementById('resetButton');
+        const selectionBox = document.getElementById('selectionBox');
 
-        function findDopRectangles(canvasWidth, canvasHeight, lengthRect, widthRect) {
-            let dopHoriz = { horizontal: 0, vertical: 0 };
-            let dopVert = { horizontal: 0, vertical: 0 };
-            if (lengthRect + rectHeight + inent <= canvasWidth) {
-                dopHoriz.horizontal++;
-                while (lengthRect + (rectHeight + inent) * (dopHoriz.horizontal + 1) <= canvasWidth) {
-                    dopHoriz.horizontal++;
-                }
-                if (rectWidth + inent + inent <= canvasHeight) {
-                    dopHoriz.vertical++;
-                    
-                    while ((rectWidth + inent) * (dopHoriz.vertical + 1) + inent <= canvasHeight) {
-                        dopHoriz.vertical++;
-                    }
-                } else {
-                    dopHoriz.horizontal = 0;
-                }
-            } else if (widthRect + rectWidth + inent <= canvasHeight) {
-                dopVert.vertical++;
-                while (widthRect + (rectWidth + inent) * (dopVert.vertical + 1) <= canvasHeight) {
-                    dopVert.vertical++;
-                }
-                if (rectHeight + inent + inent <= canvasWidth) {
-                    dopVert.horizontal++;
-                    while ((rectHeight + inent) * (dopVert.horizontal + 1) + inent <= canvasWidth) {
-                        dopVert.horizontal++;
-                    }
-                } else {
-                    dopVert.vertical =  0;
-                }
-            }
-            
-            return [dopHoriz, dopVert];
+        const rectangles = [
+            { x: 50, y: 50, width: 150, height: 100 },
+            { x: 250, y: 200, width: 100, height: 150 },
+            { x: 400, y: 300, width: 200, height: 100 }
+        ];
+
+        let selectedRectangles = [];
+        let startX, startY, isSelecting = false;
+
+        function drawRectangles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            rectangles.forEach(rect => {
+                ctx.fillStyle = selectedRectangles.includes(rect) ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 0, 255, 0.5)';
+                ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+                ctx.strokeStyle = 'black';
+                ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+            });
         }
 
-        function findNumberOfRectangles(canvasWidth, canvasHeight) {
-            let numRectangles = {};
-
-            let numHorizontal = Math.floor((canvasWidth - inent) / (rectWidth + inent));
-            let lengthRect = numHorizontal * (rectWidth + inent) + inent;
-            let numVertical = Math.floor((canvasHeight - inent) / (rectHeight + inent));
-            let widthRect = numVertical * (rectHeight + inent) + inent;
-
-            let [dopHoriz, dopVert] = findDopRectangles(canvasWidth, canvasHeight, lengthRect, widthRect)
-
-            if (numHorizontal != 0 && numVertical != 0) {
-                numRectangles = { horizontal: numHorizontal, vertical: numVertical, dopHoriz: dopHoriz, dopVert: dopVert };
-            } else {
-                alert('Не подходящие параметры');
-            }
-
-            return numRectangles;
+        function isRectIntersect(sx, sy, sw, sh, rect) {
+            const sx2 = sx + sw;
+            const sy2 = sy + sh;
+            const rectX2 = rect.x + rect.width;
+            const rectY2 = rect.y + rect.height;
+            return !(sx2 < rect.x || sx > rectX2 || sy2 < rect.y || sy > rectY2);
         }
 
-        function drawRectangles(canvasId, rectanglesData) {
-            const canvas = document.getElementById(canvasId);
-            const ctx = canvas.getContext('2d');
+        function handleMouseDown(e) {
+            startX = e.offsetX;
+            startY = e.offsetY;
+            isSelecting = true;
+            selectionBox.style.display = 'block';
+            selectionBox.style.left = `${startX}px`;
+            selectionBox.style.top = `${startY}px`;
+            selectionBox.style.width = '0px';
+            selectionBox.style.height = '0px';
+        }
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Очищаем канвас перед отрисовкой
+        function handleMouseMove(e) {
+            if (!isSelecting) return;
+            const x = e.offsetX;
+            const y = e.offsetY;
+            const width = x - startX;
+            const height = y - startY;
+            selectionBox.style.width = `${Math.abs(width)}px`;
+            selectionBox.style.height = `${Math.abs(height)}px`;
+            selectionBox.style.left = `${Math.min(startX, x)}px`;
+            selectionBox.style.top = `${Math.min(startY, y)}px`;
+        }
 
-            // Основные прямоугольники (горизонтальные)
-            for (let i = 0; i < rectanglesData.vertical; i++) {
-                for (let j = 0; j < rectanglesData.horizontal; j++) {
-                    ctx.fillStyle = 'lightblue';
-                    ctx.fillRect(
-                        inent + j * (rectWidth + inent),
-                        inent + i * (rectHeight + inent),
-                        rectWidth,
-                        rectHeight
-                    );
-                }
-            }
-            console.log(rectanglesData.dopHoriz)
-            // Дополнительные горизонтальные прямоугольники
-            for (let j = 0; j < rectanglesData.dopHoriz.vertical; j++) {
-                for (let i = 0; i < rectanglesData.dopHoriz.horizontal; i++) {
-                    ctx.fillStyle = 'lightgreen';
-                    ctx.fillRect(
-                        inent + rectanglesData.horizontal * (rectWidth + inent) + i * (rectHeight + inent),
-                        (inent + rectWidth) * j + inent,
-                        rectHeight, // Поменяли ширину на высоту
-                        rectWidth  // Поменяли высоту на ширину
-                    );
-                }
-            }
+        function handleMouseUp(e) {
+            if (!isSelecting) return;
+            isSelecting = false;
+            selectionBox.style.display = 'none';
 
-            console.log(rectanglesData.dopVert)
-            // Дополнительные вертикальные прямоугольники
-            for (let j = 0; j < rectanglesData.dopVert.horizontal; j++) {
-                for (let i = 0; i < rectanglesData.dopVert.vertical; i++) {
-                    ctx.fillStyle = 'lightcoral';
-                    ctx.fillRect(
-                        inent + j * (rectHeight + inent),
-                        inent + rectanglesData.vertical * (rectHeight + inent) + i * (rectWidth + inent),
-                        rectHeight, // Поменяли ширину на высоту
-                        rectWidth  // Поменяли высоту на ширину
-                    );
-                }
+            const x = Math.min(startX, e.offsetX);
+            const y = Math.min(startY, e.offsetY);
+            const width = Math.abs(e.offsetX - startX);
+            const height = Math.abs(e.offsetY - startY);
+
+            // Обновляем массив выбранных прямоугольников
+            selectedRectangles = rectangles.filter(rect => isRectIntersect(x, y, width, height, rect));
+            drawRectangles();
+        }
+
+        function handleDocumentMouseUp(e) {
+            if (isSelecting) {
+                handleMouseUp(e);
             }
         }
 
-        // Параметры канваса
-        const canvasWidth = 600;
-        const canvasHeight = 600;
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleDocumentMouseUp); // Handle mouseup for the entire document
 
-        // Найти количество прямоугольников
-        const rectanglesData = findNumberOfRectangles(canvasWidth, canvasHeight);
+        resetButton.addEventListener('click', () => {
+            selectedRectangles = [];
+            drawRectangles();
+        });
 
-        // Нарисовать прямоугольники на канвасе
-        drawRectangles('myCanvas', rectanglesData);
-
+        drawRectangles();
     </script>
-
 </body>
-
 </html>
