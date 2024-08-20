@@ -152,7 +152,6 @@
     <ul>
         <li>Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы + добавить в
             форму массу)</li>
-        <li>Добавить возможность перемещения нескольких объектов (выделять их, разобрать код из test.html) (?)</li>
         <li>Приятный интерфейс</li>
         <li>700 700 450 200 10</li>
         <li>600 600 140 120 10 ---</li>
@@ -213,7 +212,7 @@
         function calculateSpacing(lastElement, element, widthOrHeightProp, positionProp, startIndex, endIndex) {
             const totalGap = lastElement[positionProp] + float2int(lastElement[widthOrHeightProp] / 2)
                 - (element[positionProp] + float2int(element[widthOrHeightProp] / 2));
-            return float2int(totalGap / (endIndex - startIndex));
+            return  (endIndex - startIndex) ? float2int(totalGap / (endIndex - startIndex)) : float2int(totalGap / 2);
         }
 
         function updateElementPositions(arr1Layer, widthOrHeightProp, rowOrColumnProp, positionProp) {
@@ -222,6 +221,7 @@
 
             // Отфильтруйте и отсортируйте элементы
             const filteredAndSortedElements = filterAndSortElements(arr1Layer, rectWidth, rowOrColumnProp);
+            // console.log(filteredAndSortedElements)
 
             if (filteredAndSortedElements.length === 0) return; // Если нет элементов для обработки
 
@@ -231,10 +231,17 @@
             // Обработайте элементы по группам
             for (let i = 0; i < filteredAndSortedElements.length; i++) {
                 if (filteredAndSortedElements[i + 1]?.[rowOrColumnProp] !== currentRowOrColumnValue) {
-
-                    const currentGroup = filteredAndSortedElements.slice(startIndexOfCurrentGroup + 1, i + 1);
+                    let currentGroup;
+                    if (filteredAndSortedElements.length == 1) {
+                        currentGroup = filteredAndSortedElements.slice(0, 1);
+                        
+                    }else{
+                        currentGroup = filteredAndSortedElements.slice(startIndexOfCurrentGroup + 1, i + 1);
+                    }
+                    
+                    
                     const spacing = calculateSpacing(normalLastRec, filteredAndSortedElements[i], widthOrHeightProp, positionProp, startIndexOfCurrentGroup, i);
-
+                    
                     currentGroup.forEach((item, index) => {
                         const arrIndex = arr1Layer.indexOf(item);
                         arr1Layer[arrIndex][positionProp] += spacing * (index + 1);
@@ -245,6 +252,8 @@
                     currentRowOrColumnValue = filteredAndSortedElements[i + 1]?.[rowOrColumnProp];
                 }
             }
+
+
         }
 
         // Универсальная функция для вычисления координат
@@ -799,7 +808,7 @@
                 rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
             }
             if (endIndexChangeArr < endIndex) {
-                rectanglesClone.splice(startIndexChangeArr, 0,  JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex))))
+                rectanglesClone.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex))))
             }
             for (let i = startIndex; i <= endIndex; i++) {
                 rectangles[i].color = rectangles[i].colorAuto
@@ -818,7 +827,7 @@
                 rectangles.splice(endIndex, endIndexChangeArr - endIndex)
             }
             if (endIndexChangeArr < endIndex) {
-                rectangles.splice(startIndexChangeArr, 0,  JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex))))
+                rectangles.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex))))
             }
             for (let i = startIndex; i <= endIndex; i++) {
                 rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
@@ -960,11 +969,11 @@
         const deleteCancel = document.getElementById('deleteCancel');
 
         deleteConfirm.addEventListener('click', () => {
-            selectedRectangles.forEach(selected =>{
+            selectedRectangles.forEach(selected => {
                 let indexDeleted = rectangles.indexOf(selected);
                 rectangles.splice(indexDeleted, 1);
             });
-            
+
             deleteQuestion.style.display = 'none'; // Закрываем модальное окно
             selectedRectangles = [];
             selectedRectangle = null;
@@ -1001,14 +1010,17 @@
                         selectedRectangle = rect;
                         dragOffsetX = mousePos.x - rect.x;
                         dragOffsetY = mousePos.y - rect.y;
-
+                        if (!selectedRectangles.includes(selectedRectangle)){
+                            selectedRectangles = []
+                        }
                     }
                     //Когда 1 выделен
                     selectedRectangles.push(rect);
                     selectedRectangle = rect;
                     dragOffsetX = mousePos.x - rect.x;
                     dragOffsetY = mousePos.y - rect.y;
-                    if(evt.button === 0){
+                    if (evt.button === 0) {
+                        
 
                     } else if (evt.button === 1) {
                         evt.preventDefault();
@@ -1049,6 +1061,14 @@
             selectionBox.style.top = `${Math.min(startY, y)}px`;
         }
 
+        function clampCoordinate(delta, center, halfSize) {
+            if (delta > 0) {
+                return Math.min(delta, center - halfSize);
+            } else {
+                return Math.max(delta, -(center - halfSize));
+            }
+        }
+
         canvas.addEventListener('mousemove', function (evt) {
             if (selectedRectangle) {
                 const mousePos = getMousePos(canvas, evt);
@@ -1062,21 +1082,12 @@
                 const halfHeight = float2int(selectedRectangle.height / 2);
                 const deltaX = mousePos.x - dragOffsetX;
                 const deltaY = mousePos.y - dragOffsetY;
-                if (deltaX > 0) {
-                    selectedRectangle.x = (deltaX > (centerX - halfWidth)) ? (centerX - halfWidth) : float2int(deltaX);
-                } else {
-                    selectedRectangle.x = (deltaX < -(centerX - halfWidth)) ? -(centerX - halfWidth) : float2int(deltaX);
-                }
-
-                if ((deltaY) > 0) {
-                    selectedRectangle.y = ((deltaY) > (centerY - halfHeight)) ? (centerY - halfHeight) : float2int(deltaY);
-                } else {
-                    selectedRectangle.y = ((deltaY) < -(centerY - halfHeight)) ? -(centerY - halfHeight) : float2int(deltaY);
-                }
+                selectedRectangle.x = float2int(clampCoordinate(deltaX, centerX, halfWidth));
+                selectedRectangle.y = float2int(clampCoordinate(deltaY, centerY, halfHeight));
                 for (let i = 0; i < selectedRectangles.length; i++) {
 
-                    selectedRectangles[i].x = float2int(mousePos.x - (dragOffsetX + selectedRectangle.xAuto - selectedRectangles[i].xAuto));
-                    selectedRectangles[i].y = float2int(mousePos.y - (dragOffsetY + selectedRectangle.yAuto - selectedRectangles[i].yAuto));
+                    selectedRectangles[i].x = float2int(clampCoordinate(mousePos.x - (dragOffsetX + selectedRectangle.xAuto - selectedRectangles[i].xAuto), centerX, selectedRectangles[i].width / 2));
+                    selectedRectangles[i].y = float2int(clampCoordinate(mousePos.y - (dragOffsetY + selectedRectangle.yAuto - selectedRectangles[i].yAuto), centerY, selectedRectangles[i].height / 2));
 
                 }
 
@@ -1092,6 +1103,7 @@
             if (selectedRectangle) {
                 selectedRectangle = null;
                 selectedRectangles = [];
+                drawLayer();
             }
         });
 
