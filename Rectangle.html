@@ -138,15 +138,6 @@
 
     <canvas id="myCanvas" width="800" height="800"></canvas>
     <ul>
-
-
-        <li><strike>Проверка на кладку диагональную (высота среди широты) (440 420 140 120 6)</strike></li>
-        <li><strike>Менять местами при кладке при доп горизонт, допВерт</strike></li>
-        <li><strike>Поворот окна</strike></li>
-        <li><strike>Сохранять измененный слой руками и спрашивать при нажатии на дополнительный слой (либо на переход в
-                другой
-                слой без кнокпи сохранения) сделать ли все последующие такие (через 1) или нет</strike></li> +-
-        <li>Изменение масштаба либо окна (canvas) при изменении паллета</li>
         <li>Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы + добавить в
             форму массу)</li>
         <li>Добавить возможность перемещения нескольких объектов (выделять их, разобрать код из test.html) (?)</li>
@@ -465,8 +456,8 @@
 
         function oddLayer(palletWidth, palletHeight) {
             // let matrixRectangles = [];
-            centerX = Math.floor(palletWidth / 2) ;
-            centerY = Math.floor(palletHeight / 2) ;
+            centerX = Math.floor(palletWidth / 2);
+            centerY = Math.floor(palletHeight / 2);
             let numRectangles = findNumberOfRectangles(palletWidth, palletHeight);
 
 
@@ -507,26 +498,6 @@
                         matrixRectangles.push(Array(countDopHorizHoriz).fill(0));
                         matrixRectangles.at(-1).push(2);
                     }
-
-
-
-
-                    //     matrixRectangles.splice(matrixRectangles.length, 0, dopArr);
-                    // matrixRectangles = [
-                    //     [2, 1, 1, 1, 1, 1, 1],
-                    //     [2, 0, 0, 0, 0, 0, 0],
-                    //     [2, 0, 0, 0, 0, 0, 0],
-                    //     [2, 0, 0, 0, 0, 0, 0],
-                    //     [2, 0, 0, 0, 0, 0, 0],
-                    //     [2, 0, 0, 0, 0, 0, 0],
-                    //     [1, 1, 1, 1, 1, 1, 0],
-                    //     [0, 0, 0, 0, 0, 0, 2],
-                    //     [0, 0, 0, 0, 0, 0, 2],
-                    //     [0, 0, 0, 0, 0, 0, 2],
-                    //     [0, 0, 0, 0, 0, 0, 2],
-                    //     [0, 0, 0, 0, 0, 0, 2],
-                    //     [0, 0, 0, 0, 0, 0, 2],
-                    // ]
 
                 }
                 else {
@@ -681,16 +652,34 @@
             rotateRectangles(rectangles, centerX, centerY);
         });
 
+        function initialScale(){
+            let palletWidthValue = parseInt(document.getElementById('palletWidth').value);
+            let palletHeightValue = parseInt(document.getElementById('palletHeight').value);
+            scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue) * scale).toFixed(1), (parseInt(canvas.height) / palletHeightValue * scale).toFixed(1))
+            scale = scaleMax - 0.1
+            spacingCenterX = float2int((parseInt(canvas.width) - palletWidthValue * scale) / 2);
+            spacingCenterY = float2int((parseInt(canvas.height) - palletHeightValue * scale) / 2);
+            ctx.setTransform(scale, 0, 0, scale, spacingCenterX, spacingCenterY);
+        }
+
+        function gettingDataForm(){
+            inent = Number(document.getElementById('inentM').value);
+            rectWidth = parseInt(document.getElementById('rectWidth').value);
+            rectHeight = parseInt(document.getElementById('rectHeight').value);
+            rectWidth = parseInt(document.getElementById('rectWidth').value);
+        }
+        
 
 
-
+        let scale = 1;
+        let scaleMax = 1;
         form.addEventListener('submit', function (event) {
             event.preventDefault();
             rectangles = [];
-            spacingCenterX = float2int((parseInt(document.getElementById('myCanvas').width) - parseInt(document.getElementById('palletWidth').value) * scale) / 2);
-            spacingCenterY = float2int((parseInt(document.getElementById('myCanvas').height) - parseInt(document.getElementById('palletHeight').value) * scale) / 2);
-            ctx.setTransform(scale, 0, 0, scale, spacingCenterX, spacingCenterY);
             level = 1;
+
+            initialScale();
+            
             let child = tab.lastElementChild;
             while (child) {
                 tab.removeChild(child);
@@ -699,11 +688,10 @@
 
             const palletWidth = parseInt(document.getElementById('palletWidth').value);
             const palletHeight = parseInt(document.getElementById('palletHeight').value);
-            inent = Number(document.getElementById('inentM').value);
-            rectWidth = parseInt(document.getElementById('rectWidth').value);
-            rectHeight = parseInt(document.getElementById('rectHeight').value);
-            rectWidth = parseInt(document.getElementById('rectWidth').value);
+        
             let layer = parseInt(document.getElementById('minLayer').value);
+
+            gettingDataForm();
 
             // Показ всех слоев одновременно
             for (let i = 0; i < layer; i++) {
@@ -711,7 +699,6 @@
                     rectangles[i].isLastlayer = false;
                 }
 
-                // getRectangles(palletWidth, palletHeight);
                 if (level % 2 != 0) {
                     changeWidthHeight();
                     oddLayer(palletWidth, palletHeight)
@@ -726,8 +713,6 @@
             }
 
             createButton(layer);
-            // console.log(rectangles)
-            // oddLayer(palletWidth, palletHeight);
             layerNum = layer;
             drawLayer();
         });
@@ -743,8 +728,7 @@
         function createButton(quantity) {
 
             for (let i = 1; i <= quantity; i++) {
-                // <input checked id="tab-btn-1" name="tab-btn" type="radio" value="">
-                // <label for="tab-btn-1">Вкладка 1</label>
+                
                 const button = document.createElement('input');
                 button.setAttribute('type', 'radio');
                 button.setAttribute("checked", "");
@@ -828,7 +812,7 @@
         function drawLayer() {
             let startLayer = -1;
             let endLayer = -1;
-            ctx.clearRect(-spacingCenterX, -spacingCenterY, canvas.width + spacingCenterX, canvas.height +spacingCenterY);
+            ctx.clearRect(-spacingCenterX, -spacingCenterY, canvas.width + spacingCenterX, canvas.height + spacingCenterY);
             for (var i = 0; i < rectangles.length; i++) {
                 rectangles[i].isLastlayer = false;
 
@@ -843,7 +827,7 @@
             for (let i = startLayer; i < ((endLayer == -1) ? rectangles.length : endLayer); i++) {
                 rectangles[i].isLastlayer = true;
             }
-            
+
             rectangles.slice(0, ((endLayer == -1) ? rectangles.length : endLayer)).forEach(drawRectangle);
             drawPallet();
 
@@ -1002,9 +986,9 @@
             if (selectedRectangle && selectedRectangle.isDragging) {
                 const mousePos = getMousePos(canvas, evt);
                 if ((mousePos.x - centerX - dragOffsetX) > 0) {
-                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) > (centerX - float2int(selectedRectangle.width / 2) )) ? (centerX - float2int(selectedRectangle.width / 2)) : float2int(mousePos.x - centerX - dragOffsetX);
+                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) > (centerX - float2int(selectedRectangle.width / 2))) ? (centerX - float2int(selectedRectangle.width / 2)) : float2int(mousePos.x - centerX - dragOffsetX);
                 } else {
-                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) < -(centerX - float2int(selectedRectangle.width / 2) )) ? -(centerX - float2int(selectedRectangle.width / 2)) : float2int(mousePos.x - centerX - dragOffsetX);
+                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) < -(centerX - float2int(selectedRectangle.width / 2))) ? -(centerX - float2int(selectedRectangle.width / 2)) : float2int(mousePos.x - centerX - dragOffsetX);
                 }
 
                 if ((mousePos.y - centerY - dragOffsetY) > 0) {
@@ -1026,7 +1010,7 @@
         });
 
         function setCanvasScale(scale) {
-            ctx.clearRect(-spacingCenterX, -spacingCenterY, canvas.width + spacingCenterX, canvas.height +spacingCenterY);
+            ctx.clearRect(-spacingCenterX, -spacingCenterY, canvas.width + spacingCenterX, canvas.height + spacingCenterY);
             spacingCenterX = float2int((parseInt(document.getElementById('myCanvas').width) - parseInt(document.getElementById('palletWidth').value) * scale) / 2);
             spacingCenterY = float2int((parseInt(document.getElementById('myCanvas').height) - parseInt(document.getElementById('palletHeight').value) * scale) / 2);
             // Сбрасываем трансформацию и устанавливаем новый масштаб
@@ -1035,14 +1019,14 @@
 
         }
 
-        let scale = 1;
+
         document.addEventListener('keydown', evt => {
-            
+
             if (evt.code === 'Minus') {
                 scale = Math.max(0.1, scale - 0.1); // Ограничиваем масштаб, чтобы не стало меньше 0.1
                 setCanvasScale(scale);
             } else if (evt.code === 'Equal') {
-                scale += 0.1;
+                scale = Math.min(scaleMax, scale + 0.1);;
                 setCanvasScale(scale);
             }
         });
