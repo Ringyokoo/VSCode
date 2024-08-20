@@ -109,6 +109,14 @@
             background-color: #f44336;
             color: white;
         }
+
+        .selection-box {
+            margin-left: 20px;
+            border: 1px dashed rgba(0, 0, 255, 0.7);
+            position: absolute;
+            background: rgba(0, 0, 255, 0.2);
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -136,7 +144,11 @@
     <div class="tab">
     </div>
 
-    <canvas id="myCanvas" width="800" height="800"></canvas>
+    <div style="position: relative;">
+        <canvas id="myCanvas" width="800" height="800"></canvas>
+        <div id="selectionBox" class="selection-box" style="display: none;"></div>
+    </div>
+
     <ul>
         <li>Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы + добавить в
             форму массу)</li>
@@ -176,7 +188,7 @@
         let selectedRectangle;
 
         let centerX, centerY, predelX, predelY;
-        let rectWidth, rectHeight, rectCount;
+        let rectWidth, rectHeight;
         let rectangles = [];
         let inent;
         let level = 1;
@@ -345,7 +357,6 @@
                         y: coordinateY + inent,
                         width: rectWidth,
                         height: rectHeight,
-                        isDragging: false,
                         isLastlayer: true,
                         color: rgbColor,
                         text: text,
@@ -378,6 +389,7 @@
             centering(arr1Layer);
 
             rectangles.push(...arr1Layer);
+            rectanglesClone.push(...arr1Layer.map(obj => JSON.parse(JSON.stringify(obj))));
 
             flagAddHoriz = false;
             flagAddVert = false;
@@ -624,19 +636,18 @@
 
 
             const item = {
-                x: 0,
-                y: 0,
+                x: lastRectangleLayer.x + 10,
+                y: lastRectangleLayer.y + 10,
                 width: lastRectangleLayer.width,
                 height: lastRectangleLayer.height,
-                isDragging: false,
                 isLastlayer: true,
                 color: invertColor(lastRectangleLayer.color),
                 text: lastRectangleLayer.text,
                 column: lastRectangleLayer.column,
                 row: lastRectangleLayer.row,
                 layer: lastRectangleLayer.layer,
-                xAuto: 0,
-                yAuto: 0,
+                xAuto: lastRectangleLayer.x + 10,
+                yAuto: lastRectangleLayer.y + 10,
                 widthAuto: lastRectangleLayer.widthAuto,
                 heightAuto: lastRectangleLayer.heightAuto,
                 textAuto: lastRectangleLayer.textAuto,
@@ -644,7 +655,8 @@
             };
 
             rectangles.splice(lastRectangleLayerIndex + 1, 0, item);
-
+            console.log(rectangles)
+            // rectanglesClone.push(JSON.parse(JSON.stringify(item)));
             drawLayer();
         });
 
@@ -652,7 +664,7 @@
             rotateRectangles(rectangles, centerX, centerY);
         });
 
-        function initialScale(){
+        function initialScale() {
             let palletWidthValue = parseInt(document.getElementById('palletWidth').value);
             let palletHeightValue = parseInt(document.getElementById('palletHeight').value);
             scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue) * scale).toFixed(1), (parseInt(canvas.height) / palletHeightValue * scale).toFixed(1))
@@ -662,24 +674,26 @@
             ctx.setTransform(scale, 0, 0, scale, spacingCenterX, spacingCenterY);
         }
 
-        function gettingDataForm(){
+        function gettingDataForm() {
             inent = Number(document.getElementById('inentM').value);
             rectWidth = parseInt(document.getElementById('rectWidth').value);
             rectHeight = parseInt(document.getElementById('rectHeight').value);
             rectWidth = parseInt(document.getElementById('rectWidth').value);
         }
-        
+
 
 
         let scale = 1;
         let scaleMax = 1;
+        let rectanglesClone = [];
         form.addEventListener('submit', function (event) {
             event.preventDefault();
             rectangles = [];
+            rectanglesClone = [];
             level = 1;
-
+            scale = 1;
             initialScale();
-            
+
             let child = tab.lastElementChild;
             while (child) {
                 tab.removeChild(child);
@@ -688,7 +702,7 @@
 
             const palletWidth = parseInt(document.getElementById('palletWidth').value);
             const palletHeight = parseInt(document.getElementById('palletHeight').value);
-        
+
             let layer = parseInt(document.getElementById('minLayer').value);
 
             gettingDataForm();
@@ -728,7 +742,7 @@
         function createButton(quantity) {
 
             for (let i = 1; i <= quantity; i++) {
-                
+
                 const button = document.createElement('input');
                 button.setAttribute('type', 'radio');
                 button.setAttribute("checked", "");
@@ -765,35 +779,50 @@
         }
 
         function hasUnsavedChanges() {
-            return rectangles.some(rectangle =>
-                rectangle.x !== rectangle.xAuto || rectangle.y !== rectangle.yAuto
-            );
+            const startIndex = rectangles.findIndex(rect => rect.layer == layerNum);
+            const endIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
+            for (let i = startIndex; i <= endIndex; i++) {
+                if (rectangles[i].x !== rectanglesClone[i]?.x || rectangles[i].y !== rectanglesClone[i]?.y) {
+                    // console.log(rectangles[i], rectanglesClone[i])
+                    return true;
+                }
+            }
+            return false;
         }
-        function updateDataRectangles() {
-            const filteredRectangles = rectangles.filter(rectangle => rectangle.layer === layerNum);
 
-            // Обновляем свойства для отфильтрованных элементов
-            filteredRectangles.forEach(rectangle => {
-                rectangle.xAuto = rectangle.x;
-                rectangle.yAuto = rectangle.y;
-                rectangle.widthAuto = rectangle.width;
-                rectangle.heightAuto = rectangle.height;
-                rectangle.textAuto = rectangle.text;
-                rectangle.color = rectangle.colorAuto;
-            });
+        function updateDataRectangles() {
+            const startIndex = rectangles.findIndex(rect => rect.layer == layerNum);
+            const endIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
+            const startIndexChangeArr = rectanglesClone.findIndex(rect => rect.layer == layerNum);
+            const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
+            if (endIndexChangeArr > endIndex) {
+                rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
+            }
+            if (endIndexChangeArr < endIndex) {
+                rectanglesClone.splice(startIndexChangeArr, 0,  JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex))))
+            }
+            for (let i = startIndex; i <= endIndex; i++) {
+                rectangles[i].color = rectangles[i].colorAuto
+                rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
+            }
+
+
         }
 
         function returnDataRectangles() {
-            const filteredRectangles = rectangles.filter(rectangle => rectangle.layer === layerNum);
-
-            filteredRectangles.forEach(rectangle => {
-                rectangle.x = rectangle.xAuto;
-                rectangle.y = rectangle.yAuto;
-                rectangle.width = rectangle.widthAuto;
-                rectangle.height = rectangle.heightAuto;
-                rectangle.text = rectangle.textAuto;
-                rectangle.color = rectangle.colorAuto;
-            });
+            const startIndex = rectanglesClone.findIndex(rect => rect.layer == layerNum);
+            const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
+            const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == layerNum);
+            const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == layerNum);
+            if (endIndexChangeArr > endIndex) {
+                rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+            }
+            if (endIndexChangeArr < endIndex) {
+                rectangles.splice(startIndexChangeArr, 0,  JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex))))
+            }
+            for (let i = startIndex; i <= endIndex; i++) {
+                rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
+            }
         }
 
         saveConfirm.addEventListener('click', () => {
@@ -848,7 +877,7 @@
 
             ctx.rect(centerX + rect.x - float2int(rect.width / 2), centerY + rect.y - float2int(rect.height / 2), rect.width, rect.height);
 
-            ctx.fillStyle = rect.color;
+            ctx.fillStyle = selectedRectangles.includes(rect) || selectedRectangle == rect ? 'rgba(255, 0, 0, 0.5)' : rect.color;
             ctx.fill();
             if (!rect.isLastlayer) {
                 ctx.strokeStyle = rect.color;
@@ -931,9 +960,13 @@
         const deleteCancel = document.getElementById('deleteCancel');
 
         deleteConfirm.addEventListener('click', () => {
-            let indexDeleted = rectangles.indexOf(selectedRectangle);
+            selectedRectangles.forEach(selected =>{
+                let indexDeleted = rectangles.indexOf(selected);
+                rectangles.splice(indexDeleted, 1);
+            });
+            
             deleteQuestion.style.display = 'none'; // Закрываем модальное окно
-            rectangles.splice(indexDeleted, 1);
+            selectedRectangles = [];
             selectedRectangle = null;
             drawLayer();
 
@@ -941,71 +974,124 @@
 
         deleteCancel.addEventListener('click', () => {
             deleteQuestion.style.display = 'none'; // Закрываем модальное окно
-
             selectedRectangle = null;
-
+            selectedRectangles = [];
+            drawLayer();
         });
 
-        canvas.addEventListener('mousedown', function (evt) {
+        function handleMouseDown(e) {
+            startX = e.offsetX;
+            startY = e.offsetY;
+            isSelecting = true;
+            selectionBox.style.display = 'block';
+            selectionBox.style.left = `${startX}px`;
+            selectionBox.style.top = `${startY}px`;
+            selectionBox.style.width = '0px';
+            selectionBox.style.height = '0px';
+        }
 
+        let arrDragOffset = []
+        canvas.addEventListener('mousedown', function (evt) {
+            // selectedRectangles = []
             const mousePos = getMousePos(canvas, evt);
             rectangles.forEach(rect => {
                 if (isInsideRect(mousePos, rect) && rect.isLastlayer) {
+                    //Когда несколько выделяется
+                    if (selectedRectangles.length) {
+                        selectedRectangle = rect;
+                        dragOffsetX = mousePos.x - rect.x;
+                        dragOffsetY = mousePos.y - rect.y;
+
+                    }
+                    //Когда 1 выделен
+                    selectedRectangles.push(rect);
                     selectedRectangle = rect;
-                    if (evt.button === 0) {
-                        dragOffsetX = mousePos.x - (centerX + rect.x);
-                        dragOffsetY = mousePos.y - (centerY + rect.y);
-                        rect.isDragging = true;
+                    dragOffsetX = mousePos.x - rect.x;
+                    dragOffsetY = mousePos.y - rect.y;
+                    if(evt.button === 0){
+
+                    } else if (evt.button === 1) {
+                        evt.preventDefault();
+                        selectedRectangles = [];
+                        let dop = selectedRectangle.height;
+                        selectedRectangle.height = selectedRectangle?.width;
+                        selectedRectangle.width = dop;
+
+                        if (arrText.indexOf(selectedRectangle.text) + 1 < arrText.length) {
+                            selectedRectangle.text = arrText[arrText.indexOf(selectedRectangle.text) + 1];
+                        } else {
+                            selectedRectangle.text = arrText[0];
+                        }
+
+                        drawLayer();
+                    } else {
+                        deleteQuestion.style.display = 'flex';
                     }
                 }
             });
-            if (evt.button === 1 && selectedRectangle) {
-                evt.preventDefault();
-                let dop = selectedRectangle.height;
-                selectedRectangle.height = selectedRectangle?.width;
-                selectedRectangle.width = dop;
-                selectedRectangle.isDragging = false;
-                if (arrText.indexOf(selectedRectangle.text) + 1 < arrText.length) {
-                    selectedRectangle.text = arrText[arrText.indexOf(selectedRectangle.text) + 1];
-                } else {
-                    selectedRectangle.text = arrText[0];
-                }
+            if (!selectedRectangle) {
 
-                drawLayer();
+                handleMouseDown(evt)
 
             }
-            if (evt.button === 2 && selectedRectangle) {
-
-                deleteQuestion.style.display = 'flex';
-
-
-            }
+            // console.log(selectedRectangles)
         });
 
+        function handleMouseMove(e) {
+            if (!isSelecting) return;
+            const x = e.offsetX;
+            const y = e.offsetY;
+            const width = x - startX;
+            const height = y - startY;
+            selectionBox.style.width = `${Math.abs(width)}px`;
+            selectionBox.style.height = `${Math.abs(height)}px`;
+            selectionBox.style.left = `${Math.min(startX, x)}px`;
+            selectionBox.style.top = `${Math.min(startY, y)}px`;
+        }
+
         canvas.addEventListener('mousemove', function (evt) {
-            if (selectedRectangle && selectedRectangle.isDragging) {
+            if (selectedRectangle) {
                 const mousePos = getMousePos(canvas, evt);
-                if ((mousePos.x - centerX - dragOffsetX) > 0) {
-                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) > (centerX - float2int(selectedRectangle.width / 2))) ? (centerX - float2int(selectedRectangle.width / 2)) : float2int(mousePos.x - centerX - dragOffsetX);
+                selectedRectangles = selectedRectangles.filter(rect => rect != selectedRectangle);
+                // console.log(selectedRectangle)
+                // console.log(selectedRectangles);
+                // selectedRectangles.forEach(selectedRectangle => {
+
+                // });
+                const halfWidth = float2int(selectedRectangle.width / 2);
+                const halfHeight = float2int(selectedRectangle.height / 2);
+                const deltaX = mousePos.x - dragOffsetX;
+                const deltaY = mousePos.y - dragOffsetY;
+                if (deltaX > 0) {
+                    selectedRectangle.x = (deltaX > (centerX - halfWidth)) ? (centerX - halfWidth) : float2int(deltaX);
                 } else {
-                    selectedRectangle.x = ((mousePos.x - centerX - dragOffsetX) < -(centerX - float2int(selectedRectangle.width / 2))) ? -(centerX - float2int(selectedRectangle.width / 2)) : float2int(mousePos.x - centerX - dragOffsetX);
+                    selectedRectangle.x = (deltaX < -(centerX - halfWidth)) ? -(centerX - halfWidth) : float2int(deltaX);
                 }
 
-                if ((mousePos.y - centerY - dragOffsetY) > 0) {
-                    selectedRectangle.y = ((mousePos.y - centerY - dragOffsetY) > (centerY - float2int(selectedRectangle.height / 2))) ? (centerY - float2int(selectedRectangle.height / 2)) : float2int(mousePos.y - centerY - dragOffsetY);
+                if ((deltaY) > 0) {
+                    selectedRectangle.y = ((deltaY) > (centerY - halfHeight)) ? (centerY - halfHeight) : float2int(deltaY);
                 } else {
-                    selectedRectangle.y = ((mousePos.y - centerY - dragOffsetY) < -(centerY - float2int(selectedRectangle.height / 2))) ? -(centerY - float2int(selectedRectangle.height / 2)) : float2int(mousePos.y - centerY - dragOffsetY);
+                    selectedRectangle.y = ((deltaY) < -(centerY - halfHeight)) ? -(centerY - halfHeight) : float2int(deltaY);
+                }
+                for (let i = 0; i < selectedRectangles.length; i++) {
+
+                    selectedRectangles[i].x = float2int(mousePos.x - (dragOffsetX + selectedRectangle.xAuto - selectedRectangles[i].xAuto));
+                    selectedRectangles[i].y = float2int(mousePos.y - (dragOffsetY + selectedRectangle.yAuto - selectedRectangles[i].yAuto));
+
                 }
 
                 // selectedRectangle.y = mousePos.y - centerY - dragOffsetY;
                 drawLayer();
+            } else {
+                handleMouseMove(evt);
             }
+
         });
 
         canvas.addEventListener('mouseup', function () {
             if (selectedRectangle) {
-                selectedRectangle.isDragging = false;
                 selectedRectangle = null;
+                selectedRectangles = [];
             }
         });
 
@@ -1031,6 +1117,59 @@
             }
         });
 
+        const selectionBox = document.getElementById('selectionBox');
+        let selectedRectangles = [];
+        let startX, startY, isSelecting = false;
+
+        function isRectIntersect(sx, sy, sw, sh, rect) {
+            if (rect.layer != layerNum) {
+                return false;
+            }
+
+            const sx2 = sx + sw;
+            const sy2 = sy + sh;
+            const rectX2 = rect.x + rect.width / 2;
+            const rectY2 = rect.y + rect.height / 2;
+            return !(sx2 < rect.x - rect.width / 2 || sx > rectX2 || sy2 < rect.y - rect.height / 2 || sy > rectY2);
+        }
+
+
+
+
+
+        function handleMouseUp(e) {
+            if (!isSelecting) return;
+            isSelecting = false;
+            selectionBox.style.display = 'none';
+            const x = (Math.min(startX, e.offsetX) / scale - spacingCenterX / scale) - centerX;
+            const y = (Math.min(startY, e.offsetY) / scale - spacingCenterY / scale) - centerY;
+            const width = Math.abs(e.offsetX - startX) / scale;
+            const height = Math.abs(e.offsetY - startY) / scale;
+
+            // Обновляем массив выбранных прямоугольников
+            selectedRectangles = rectangles.filter(rect => isRectIntersect(x, y, width, height, rect));
+            const filteredRectangles = rectangles.filter(rectangle => rectangle.layer === layerNum);
+
+            // Обновляем свойства для отфильтрованных элементов
+            filteredRectangles.forEach(rectangle => {
+                rectangle.xAuto = rectangle.x;
+                rectangle.yAuto = rectangle.y;
+                rectangle.widthAuto = rectangle.width;
+                rectangle.heightAuto = rectangle.height;
+                rectangle.textAuto = rectangle.text;
+                rectangle.color = rectangle.colorAuto;
+            });
+
+
+            drawLayer();
+        }
+
+        function handleDocumentMouseUp(e) {
+            if (isSelecting) {
+                handleMouseUp(e);
+            }
+        }
+        document.addEventListener('mouseup', handleDocumentMouseUp); // Handle mouseup for the entire document
 
         // Инициализация при загрузке
         form.dispatchEvent(new Event('submit'));
