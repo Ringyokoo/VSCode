@@ -3,18 +3,46 @@ body {
     -moz-user-select: none;
     -webkit-user-select: none;
     user-select: none;
-    display: flex;
+    overflow: hidden;
+}
+
+.container {
+    display: grid;
+    grid-template: repeat(2, 1fr) / repeat(3, 1fr);
+    grid-auto-flow: row;
+
 }
 
 canvas {
     border: 1px solid black;
     display: block;
-    margin-left: 20px;
+    /* margin: 0 20px 0 20px; */
 }
 
-.canvasAndSelection{
+.canvasAndSelection {
     position: relative;
+    grid-row: span 2;
+    background-color: antiquewhite;
 }
+
+#canvasForm {
+    width: auto;
+    background-color: lightblue;
+    margin: 0;
+}
+
+.viewingLayers {
+    width: auto;
+    background-color: rgb(255, 174, 174);
+    margin: 0;
+}
+
+@media (max-width:calc(500px + max(100vh, 100vw / 2))) {
+    .container {
+        grid-template: repeat(2, 1fr) / repeat(2, 1fr);
+    }
+}
+
 
 form {
     display: flex;
@@ -25,7 +53,7 @@ form {
 
 .tab {
     display: flex;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
 }
 
 .tab>input[type="radio"] {

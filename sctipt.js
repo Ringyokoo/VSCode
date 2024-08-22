@@ -18,6 +18,9 @@
         let spacingCenterX = 0;
         let spacingCenterY = 0;
 
+        canvas.width = Math.max(document.documentElement.clientHeight - 20, document.documentElement.clientWidth / 2);
+        canvas.height = Math.max(document.documentElement.clientHeight - 20);
+
         function float2int(value) {
             return value | 0; // Побитывая операция
         }
@@ -50,21 +53,22 @@
             for (let i = 0; i < filteredAndSortedElements.length; i++) {
                 if (filteredAndSortedElements[i + 1]?.[rowOrColumnProp] !== currentRowOrColumnValue) {
                     let currentGroup;
+                    let spacing = calculateSpacing(normalLastRec, filteredAndSortedElements[i], widthOrHeightProp, positionProp, startIndexOfCurrentGroup, i);
                     if (filteredAndSortedElements.length == 1) {
                         currentGroup = filteredAndSortedElements.slice(0, 1);
                         
-                    }else{
+                    }else if(spacing > 0){
                         currentGroup = filteredAndSortedElements.slice(startIndexOfCurrentGroup + 1, i + 1);
                     }
                     
                     
-                    const spacing = calculateSpacing(normalLastRec, filteredAndSortedElements[i], widthOrHeightProp, positionProp, startIndexOfCurrentGroup, i);
                     
-                    currentGroup.forEach((item, index) => {
+                    currentGroup?.forEach((item, index) => {
                         const arrIndex = arr1Layer.indexOf(item);
                         arr1Layer[arrIndex][positionProp] += spacing * (index + 1);
                         arr1Layer[arrIndex][positionProp + 'Auto'] = arr1Layer[arrIndex][positionProp];
                     });
+                    
 
                     startIndexOfCurrentGroup = i + 1;
                     currentRowOrColumnValue = filteredAndSortedElements[i + 1]?.[rowOrColumnProp];
@@ -169,7 +173,7 @@
 
             for (let i = 0; i < arr.length; i++) {
                 if (!arr1Layer?.at(-1)?.isLastlayer) {
-                    rgbColor = `rgb(${getRandomInt(255)} ${getRandomInt(255)} ${getRandomInt(255)} / 50%)`;
+                    rgbColor = `rgba(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.5)`;
                 }
 
                 for (let j = 0; j < arr[i].length; j++) {
@@ -446,7 +450,7 @@
             let invertedB = 255 - b;
 
             // Возвращаем инвертированный цвет
-            return `rgb(${invertedR} ${invertedG} ${invertedB} / 50%)`;
+            return `rgba(${invertedR}, ${invertedG}, ${invertedB}, 0.5)`;
         }
 
         plus.addEventListener('click', evt => {
@@ -477,7 +481,7 @@
             };
 
             rectangles.splice(lastRectangleLayerIndex + 1, 0, item);
-            console.log(rectangles)
+            // console.log(rectangles)
             // rectanglesClone.push(JSON.parse(JSON.stringify(item)));
             drawLayer();
         });
@@ -489,8 +493,9 @@
         function initialScale() {
             let palletWidthValue = parseInt(document.getElementById('palletWidth').value);
             let palletHeightValue = parseInt(document.getElementById('palletHeight').value);
-            scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue) * scale).toFixed(1), (parseInt(canvas.height) / palletHeightValue * scale).toFixed(1))
-            scale = scaleMax - 0.1
+            scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue) * scale).toFixed(1), (parseInt(canvas.height) / palletHeightValue * scale).toFixed(1));
+            scaleMax = (palletWidthValue * scaleMax  < canvas.width && palletHeightValue * scaleMax  < canvas.height) ? scaleMax: scaleMax - 0.1;
+            scale = scaleMax;
             spacingCenterX = float2int((parseInt(canvas.width) - palletWidthValue * scale) / 2);
             spacingCenterY = float2int((parseInt(canvas.height) - palletHeightValue * scale) / 2);
             ctx.setTransform(scale, 0, 0, scale, spacingCenterX, spacingCenterY);
@@ -609,7 +614,7 @@
             const startIndex = rectanglesClone.findIndex(rect => rect.layer == layerNum);
             const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
             for (let i = startIndex; i <= endIndex; i++) {
-                if (!rectangles[i] || rectangles[i].x !== rectanglesClone[i].x || rectangles[i].y !== rectanglesClone[i].y) {
+                if (!rectangles[i] || rectangles[i].x !== rectanglesClone[i].x || rectangles[i].y !== rectanglesClone[i].y || rectangles[i].width !== rectanglesClone[i].width) {
                     // console.log(rectangles[i], rectanglesClone[i])
                     return true;
                 }
@@ -724,43 +729,50 @@
 
 
         function drawNumbers(rect) {
-            ctx.font = "15px arial";
+            ctx.font = `${15 / scale}px arial`;
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
-            if (!rect.isLastlayer) {
-                ctx.fillStyle = rect.color;
-            } else {
+            if (rect.isLastlayer) {
+            //     ctx.fillStyle = rect.color;
+            // } else {
                 ctx.fillStyle = 'black'
-            }
+            // }
 
             let text = (rect.x).toString() + ', ' + (-rect.y).toString();
             ctx.fillText(text, centerX + rect.x, centerY + rect.y);
+            }
         }
 
         function drawArrow(rect) {
-            ctx.font = "24px arial";
+            ctx.font = `${24 / scale}px arial`;
             ctx.textBaseline = "middle";
-            if (!rect.isLastlayer) {
-                ctx.fillStyle = rect.color;
-            } else {
-                ctx.fillStyle = 'black'
-            }
+            if (rect.isLastlayer) {
+            //     ctx.fillStyle = rect.color;
+            // } else {
+            //     ctx.fillStyle = 'black'
+            // }
+
+            let widthPlus = centerX + rect.x - Math.floor(rect.width / 2) + 15 / scale;
+            let widthMinus = centerX + rect.x + Math.floor(rect.width / 2) - 15 / scale;
+            let heightPlus = rect.y + centerY - Math.floor(rect.height / 2) + 15 / scale;
+            let heightMinus =  rect.y + centerY + Math.floor(rect.height / 2) - 15 / scale;
             if (rect.text == '↑') {
-                ctx.fillText(rect.text, centerX + rect.x - Math.floor(rect.width / 2) + 15, rect.y + centerY - Math.floor(rect.height / 2) + 15);
-                ctx.fillText(rect.text, centerX + rect.x + Math.floor(rect.width / 2) - 15, rect.y + centerY - Math.floor(rect.height / 2) + 15);
+                ctx.fillText(rect.text, widthPlus, heightPlus);
+                ctx.fillText(rect.text, widthMinus, heightPlus);
             } else if (rect.text == '→') {
-                ctx.fillText(rect.text, centerX + rect.x + Math.floor(rect.width / 2) - 15, rect.y + centerY - Math.floor(rect.height / 2) + 15);
-                ctx.fillText(rect.text, centerX + rect.x + Math.floor(rect.width / 2) - 15, rect.y + centerY + Math.floor(rect.height / 2) - 15);
+                ctx.fillText(rect.text, widthMinus, heightPlus);
+                ctx.fillText(rect.text, widthMinus,heightMinus);
 
             } else if (rect.text == '←') {
-                ctx.fillText(rect.text, centerX + rect.x - Math.floor(rect.width / 2) + 15, rect.y + centerY - Math.floor(rect.height / 2) + 15);
-                ctx.fillText(rect.text, centerX + rect.x - Math.floor(rect.width / 2) + 15, rect.y + centerY + Math.floor(rect.height / 2) - 15);
+                ctx.fillText(rect.text, widthPlus, heightPlus);
+                ctx.fillText(rect.text, widthPlus,heightMinus);
 
             } else {
-                ctx.fillText(rect.text, centerX + rect.x - Math.floor(rect.width / 2) + 15, rect.y + centerY + Math.floor(rect.height / 2) - 15);
-                ctx.fillText(rect.text, centerX + rect.x + Math.floor(rect.width / 2) - 15, rect.y + centerY + Math.floor(rect.height / 2) - 15);
+                ctx.fillText(rect.text, widthPlus,heightMinus);
+                ctx.fillText(rect.text, widthMinus,heightMinus);
 
             }
+        }
 
         }
 
@@ -951,7 +963,7 @@
         document.addEventListener('keydown', evt => {
 
             if (evt.code === 'Minus') {
-                scale = Math.max(0.1, scale - 0.1); // Ограничиваем масштаб, чтобы не стало меньше 0.1
+                scale = Math.max(0.2, scale - 0.1); // Ограничиваем масштаб, чтобы не стало меньше 0.1
                 setCanvasScale(scale);
             } else if (evt.code === 'Equal') {
                 scale = Math.min(scaleMax, scale + 0.1);;
