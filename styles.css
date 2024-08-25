@@ -4,66 +4,147 @@ body {
     -webkit-user-select: none;
     user-select: none;
     overflow: hidden;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 15px;
 }
 
 .container {
     display: grid;
-    grid-template: repeat(2, 1fr) / repeat(3, 1fr);
+    grid-template-columns: 1fr 2fr;
     grid-auto-flow: row;
+}
 
+.leftColumn {
+    max-height: 100vh;
 }
 
 canvas {
     border: 1px solid black;
     display: block;
-    /* margin: 0 20px 0 20px; */
 }
 
 .canvasAndSelection {
     position: relative;
-    grid-row: span 2;
-    background-color: antiquewhite;
+    /* background-color: antiquewhite; */
 }
 
 #canvasForm {
-    width: auto;
-    background-color: lightblue;
-    margin: 0;
+    /* background-color: #f39c12; */
+    overflow-y: scroll;
+    resize: vertical;
+    min-height: 100px;
+    max-height: calc(40vh - 10px);
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    /* color: #f39c12; */
+    padding: 10px;
+    box-sizing: border-box;
+
 }
 
-.viewingLayers {
-    width: auto;
-    background-color: rgb(255, 174, 174);
-    margin: 0;
+#canvasForm>input {
+    padding: 12px;
+    font-size: 14px;
+
 }
 
-@media (max-width:calc(500px + max(100vh, 100vw / 2))) {
-    .container {
-        grid-template: repeat(2, 1fr) / repeat(2, 1fr);
-    }
+#canvasForm>label {
+    padding-top: 10px;
+
 }
 
 
-form {
-    display: flex;
-    flex-direction: column;
-    width: 200px;
-    margin-bottom: 20px;
+.resizable-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
+
+.resizable-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.resizable-form input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#submit {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    /* Зеленый цвет */
+    color: white;
+    border: none;
+    grid-column: span 2;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#submit:hover {
+    background-color: #218838;
+}
+
+
+
 
 .tab {
+    overflow-y: scroll;
+    resize: vertical;
+    position: sticky;
+    top: 0;
+    min-height: 100px;
+    max-height: calc(60vh - 10px);
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
     display: flex;
-    /* flex-wrap: wrap; */
+    flex-wrap: wrap;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .tab>input[type="radio"] {
     display: none;
 }
 
-.tab-content {
+.content {
     display: none;
     width: 100%;
     margin-top: 1rem;
+    background-color: #f0efef;
+    margin: 0;
+    
+}
+
+.btn:after {
+    content: '\02795';
+    /* Unicode character for "plus" sign (+) */
+    font-size: 13px;
+    color: white;
+    float: right;
+    margin-left: 5px;
+}
+
+.btn:after {
+    content: "\2796";
+    /* Unicode character for "minus" sign (-) */
 }
 
 .tab>label {
@@ -72,10 +153,16 @@ form {
     cursor: pointer;
     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
     text-decoration: none;
-    color: #0d6efd;
-    border: 0;
-    border-radius: 0.375rem;
+    color: #333;
+    /* border: 0; */
+    /* border-radius: 0.375rem; */
     background: 0 0;
+}
+
+.tab>input[type="radio"]:hover+label {
+    cursor: default;
+    color: #fff;
+    background-color: #5b9bfd;
 }
 
 .tab>input[type="radio"]:checked+label {
@@ -114,6 +201,8 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    background-color: #5b9bfd;
+    color:white
 }
 
 button:hover {
@@ -142,4 +231,42 @@ button#deleteCancel {
     position: absolute;
     background: rgba(0, 0, 255, 0.2);
     pointer-events: none;
+}
+
+.color_wrapper {
+    background-color: black;
+    display: inline-block;
+    visibility: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 20px;
+}
+
+.color_wrapper::before {
+    content: "";
+    position: absolute;
+    border-radius: 3px;
+    outline: black solid 2px;
+    border: white solid 3px;
+    height: 2rem;
+    width: 2rem;
+    pointer-events: none;
+    background-color: inherit;
+    visibility: visible;
+    box-sizing: border-box;
+}
+
+.color_picker {
+    opacity: 0;
+    height: 2rem;
+    width: 2rem;
+    box-sizing: border-box;
+    pointer-events: initial;
+    visibility: visible;
+}
+
+
+.color_picker_alpha {
+    filter: grayscale(100%);
+    visibility: visible;
 }

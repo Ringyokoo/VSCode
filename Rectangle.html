@@ -9,55 +9,63 @@
 <body>
     <!-- Необычные случаи 700 700 450 200; 400 400 140 120 -->
     <div class="container">
-        <form id="canvasForm">
-            <label for="palletWidth">Ширина:</label>
-            <input type="number" id="palletWidth" value="1200" required>
-            <label for="palletHeight">Высота:</label>
-            <input type="number" id="palletHeight" value="800" required>
-            <label for="rectWidth">Ширина прямоугольника:</label>
-            <input type="number" id="rectWidth" value="310" required>
-            <label for="rectHeight">Высота прямоугольника:</label>
-            <input type="number" id="rectHeight" value="200" required>
-            <label for="inentM">Минимальный отступ:</label>
-            <input type="number" id="inentM" value="10" required>
-            <label for="minLayer">Количество слоев</label>
-            <input type="number" id="minLayer" value="2" required>
-            <button type="submit">Apply</button>
-        </form>
+        <div class="leftColumn">
+            <form id="canvasForm" class="resizable-form">
+                <label for="palletWidth">Ширина паллета:</label>
+                <input type="number" id="palletWidth" value="1200" required>
+                <label for="palletHeight">Высота паллета:</label>
+                <input type="number" id="palletHeight" value="800" required>
+                <label for="rectWidth">Ширина мешка:</label>
+                <input type="number" id="rectWidth" value="310" required>
+                <label for="rectHeight">Высота мешка:</label>
+                <input type="number" id="rectHeight" value="200" required>
+                <label for="inentM">Минимальный промежуток:</label>
+                <input type="number" id="inentM" value="10" required>
+                <label for="minLayer">Количество слоев:</label>
+                <input type="number" id="minLayer" value="3" required>
+                <button type="submit" id="submit">Применить</button>
 
+            </form>
+            <!-- <div class="viewingLayers"> -->
+            <div class="tab">
+            </div>
+            <!-- <button type="button" id='plus' title="Добавить прямоугольник">+</button>
+                <button type="button" id='rotate' title="Повернуть на 180">↻</button> -->
+            <!-- </div> -->
+        </div>
         <div class="canvasAndSelection">
             <canvas id="myCanvas"></canvas>
             <div id="selectionBox" class="selection-box" style="display: none;"></div>
         </div>
 
-        <div class="viewingLayers">
+        <!-- <div class="viewingLayers">
             <div class="tab">
             </div>
             <button type="button" id='plus' title="Добавить прямоугольник">+</button>
             <button type="button" id='rotate' title="Повернуть на 180">↻</button>
-            <ul>
-                <li>Дорабоать кладку рядами/столбцами</li>
+            <ul> -->
+        <!-- <li>Дорабоать кладку рядами/столбцами</li>
                 <li><strike>Поправить расположение стрелочек из-за scale</strike></li>
                 <li><strike>Сделать так чтобы пропадали надписи у не главного слоя</strike></li>
-                <li>Учитывать размер экрана для ширины высоты канваса</li>
+                <li><strike>Учитывать размер экрана для ширины высоты канваса</strike></li>
                 <li>Добавить клавиши для удаления, поворота</li>
-                <li>Ручное изменение цвета прямоугольникво слоя</li>
+                <li><strike>Ручное изменение цвета прямоугольникво слоя<strike></li>
                 <li>Понять когда кладка квадартом не самая удачная и спрашивать как лучше</li>
+                <li>Добавить удаление слоя</li>
                 <li>Копирование слоев</li>
                 <li>Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы +
                     добавить в
-                    форму массу)</li>
-                <!-- <li>Приятный интерфейс</li>
+                    форму массу)</li> -->
+        <!-- <li>Приятный интерфейс</li>
             <li>700 700 450 200 10</li>
             <li>600 600 140 120 10 ---</li>
             <li>600 600 145 20 10 Кладка рядами столбцами</li>
             <li>600 600 310 30 10 Кладка квадратом</li>
             <li>600 600 450 30 10 спрашивать вопрос про укладку по устойчивости или по максимальной вместимости</li>
             <li>600 600 286 120 10 Кладка квадратом</li> -->
-            </ul>
-        </div>
+        <!-- </ul>
+        </div> -->
     </div>
-
 
     <div id="saveQuestion" class="modal">
         <div class="modal-content">
@@ -76,6 +84,12 @@
     </div>
 
     <script src="sctipt.js"></script>
+    <script>
+
+
+        const colorPickers = document.querySelectorAll('.color_picker');
+        colorPickers.forEach(picker => setColor(picker));
+    </script>
 </body>
 
 </html>

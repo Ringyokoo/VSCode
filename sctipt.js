@@ -18,8 +18,8 @@ let flagAddHoriz = false;
 let spacingCenterX = 0;
 let spacingCenterY = 0;
 
-canvas.width = Math.max(document.documentElement.clientHeight - 20, document.documentElement.clientWidth / 2);
-canvas.height = Math.max(document.documentElement.clientHeight - 20);
+canvas.width = document.documentElement.clientWidth / 3 * 2;
+canvas.height = document.documentElement.clientHeight - 20;
 
 function float2int(value) {
     return value | 0; // Побитывая операция
@@ -452,49 +452,62 @@ function invertColor(rgbColor) {
     // Возвращаем инвертированный цвет
     return `rgba(${invertedR}, ${invertedG}, ${invertedB}, 0.5)`;
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const plusButtons = document.querySelectorAll('.plus');
+    plusButtons.forEach(button => {
+        button.addEventListener('click', evt => {
+            let lastRectangleLayerIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
+            let lastRectangleLayer = rectangles[lastRectangleLayerIndex];
 
-plus.addEventListener('click', evt => {
-    let lastRectangleLayerIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
-    let lastRectangleLayer = rectangles[lastRectangleLayerIndex];
-
-    // При добавлении нового прямоугольника возвращать цвет прошлого.
-    lastRectangleLayer.color = rectangles[lastRectangleLayerIndex - 1].color;
+            // При добавлении нового прямоугольника возвращать цвет прошлого.
+            lastRectangleLayer.color = rectangles[lastRectangleLayerIndex - 1].color;
 
 
-    const item = {
-        x: lastRectangleLayer.x + 10,
-        y: lastRectangleLayer.y + 10,
-        width: lastRectangleLayer.width,
-        height: lastRectangleLayer.height,
-        isLastlayer: true,
-        color: invertColor(lastRectangleLayer.color),
-        text: lastRectangleLayer.text,
-        column: lastRectangleLayer.column,
-        row: lastRectangleLayer.row,
-        layer: lastRectangleLayer.layer,
-        xAuto: lastRectangleLayer.x + 10,
-        yAuto: lastRectangleLayer.y + 10,
-        widthAuto: lastRectangleLayer.widthAuto,
-        heightAuto: lastRectangleLayer.heightAuto,
-        textAuto: lastRectangleLayer.textAuto,
-        colorAuto: lastRectangleLayer.colorAuto
-    };
+            const item = {
+                x: lastRectangleLayer.x + 10,
+                y: lastRectangleLayer.y + 10,
+                width: lastRectangleLayer.width,
+                height: lastRectangleLayer.height,
+                isLastlayer: true,
+                color: invertColor(lastRectangleLayer.color),
+                text: lastRectangleLayer.text,
+                column: lastRectangleLayer.column,
+                row: lastRectangleLayer.row,
+                layer: lastRectangleLayer.layer,
+                xAuto: lastRectangleLayer.x + 10,
+                yAuto: lastRectangleLayer.y + 10,
+                widthAuto: lastRectangleLayer.widthAuto,
+                heightAuto: lastRectangleLayer.heightAuto,
+                textAuto: lastRectangleLayer.textAuto,
+                colorAuto: lastRectangleLayer.colorAuto
+            };
 
-    rectangles.splice(lastRectangleLayerIndex + 1, 0, item);
-    // console.log(rectangles)
-    // rectanglesClone.push(JSON.parse(JSON.stringify(item)));
-    drawLayer();
+            rectangles.splice(lastRectangleLayerIndex + 1, 0, item);
+            // console.log(rectangles)
+            // rectanglesClone.push(JSON.parse(JSON.stringify(item)));
+            drawLayer();
+        });
+    });
 });
 
-rotate.addEventListener('click', evt => {
-    rotateRectangles(rectangles, centerX, centerY);
+document.addEventListener('DOMContentLoaded', () => {
+    const rotateButtons = document.querySelectorAll('.rotate');
+    rotateButtons.forEach(button => {
+        button.addEventListener('click', evt => {
+            rotateRectangles(rectangles, centerX, centerY);
+        });
+    });
 });
 
 function initialScale() {
     let palletWidthValue = parseInt(document.getElementById('palletWidth').value);
     let palletHeightValue = parseInt(document.getElementById('palletHeight').value);
     scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue) * scale).toFixed(1), (parseInt(canvas.height) / palletHeightValue * scale).toFixed(1));
+
     scaleMax = (palletWidthValue * scaleMax < canvas.width && palletHeightValue * scaleMax < canvas.height) ? scaleMax : scaleMax - 0.1;
+    if (scaleMax == 0) {
+        alert('Error')
+    }
     scale = scaleMax;
     spacingCenterX = float2int((parseInt(canvas.width) - palletWidthValue * scale) / 2);
     spacingCenterY = float2int((parseInt(canvas.height) - palletHeightValue * scale) / 2);
@@ -560,6 +573,38 @@ form.addEventListener('submit', function (event) {
     drawLayer();
 });
 
+function rgbaStringToHex(rgba) {
+    // Извлекаем значения R, G, B, A из строки
+    const rgbaValues = rgba.match(/\d+(\.\d+)?/g).map(Number);
+
+    const r = rgbaValues[0];
+    const g = rgbaValues[1];
+    const b = rgbaValues[2];
+    const a = rgbaValues[3];
+
+    // Преобразуем R, G, B в шестнадцатеричный формат
+    const red = r.toString(16).padStart(2, '0');
+    const green = g.toString(16).padStart(2, '0');
+    const blue = b.toString(16).padStart(2, '0');
+
+    // Преобразуем альфа-значение (a) в шестнадцатеричный формат
+    const alpha = Math.round(a * 255);
+
+    // Возвращаем цвет в формате #RRGGBBAA
+    return `#${red}${green}${blue}`;
+}
+
+function getAlpha(rgba) {
+    const rgbaValues = rgba.match(/\d+(\.\d+)?/g).map(Number);
+
+    const r = rgbaValues[0];
+    const g = rgbaValues[1];
+    const b = rgbaValues[2];
+    const a = rgbaValues[3];
+
+    const alpha = Math.round(a * 255);
+    return alpha;
+}
 
 const tab = document.querySelector('.tab');
 const saveQuestion = document.getElementById('saveQuestion');
@@ -571,6 +616,17 @@ let pendingSwitch = null;
 function createButton(quantity) {
 
     for (let i = 1; i <= quantity; i++) {
+        const plusButton = document.createElement('button');
+        plusButton.type = 'button';
+        plusButton.classList.add('plus');
+        plusButton.title = 'Добавить прямоугольник';
+        plusButton.innerHTML = '+';
+
+        const rotateButton = document.createElement('button');
+        rotateButton.type = 'button';
+        rotateButton.classList.add('rotate');
+        rotateButton.title = 'Повернуть на 180';
+        rotateButton.innerHTML = '↻';
 
         const button = document.createElement('input');
         button.setAttribute('type', 'radio');
@@ -590,17 +646,73 @@ function createButton(quantity) {
                 selectedRectangle = null
                 drawLayer();
             }
-
-
+            displayNone();
+            let content = button.nextElementSibling.nextElementSibling;
+            content.style.display = 'block'
         })
+
         tab.appendChild(button);
         const label = document.createElement('label');
         label.setAttribute("for", `tab-bth-${i}`);
         label.innerHTML = `Слой ${i}`
         tab.appendChild(label);
+        const div = document.createElement('div');
+        div.classList.add('content');
+        const rgbaString = rectangles[rectangles.findIndex(rect => rect.layer == i)].color;
+        div.innerHTML = `
+  <div class="color_wrapper">
+    <input class="color_picker" oninput="setColor(this)" type="color" value='${rgbaStringToHex(rgbaString)}' style= "background-color: ${rgbaStringToHex(rgbaString)}">
+    <input class="color_picker_alpha" oninput="setColor(this)" type="range" min="0" max="255" step="1" value="${getAlpha(rgbaString)}" />
+  </div>`;
+        if (i == quantity) {
+            div.style.display = 'block';
+        }
+        // const colorPickers = div.querySelectorAll('.color_picker');
+        // colorPickers.forEach(picker => setColor(picker));
+        div.appendChild(plusButton);
+        div.appendChild(rotateButton);
+        tab.appendChild(div);
     }
 
 }
+
+function displayNone() {
+    let coll = document.getElementsByClassName("btn");
+    for (let j = 0; j < coll.length; j++) {
+        let content = coll[j].nextElementSibling.nextElementSibling;
+        content.style.display = "none";
+
+    }
+
+}
+
+function setColor(el) {
+    const colorWrapper = el.closest('.color_wrapper'); // Находим ближайший родитель с классом .color_wrapper
+    const colorPicker = colorWrapper.querySelector('.color_picker');
+    const colorPickerAlpha = colorWrapper.querySelector('.color_picker_alpha');
+
+    colorWrapper.style.backgroundColor = colorPicker.value +
+        (colorPickerAlpha.value == 255 ? "" :
+            parseInt(colorPickerAlpha.value).toString(16).padStart(2, "0"));
+
+    changeColor(colorWrapper.style.backgroundColor);
+}
+
+
+function changeColor(color) {
+    rectangles.filter(rect => rect.layer == layerNum).forEach(rect => {
+        rect.color = color;
+        rect.colorAuto = color;
+    });
+    rectanglesClone.filter(rect => rect.layer == layerNum).forEach(rect => {
+        rect.color = color;
+        rect.colorAuto = color;
+    });
+    drawLayer();
+}
+
+
+
 function switchLayer() {
     if (pendingSwitch !== null) {
         layerNum = pendingSwitch; // Переключаемся на запомненный слой
@@ -613,9 +725,10 @@ function switchLayer() {
 function hasUnsavedChanges() {
     const startIndex = rectanglesClone.findIndex(rect => rect.layer == layerNum);
     const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
-    for (let i = startIndex; i <= endIndex; i++) {
-        if (!rectangles[i] || rectangles[i].x !== rectanglesClone[i].x || rectangles[i].y !== rectanglesClone[i].y || rectangles[i].width !== rectanglesClone[i].width) {
-            // console.log(rectangles[i], rectanglesClone[i])
+    const startIndexRect = rectangles.findIndex(rect => rect.layer == layerNum);
+    const endIndexRect = rectangles.findLastIndex(rect => rect.layer == layerNum);
+    for (let i = Math.min(startIndex, startIndexRect); i <= Math.max(endIndex, endIndexRect); i++) {
+        if (JSON.stringify(rectangles[i]) !== JSON.stringify(rectanglesClone[i])) {
             return true;
         }
     }
@@ -627,16 +740,24 @@ function updateDataRectangles() {
     const endIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
     const startIndexChangeArr = rectanglesClone.findIndex(rect => rect.layer == layerNum);
     const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
-    if (endIndexChangeArr > endIndex) {
-        rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
+    
+    if (startIndex != -1 && endIndex != -1){
+        if (endIndexChangeArr > endIndex) {
+            rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
+        }
+        if (endIndexChangeArr < endIndex) {
+            rectanglesClone.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex))))
+        }
+        for (let i = startIndex; i <= endIndex; i++) {
+            console.log(rectangles[i], startIndex, endIndex)
+            rectangles[i].color = rectangles[i].colorAuto
+            rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
+        }
+    }else{
+        alert('Нельзя удалить весь слой');
+        returnDataRectangles();
     }
-    if (endIndexChangeArr < endIndex) {
-        rectanglesClone.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex))))
-    }
-    for (let i = startIndex; i <= endIndex; i++) {
-        rectangles[i].color = rectangles[i].colorAuto
-        rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
-    }
+    
 
 
 }
@@ -646,13 +767,17 @@ function returnDataRectangles() {
     const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
     const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == layerNum);
     const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == layerNum);
-    if (endIndexChangeArr > endIndex) {
-        rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+    if(endIndexChangeArr != -1 && startIndexChangeArr != -1){
+        if (endIndexChangeArr > endIndex) {
+            rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+        }
+        if (endIndexChangeArr < endIndex) {
+            rectangles.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex))))
+        }
     }
-    if (endIndexChangeArr < endIndex) {
-        rectangles.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex))))
-    }
+    
     for (let i = startIndex; i <= endIndex; i++) {
+        console.log(rectangles[i], startIndex, endIndex, startIndexChangeArr, endIndexChangeArr)
         rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
     }
 
@@ -802,7 +927,10 @@ const deleteConfirm = document.getElementById('deleteConfirm');
 const deleteCancel = document.getElementById('deleteCancel');
 
 deleteConfirm.addEventListener('click', () => {
-    selectedRectangles.length -= 1;
+    if(selectedRectangles.length != 1){
+        selectedRectangles.length -= 1;
+    }
+    
     selectedRectangles.forEach(selected => {
         let indexDeleted = rectangles.indexOf(selected);
         rectangles.splice(indexDeleted, 1);
@@ -961,13 +1089,14 @@ function setCanvasScale(scale) {
 
 
 document.addEventListener('keydown', evt => {
-
-    if (evt.code === 'Minus') {
-        scale = Math.max(0.2, scale - 0.1); // Ограничиваем масштаб, чтобы не стало меньше 0.1
-        setCanvasScale(scale);
-    } else if (evt.code === 'Equal') {
-        scale = Math.min(scaleMax, scale + 0.1);;
-        setCanvasScale(scale);
+    if (document.activeElement.tagName !== 'INPUT') {
+        if (evt.code === 'Minus') {
+            scale = Math.max((scale != 0.1) ? 0.2 : 0.1, scale - 0.1); // Ограничиваем масштаб, чтобы не стало меньше 0.1
+            setCanvasScale(scale);
+        } else if (evt.code === 'Equal') {
+            scale = Math.min(scaleMax, scale + 0.1);;
+            setCanvasScale(scale);
+        }
     }
 });
 
