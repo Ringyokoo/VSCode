@@ -657,12 +657,31 @@ function createButton(quantity) {
         containerLabel.appendChild(repeatButton);
         containerLabel.appendChild(numberInput);
 
+        const copyButtonLayer = document.createElement('button');
+        copyButtonLayer.type = 'button';
+        copyButtonLayer.onclick = copyLayer; // ------------------------------------------------
+        copyButtonLayer.classList.add('copy');
+        copyButtonLayer.innerHTML = 'Копировать слой №';
+
+        // Создание поля ввода числа
+        const layerInput = document.createElement('input');
+        layerInput.type = 'number';
+        layerInput.min = '1';
+        layerInput.max = quantity;
+        layerInput.placeholder = 'N';
+        layerInput.style.width = '40px';
+        layerInput.style.height = '30px';
+
+        // Объединение кнопки и поля ввода
+        const containerLayerLabel = document.createElement('label');
+        containerLayerLabel.classList.add('layerLabel');
+        containerLayerLabel.appendChild(copyButtonLayer);
+        containerLayerLabel.appendChild(layerInput);
+
         const checkInput = document.createElement('input');
         checkInput.type = 'checkbox';
         checkInput.classList.add('checkText');
         checkInput.setAttribute("checked", "");
-
-
 
         const p = document.createElement('p');
         p.classList.add('deleteTextLowLayer')
@@ -716,6 +735,7 @@ function createButton(quantity) {
         // colorPickers.forEach(picker => setColor(picker));
         div.appendChild(plusButton);
         div.appendChild(rotateButton);
+        div.appendChild(containerLayerLabel);
         div.appendChild(p);
         div.appendChild(containerLabel);
 
@@ -732,6 +752,38 @@ function displayNone() {
 
     }
 
+}
+
+function copyLayer(evt) {
+    const n = parseInt(evt.srcElement.nextElementSibling.value);
+    let layerThis = rectangles.filter(rect => rect.layer == n);
+    let layerOther = rectangles.filter(rect => rect.layer == layerNum);
+    if (layerOther.length > layerThis.length) {
+        rectangles.splice(rectangles.indexOf(layerOther.at(layerThis.length - layerOther.length)), layerOther.length - layerThis.length);
+        layerOther = rectangles.filter(rect => rect.layer == i);
+
+    } else if (layerOther.length < layerThis.length) {
+        for (let j = 0; j < layerThis.length - layerOther.length; j++) {
+            rectangles.splice(rectangles.indexOf(layerOther[0]), 0, layerOther[0]);
+            layerOther = rectangles.filter(rect => rect.layer == i);
+        }
+    }
+    for (let j = 0; j < layerOther.length; j++) {
+        layerOther[j].x = layerThis[j].x;
+        layerOther[j].y = layerThis[j].y;
+        layerOther[j].width = layerThis[j].width;
+        layerOther[j].height = layerThis[j].height;
+        layerOther[j].xAuto = layerThis[j].xAuto;
+        layerOther[j].yAuto = layerThis[j].yAuto;
+        layerOther[j].widthAuto = layerThis[j].widthAuto;
+        layerOther[j].heightAuto = layerThis[j].heightAuto;
+        layerOther[j].text = layerThis[j].text;
+        layerOther[j].column = layerThis[j].column;
+        layerOther[j].row = layerThis[j].row;
+        layerOther[j].textAuto = layerThis[j].textAuto;
+
+    }
+    drawLayer();
 }
 
 function repeatLayer(evt) {

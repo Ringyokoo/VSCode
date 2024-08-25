@@ -248,13 +248,25 @@ button {
     background-color: #4CAF50;
 }
 
-.repeat {
+.repeat, .copy {
     background-color: #3C4A63;
     margin: 0 7px 0 15px;
 }
 
+.repeat:hover, .copy:hover {
+    background-color: #202837;
+}
+.repeat:active, .copy:active {
+    background-color: #666e7c;
+}
+
 .deleteTextLowLayer {
     margin-left: 15px;
+}
+
+.deleteTextLowLayer> label{
+    align-items: center;
+    display: flex;
 }
 
 .checkText {
@@ -266,7 +278,10 @@ button {
     margin-bottom: 10px;
     display: flex;
 }
-
+.layerLabel{
+    margin-top: 10px;
+    display: flex;
+}
 
 .rotate {
     background-color: #F39C12;
