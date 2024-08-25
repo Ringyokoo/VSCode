@@ -9,21 +9,22 @@
 <body>
     <!-- Необычные случаи 700 700 450 200; 400 400 140 120 -->
     <div class="container">
+
         <div class="leftColumn">
             <button class="accordion">Форма</button>
             <form id="canvasForm" class="resizable-form">
                 <label for="palletWidth">Ширина паллета:</label>
-                <input type="number" id="palletWidth" placeholder="мм"  required>
+                <input type="number" id="palletWidth" placeholder="мм" required>
                 <label for="palletHeight">Длина паллета:</label>
-                <input type="number" id="palletHeight" placeholder="мм" value="600" required>
+                <input type="number" id="palletHeight" placeholder="мм" required>
                 <label for="rectWidth">Ширина мешка:</label>
-                <input type="number" id="rectWidth" placeholder="мм" value="470" required>
+                <input type="number" id="rectWidth" placeholder="мм" required>
                 <label for="rectHeight">Длина мешка:</label>
-                <input type="number" id="rectHeight" placeholder="мм" value="30" required>
+                <input type="number" id="rectHeight" placeholder="мм"  required>
                 <label for="inentM">Минимальный промежуток:</label>
-                <input type="number" id="inentM" placeholder="мм" value="10" required>
+                <input type="number" id="inentM" placeholder="мм"  required>
                 <label for="minLayer">Количество слоев:</label>
-                <input type="number" id="minLayer" placeholder="кол-во" value="2" required>
+                <input type="number" id="minLayer" placeholder="кол-во" required>
                 <button type="submit" id="submit">Применить</button>
 
             </form>
@@ -41,7 +42,7 @@
         </div>
 
         <!-- <ul>
-            <li>-Добавить инструкцию</li>
+            <li>+Добавить инструкцию</li>
             <li>-Добавить координаты в контекст</li>
             <li>+Добавить фокус на сохранение</li>
             <li>(?)Дорабоать кладку рядами/столбцами</li>
@@ -71,6 +72,32 @@
             <p>Вы уверены, что хотите удалить объект?</p>
             <button id="deleteConfirm">Удалить</button>
             <button id="deleteCancel">Отмена</button>
+        </div>
+    </div>
+    <button id="infoButton">i</button>
+
+    <div id="controlsModal" class="modal">
+        <div class="modal-content-inst">
+            <span class="close">&times;</span>
+            <h2>Управление фигурами:</h2>
+            <div class="control">
+                <span class="action">Перемещение:</span>
+                <span class="key">ЛКМ</span>
+            </div>
+            <div class="control">
+                <span class="action">Поворот вправо:</span>
+                <span class="key">СКМ</span>
+                <span class="key">→</span>
+            </div>
+            <div class="control">
+                <span class="action">Поворот влево:</span>
+                <span class="key">←</span>
+            </div>
+            <div class="control">
+                <span class="action">Удаление:</span>
+                <span class="key">ПКМ</span>
+                <span class="key">Delete</span>
+            </div>
         </div>
     </div>
 
@@ -132,14 +159,16 @@
                     panel.style.maxHeight = null;
                     panel.style.padding = 0;
                 } else {
-                    panel.style.maxHeight = panel.scrollHeight + "px";
+                    panel.style.maxHeight = (window.innerHeight - 170 > panel.scrollHeight) ? panel.scrollHeight + "px" : window.innerHeight - 170 + "px";
                     panel.style.padding = "20px";
+                    tab.scrollTop = tab.scrollHeight;
                 }
             });
         }
 
         // Открыть первую панель при загрузке страницы
         openFirstPanel();
+        
 
 
 

@@ -48,6 +48,17 @@ canvas {
 
 }
 
+#infoButton {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 0;
+    font-size: 15px;
+    font-family: Georgia, serif;
+    background-color: #6976CB;
+    font-weight: 800;
+}
+
 .accordion {
     font-size: 15px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -133,8 +144,8 @@ canvas {
 
 
 .tab {
+    overflow-y: scroll;
     max-height: 0;
-    overflow: hidden;
     transition: max-height 0.2s ease-out;
     position: sticky;
     top: 0;
@@ -336,4 +347,80 @@ button#deleteCancel:hover {
 .color_picker_alpha {
     filter: grayscale(100%);
     visibility: visible;
+}
+
+.modal-content-inst {
+    background-color: #ffffff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 10px;
+}
+
+button#infoButton {
+    font-size: 18px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+}
+
+button#infoButton:hover {
+    background-color: #0056b3;
+}
+
+
+.modal-content-inst h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #007bff;
+
+}
+
+.control {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.action {
+    font-size: 18px;
+    flex: 1;
+}
+
+.key {
+    font-size: 18px;
+    background-color: #ddd;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-left: 10px;
+    text-align: center;
+    min-width: 40px;
+}
+
+.key:hover {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
 }
