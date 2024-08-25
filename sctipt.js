@@ -173,7 +173,7 @@ function getCoord(arr) {
 
     for (let i = 0; i < arr.length; i++) {
         if (!arr1Layer?.at(-1)?.isLastlayer) {
-            rgbColor = `rgba(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.5)`;
+            rgbColor = `rgba(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.3)`;
         }
 
         for (let j = 0; j < arr[i].length; j++) {
@@ -311,7 +311,7 @@ function oddLayer(palletWidth, palletHeight) {
     // Для дополнительных горизонтальных (если одинаковое кол-во столбцов обычных и дополнительных (+1)) распределение по столбцам
     if (numRectangles.dopHoriz.horizontal) {
         //Кладка квадратом
-        if (numRectangles.dopHoriz.vertical == 1 && numRectangles.horizontal == 1 && (numRectangles.dopHoriz.horizontal > 2 || numRectangles.vertical > 2)) {
+        if (numRectangles.dopHoriz.vertical == 1 && numRectangles.horizontal == 1 && (numRectangles.dopHoriz.horizontal > 2 || numRectangles.vertical > 2) && numRectangles.dopHoriz.horizontal * 4 > numRectangles.vertical - 4) {
             layingSquareHoriz = true;
             countDopHorizHoriz = numRectangles.dopHoriz.horizontal; // поменять название
             // console.log(countDopHorizHoriz)
@@ -362,7 +362,7 @@ function oddLayer(palletWidth, palletHeight) {
     // Для дополнительных вертикальных (если одинаковое кол-во столбцов обычных и дополнительных (+1)) распределение по рядам
     if (numRectangles.dopVert.vertical) {
         //Кладка квадратом
-        if (numRectangles.dopVert.horizontal == 1 && numRectangles.vertical == 1 && (numRectangles.dopVert.vertical > 2 || numRectangles.horizontal > 2)) {
+        if (numRectangles.dopVert.horizontal == 1 && numRectangles.vertical == 1 && (numRectangles.dopVert.vertical > 2 || numRectangles.horizontal > 2) && numRectangles.dopVert.vertical * 4 > numRectangles.horizontal - 4) {
             layingSquareVert = true;
             let differenceValues = numRectangles.dopVert.vertical; // поменять название
             let dopArr = Array(differenceValues).fill(2);
@@ -450,10 +450,18 @@ function invertColor(rgbColor) {
     let invertedB = 255 - b;
 
     // Возвращаем инвертированный цвет
-    return `rgba(${invertedR}, ${invertedG}, ${invertedB}, 0.5)`;
+    return `rgba(${invertedR}, ${invertedG}, ${invertedB}, 0.3)`;
 }
-document.addEventListener('DOMContentLoaded', () => {
-    const plusButtons = document.querySelectorAll('.plus');
+function checkTextF(){
+    checkText.forEach(button =>{
+        button.addEventListener('click', evt => {
+            drawLayer();
+        });
+    })
+}
+
+
+function plusButtonsF() {
     plusButtons.forEach(button => {
         button.addEventListener('click', evt => {
             let lastRectangleLayerIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
@@ -483,21 +491,19 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             rectangles.splice(lastRectangleLayerIndex + 1, 0, item);
-            // console.log(rectangles)
-            // rectanglesClone.push(JSON.parse(JSON.stringify(item)));
+            
             drawLayer();
         });
     });
-});
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    const rotateButtons = document.querySelectorAll('.rotate');
+function rotateButtonsF() {
     rotateButtons.forEach(button => {
         button.addEventListener('click', evt => {
             rotateRectangles(rectangles, centerX, centerY);
         });
     });
-});
+}
 
 function initialScale() {
     let palletWidthValue = parseInt(document.getElementById('palletWidth').value);
@@ -528,7 +534,6 @@ let scaleMax = 1;
 let rectanglesClone = [];
 form.addEventListener('submit', function (event) {
     event.preventDefault();
-
     rectangles = [];
     rectanglesClone = [];
     level = 1;
@@ -647,9 +652,24 @@ function createButton(quantity) {
         // Объединение кнопки и поля ввода
         const containerLabel = document.createElement('label');
         containerLabel.classList.add('repeatLabel');
-
         containerLabel.appendChild(repeatButton);
         containerLabel.appendChild(numberInput);
+
+        const checkInput = document.createElement('input');
+        checkInput.type = 'checkbox';
+        checkInput.classList.add('checkText');
+        checkInput.setAttribute("checked", "");
+        
+        
+        
+        const p = document.createElement('p');
+        p.classList.add('deleteTextLowLayer')
+
+        const checkLabel = document.createElement('label');
+        checkLabel.innerHTML = "Убрать стрелки с нижних слоев"
+        checkLabel.appendChild(checkInput);
+        p.appendChild(checkLabel);
+  
 
         const button = document.createElement('input');
         button.setAttribute('type', 'radio');
@@ -694,7 +714,9 @@ function createButton(quantity) {
         // colorPickers.forEach(picker => setColor(picker));
         div.appendChild(plusButton);
         div.appendChild(rotateButton);
+        div.appendChild(p);
         div.appendChild(containerLabel);
+       
         tab.appendChild(div);
     }
 
@@ -746,7 +768,7 @@ function repeatLayer(evt) {
         }
 
     }
-    let checked = document.querySelectorAll('.btn')[layerNum -1 + n];
+    let checked = document.querySelectorAll('.btn')[layerNum - 1 + n];
     checked.checked = true;
     layerNum += n;
     displayNone();
@@ -812,19 +834,18 @@ function updateDataRectangles() {
     const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
 
     if (startIndex != -1 && endIndex != -1) {
+        
         if (endIndexChangeArr > endIndex) {
             rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
         }
         if (endIndexChangeArr < endIndex) {
-            rectanglesClone.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex))))
+            rectanglesClone.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex- endIndexChangeArr))));
         }
         for (let i = startIndex; i <= endIndex; i++) {
             rectangles[i].color = rectangles[i].colorAuto
             rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
         }
-    } else {
-        alert('Нельзя удалить весь слой');
-        returnDataRectangles();
+       
     }
 
 
@@ -844,7 +865,7 @@ function returnDataRectangles() {
             rectangles.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex))))
         }
     }
-
+    console.log(rectangles.length, rectanglesClone.length)
     for (let i = startIndex; i <= endIndex; i++) {
         rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
     }
@@ -937,9 +958,11 @@ function drawNumbers(rect) {
 }
 
 function drawArrow(rect) {
+    
     ctx.font = `${24 / scale}px arial`;
     ctx.textBaseline = "middle";
-    if (rect.isLastlayer) {
+    
+    if (rect.isLastlayer || !checkText[rect.layer]?.checked) {
         //     ctx.fillStyle = rect.color;
         // } else {
         //     ctx.fillStyle = 'black'
@@ -966,6 +989,7 @@ function drawArrow(rect) {
 
         }
     }
+    
 
 }
 
@@ -995,9 +1019,11 @@ const deleteConfirm = document.getElementById('deleteConfirm');
 const deleteCancel = document.getElementById('deleteCancel');
 
 deleteConfirm.addEventListener('click', () => {
-    // if (selectedRectangles.length != 1) {
-    //     selectedRectangles.length -= 1;
-    // }
+    if (selectedRectangles.length == rectangles.filter(rect => rect.layer == layerNum).length) {
+        deleteCancel.click();
+        return alert('Нельзя удалить слой!');
+
+    }
 
     selectedRectangles.forEach(selected => {
         let indexDeleted = rectangles.indexOf(selected);

@@ -200,8 +200,9 @@ button {
     cursor: pointer;
     color: white
 }
-.content > button{
-    margin: 0 0 15px 15px;
+
+.content>button {
+    margin: 0 0 0 15px;
 }
 
 .plus {
@@ -210,10 +211,20 @@ button {
 
 .repeat {
     background-color: #3C4A63;
-    margin: 0 7px 15px 15px;
+    margin: 0 7px 0 15px;
+}
+
+.deleteTextLowLayer {
+    margin-left: 15px;
+}
+
+.checkText {
+    height: 15px;
+    width: 15px;
 }
 
 .repeatLabel {
+    margin-bottom: 10px;
     display: flex;
 }
 
@@ -236,9 +247,20 @@ button#deleteConfirm {
     color: white;
 }
 
+button#saveConfirm:hover,
+button#deleteConfirm:hover {
+    background-color: #218838;
+}
+
 button#saveCancel,
 button#deleteCancel {
     background-color: #f44336;
+    color: white;
+}
+
+button#saveCancel:hover,
+button#deleteCancel:hover {
+    background-color: #b9362c;
     color: white;
 }
 

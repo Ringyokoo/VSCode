@@ -12,17 +12,17 @@
         <div class="leftColumn">
             <form id="canvasForm" class="resizable-form">
                 <label for="palletWidth">Ширина паллета:</label>
-                <input type="number" id="palletWidth" value="1200" required>
-                <label for="palletHeight">Высота паллета:</label>
-                <input type="number" id="palletHeight" value="800" required>
+                <input type="number" id="palletWidth" value="600" required>
+                <label for="palletHeight">Длина паллета:</label>
+                <input type="number" id="palletHeight" value="600" required>
                 <label for="rectWidth">Ширина мешка:</label>
-                <input type="number" id="rectWidth" value="310" required>
-                <label for="rectHeight">Высота мешка:</label>
-                <input type="number" id="rectHeight" value="200" required>
+                <input type="number" id="rectWidth" value="470" required>
+                <label for="rectHeight">Длина мешка:</label>
+                <input type="number" id="rectHeight" value="30" required>
                 <label for="inentM">Минимальный промежуток:</label>
                 <input type="number" id="inentM" value="10" required>
                 <label for="minLayer">Количество слоев:</label>
-                <input type="number" id="minLayer" value="3" required>
+                <input type="number" id="minLayer" value="2" required>
                 <button type="submit" id="submit">Применить</button>
 
             </form>
@@ -40,12 +40,13 @@
         </div>
 
         <!-- <ul>
-            <li>Дорабоать кладку рядами/столбцами</li>
-            <li>Добавить клавиши для удаления, поворота</li>
-            <li>Понять когда кладка квадартом не самая удачная и спрашивать как лучше</li>
-            <li>Добавить удаление слоя</li>
-            <li>Копирование слоев</li>
-            <li>Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы +
+            <li>+В контент добавить галочку про показ текста на нижних слоях</li>
+            <li>Добавить инструкцию</li>
+            <li>-Добавить клавиши для нажития на ентер чтобы они выбирались</li>
+            <li>(?)Дорабоать кладку рядами/столбцами</li>
+            <li>+Добавить клавиши для удаления, поворота</li>
+            <li>+Понять когда кладка квадартом не самая удачная и спрашивать как лучше</li>
+            <li>(?)Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы +
                 добавить в
                 форму массу)</li>
             <li>Приятный интерфейс</li>
@@ -76,10 +77,30 @@
 
     <script src="sctipt.js"></script>
     <script>
+        let colorPickers = document.querySelectorAll('.color_picker');
+        let rotateButtons = document.querySelectorAll('.rotate');
+        let plusButtons = document.querySelectorAll('.plus');
+        let checkText = document.querySelectorAll('.checkText');
+        setColorPiker();
+        function setColorPiker() {
+            colorPickers.forEach(picker => setColor(picker));
+        }
+        tab.scrollTop = tab.scrollHeight;
+        form.addEventListener('submit', function (event) {
+            colorPickers = document.querySelectorAll('.color_picker');
+            checkText = document.querySelectorAll('.checkText');
+            checkTextF();
+            setColorPiker();
+            rotateButtons = document.querySelectorAll('.rotate');
+            rotateButtonsF();
+            plusButtons = document.querySelectorAll('.plus');
+            plusButtonsF();
+        });
 
+        plusButtonsF();
+        rotateButtonsF();
+        checkTextF();
 
-        const colorPickers = document.querySelectorAll('.color_picker');
-        colorPickers.forEach(picker => setColor(picker));
     </script>
 </body>
 
