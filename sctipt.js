@@ -916,7 +916,7 @@ function returnDataRectangles() {
             rectangles.splice(endIndex, endIndexChangeArr - endIndex)
         }
         if (endIndexChangeArr < endIndex) {
-            rectangles.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex))))
+            rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex- endIndexChangeArr))));
         }
     }
     console.log(rectangles.length, rectanglesClone.length)
@@ -975,8 +975,7 @@ function drawPallet() {
 
 function drawRectangle(rect) {
     ctx.beginPath();
-    drawNumbers(rect);
-    drawArrow(rect);
+    
 
     ctx.rect(centerX + rect.x - float2int(rect.width / 2), centerY + rect.y - float2int(rect.height / 2), rect.width, rect.height);
 
@@ -987,7 +986,8 @@ function drawRectangle(rect) {
     } else {
         ctx.strokeStyle = 'black'
     }
-
+    drawNumbers(rect);
+    drawArrow(rect);
     ctx.stroke();
     // ctx.closePath();
 }
@@ -1029,6 +1029,9 @@ function drawArrow(rect) {
         // } else {
         //     ctx.fillStyle = 'black'
         // }
+        if(!rect.isLastlayer && bullCheckText){
+            ctx.fillStyle = 'grey'
+        }
 
         let widthPlus = centerX + rect.x - Math.floor(rect.width / 2) + 15 / scale;
         let widthMinus = centerX + rect.x + Math.floor(rect.width / 2) - 15 / scale;
