@@ -280,10 +280,10 @@ function findNumberOfRectangles(palletWidth, palletHeight) {
 
     let [dopHoriz, dopVert] = findDopRectangles(palletWidth, palletHeight, lengthRect, widthRect)
 
-    if (numHorizontal != 0 && numVertical != 0) {
+    if (numHorizontal > 0 && numVertical > 0) {
         numRectangles = { horizontal: numHorizontal, vertical: numVertical, dopHoriz: dopHoriz, dopVert: dopVert };
     } else {
-        alert('Не подходящие параметры')
+        return alert('Не подходящие параметры!')
     }
 
     return numRectangles;
@@ -452,8 +452,8 @@ function invertColor(rgbColor) {
     // Возвращаем инвертированный цвет
     return `rgba(${invertedR}, ${invertedG}, ${invertedB}, 0.3)`;
 }
-function checkTextF(){
-    checkText.forEach(button =>{
+function checkTextF() {
+    checkText.forEach(button => {
         button.addEventListener('click', evt => {
             drawLayer();
         });
@@ -491,7 +491,7 @@ function plusButtonsF() {
             };
 
             rectangles.splice(lastRectangleLayerIndex + 1, 0, item);
-            
+
             drawLayer();
         });
     });
@@ -553,29 +553,31 @@ form.addEventListener('submit', function (event) {
     let layer = parseInt(document.getElementById('minLayer').value);
 
     gettingDataForm();
+    if (palletWidth && palletHeight && rectWidth && rectHeight && inent && layer) {
 
-    // Показ всех слоев одновременно
-    for (let i = 0; i < layer; i++) {
-        for (let i = 0; i < rectangles.length; i++) {
-            rectangles[i].isLastlayer = false;
+        // Показ всех слоев одновременно
+        for (let i = 0; i < layer; i++) {
+            for (let i = 0; i < rectangles.length; i++) {
+                rectangles[i].isLastlayer = false;
+            }
+
+            if (level % 2 != 0) {
+                changeWidthHeight();
+                oddLayer(palletWidth, palletHeight)
+                changeWidthHeight();
+
+                level += 1;
+            } else {
+                oddLayer(palletWidth, palletHeight);
+                level += 1;
+            }
+
         }
 
-        if (level % 2 != 0) {
-            changeWidthHeight();
-            oddLayer(palletWidth, palletHeight)
-            changeWidthHeight();
-
-            level += 1;
-        } else {
-            oddLayer(palletWidth, palletHeight);
-            level += 1;
-        }
-
+        createButton(layer);
+        layerNum = layer;
+        drawLayer();
     }
-
-    createButton(layer);
-    layerNum = layer;
-    drawLayer();
 });
 
 function rgbaStringToHex(rgba) {
@@ -659,9 +661,9 @@ function createButton(quantity) {
         checkInput.type = 'checkbox';
         checkInput.classList.add('checkText');
         checkInput.setAttribute("checked", "");
-        
-        
-        
+
+
+
         const p = document.createElement('p');
         p.classList.add('deleteTextLowLayer')
 
@@ -669,7 +671,7 @@ function createButton(quantity) {
         checkLabel.innerHTML = "Убрать стрелки с нижних слоев"
         checkLabel.appendChild(checkInput);
         p.appendChild(checkLabel);
-  
+
 
         const button = document.createElement('input');
         button.setAttribute('type', 'radio');
@@ -682,7 +684,7 @@ function createButton(quantity) {
             if (hasUnsavedChanges()) {
                 pendingSwitch = i; // Запоминаем слой, на который нужно переключиться
                 saveQuestion.style.display = 'flex';
-
+                saveConfirm.focus()
             } else {
                 layerNum = i;
                 selectedRectangles = [];
@@ -716,7 +718,7 @@ function createButton(quantity) {
         div.appendChild(rotateButton);
         div.appendChild(p);
         div.appendChild(containerLabel);
-       
+
         tab.appendChild(div);
     }
 
@@ -834,18 +836,18 @@ function updateDataRectangles() {
     const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
 
     if (startIndex != -1 && endIndex != -1) {
-        
+
         if (endIndexChangeArr > endIndex) {
             rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
         }
         if (endIndexChangeArr < endIndex) {
-            rectanglesClone.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex- endIndexChangeArr))));
+            rectanglesClone.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex - endIndexChangeArr))));
         }
         for (let i = startIndex; i <= endIndex; i++) {
             rectangles[i].color = rectangles[i].colorAuto
             rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
         }
-       
+
     }
 
 
@@ -873,6 +875,7 @@ function returnDataRectangles() {
 }
 
 saveConfirm.addEventListener('click', () => {
+
     updateDataRectangles();
     saveQuestion.style.display = 'none'; // Закрываем модальное окно
     switchLayer()
@@ -956,13 +959,20 @@ function drawNumbers(rect) {
         ctx.fillText(text, centerX + rect.x, centerY + rect.y);
     }
 }
-
+// checkText = document.querySelectorAll('.checkText');
+// console.log(checkText)
 function drawArrow(rect) {
-    
+
     ctx.font = `${24 / scale}px arial`;
     ctx.textBaseline = "middle";
-    
-    if (rect.isLastlayer || !checkText[rect.layer]?.checked) {
+    let bullCheckText = false;
+    try {
+        bullCheckText = !checkText[rect.layer]?.checked
+    } catch (e) {
+        console.log('Ошибка ' + e.name + ":" + e.message);
+    }
+
+    if (rect.isLastlayer || bullCheckText) {
         //     ctx.fillStyle = rect.color;
         // } else {
         //     ctx.fillStyle = 'black'
@@ -989,7 +999,7 @@ function drawArrow(rect) {
 
         }
     }
-    
+
 
 }
 
@@ -1115,6 +1125,7 @@ function deleteRectangle() {
     if (selectedRectangles.length) {
         textDeleted();
         deleteQuestion.style.display = 'flex';
+        deleteConfirm.focus()
     }
 }
 

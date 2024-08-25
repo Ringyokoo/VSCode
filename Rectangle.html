@@ -10,23 +10,24 @@
     <!-- Необычные случаи 700 700 450 200; 400 400 140 120 -->
     <div class="container">
         <div class="leftColumn">
+            <button class="accordion">Форма</button>
             <form id="canvasForm" class="resizable-form">
                 <label for="palletWidth">Ширина паллета:</label>
-                <input type="number" id="palletWidth" value="600" required>
+                <input type="number" id="palletWidth" placeholder="мм"  required>
                 <label for="palletHeight">Длина паллета:</label>
-                <input type="number" id="palletHeight" value="600" required>
+                <input type="number" id="palletHeight" placeholder="мм" value="600" required>
                 <label for="rectWidth">Ширина мешка:</label>
-                <input type="number" id="rectWidth" value="470" required>
+                <input type="number" id="rectWidth" placeholder="мм" value="470" required>
                 <label for="rectHeight">Длина мешка:</label>
-                <input type="number" id="rectHeight" value="30" required>
+                <input type="number" id="rectHeight" placeholder="мм" value="30" required>
                 <label for="inentM">Минимальный промежуток:</label>
-                <input type="number" id="inentM" value="10" required>
+                <input type="number" id="inentM" placeholder="мм" value="10" required>
                 <label for="minLayer">Количество слоев:</label>
-                <input type="number" id="minLayer" value="2" required>
+                <input type="number" id="minLayer" placeholder="кол-во" value="2" required>
                 <button type="submit" id="submit">Применить</button>
 
             </form>
-
+            <button class="accordion">Просмотр слоев</button>
             <!-- <div class="viewingLayers"> -->
             <div class="tab">
             </div>
@@ -40,16 +41,14 @@
         </div>
 
         <!-- <ul>
-            <li>+В контент добавить галочку про показ текста на нижних слоях</li>
-            <li>Добавить инструкцию</li>
-            <li>-Добавить клавиши для нажития на ентер чтобы они выбирались</li>
+            <li>-Добавить инструкцию</li>
+            <li>-Добавить координаты в контекст</li>
+            <li>+Добавить фокус на сохранение</li>
             <li>(?)Дорабоать кладку рядами/столбцами</li>
-            <li>+Добавить клавиши для удаления, поворота</li>
-            <li>+Понять когда кладка квадартом не самая удачная и спрашивать как лучше</li>
             <li>(?)Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы +
                 добавить в
                 форму массу)</li>
-            <li>Приятный интерфейс</li>
+            <li>+Приятный интерфейс</li>
             <li>700 700 450 200 10</li>
             <li>600 600 140 120 10 ---</li>
             <li>600 600 145 20 10 Кладка рядами столбцами</li>
@@ -95,11 +94,54 @@
             rotateButtonsF();
             plusButtons = document.querySelectorAll('.plus');
             plusButtonsF();
+
+            acc[1].click();
         });
 
         plusButtonsF();
         rotateButtonsF();
         checkTextF();
+
+        let acc = document.getElementsByClassName("accordion");
+
+        // Функция для закрытия всех панелей
+        function closeAllPanels() {
+            for (let i = 0; i < acc.length; i++) {
+                acc[i].classList.remove("active");
+                let panel = acc[i].nextElementSibling;
+                panel.style.maxHeight = null;
+                panel.style.padding = 0;
+            }
+        }
+
+        // Инициализация: открыть первую панель
+        function openFirstPanel() {
+            acc[0].classList.add("active");
+            let firstPanel = acc[0].nextElementSibling;
+            firstPanel.style.maxHeight = firstPanel.scrollHeight + "px";
+            firstPanel.style.padding = "20px";
+        }
+
+        // Добавление событий на клики для каждой панели
+        for (let i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function () {
+                closeAllPanels(); // Закрыть все панели
+                this.classList.toggle("active");
+                let panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                    panel.style.maxHeight = null;
+                    panel.style.padding = 0;
+                } else {
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                    panel.style.padding = "20px";
+                }
+            });
+        }
+
+        // Открыть первую панель при загрузке страницы
+        openFirstPanel();
+
+
 
     </script>
 </body>
