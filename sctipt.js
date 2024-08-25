@@ -628,6 +628,29 @@ function createButton(quantity) {
         rotateButton.title = 'Повернуть на 180';
         rotateButton.innerHTML = '↻';
 
+        const repeatButton = document.createElement('button');
+        repeatButton.type = 'button';
+        repeatButton.onclick = repeatLayer;
+        repeatButton.classList.add('repeat');
+        repeatButton.title = `Начиная с ${i} до ${quantity} каждые N слоев`;
+        repeatButton.innerHTML = 'Повтор слоя каждые';
+
+        // Создание поля ввода числа
+        const numberInput = document.createElement('input');
+        numberInput.type = 'number';
+        numberInput.min = '1';
+        numberInput.max = quantity;
+        numberInput.placeholder = 'N';
+        numberInput.style.width = '40px';
+        numberInput.style.height = '30px';
+
+        // Объединение кнопки и поля ввода
+        const containerLabel = document.createElement('label');
+        containerLabel.classList.add('repeatLabel');
+
+        containerLabel.appendChild(repeatButton);
+        containerLabel.appendChild(numberInput);
+
         const button = document.createElement('input');
         button.setAttribute('type', 'radio');
         button.setAttribute("checked", "");
@@ -671,6 +694,7 @@ function createButton(quantity) {
         // colorPickers.forEach(picker => setColor(picker));
         div.appendChild(plusButton);
         div.appendChild(rotateButton);
+        div.appendChild(containerLabel);
         tab.appendChild(div);
     }
 
@@ -684,6 +708,52 @@ function displayNone() {
 
     }
 
+}
+
+function repeatLayer(evt) {
+    const n = parseInt(evt.srcElement.nextElementSibling.value);
+    const maxLayer = rectangles.at(-1).layer;
+    let layerThis = rectangles.filter(rect => rect.layer == layerNum);
+    // let layerBigger = rectangles.filter(rect => rect.layer > layerNum);
+    let c = 0;
+    for (let i = layerNum + n; i <= maxLayer; i += n) {
+        c++;
+        let layerBigger = rectangles.filter(rect => rect.layer == i);
+        if (layerBigger.length > layerThis.length) {
+            rectangles.splice(rectangles.indexOf(layerBigger.at(layerThis.length - layerBigger.length)), layerBigger.length - layerThis.length);
+            layerBigger = rectangles.filter(rect => rect.layer == i);
+
+        } else if (layerBigger.length < layerThis.length) {
+            for (let j = 0; j < layerThis.length - layerBigger.length; j++) {
+                rectangles.splice(rectangles.indexOf(layerBigger[0]), 0, layerBigger[0]);
+                layerBigger = rectangles.filter(rect => rect.layer == i);
+            }
+        }
+        for (let j = 0; j < layerBigger.length; j++) {
+            layerBigger[j].x = layerThis[j].x;
+            layerBigger[j].y = layerThis[j].y;
+            layerBigger[j].width = layerThis[j].width;
+            layerBigger[j].height = layerThis[j].height;
+            layerBigger[j].xAuto = layerThis[j].xAuto;
+            layerBigger[j].yAuto = layerThis[j].yAuto;
+            layerBigger[j].widthAuto = layerThis[j].widthAuto;
+            layerBigger[j].heightAuto = layerThis[j].heightAuto;
+            layerBigger[j].text = layerThis[j].text;
+            layerBigger[j].column = layerThis[j].column;
+            layerBigger[j].row = layerThis[j].row;
+            layerBigger[j].textAuto = layerThis[j].textAuto;
+
+        }
+
+    }
+    let checked = document.querySelectorAll('.btn')[layerNum -1 + n];
+    checked.checked = true;
+    layerNum += n;
+    displayNone();
+    let content = checked.nextElementSibling.nextElementSibling;
+    content.style.display = 'block';
+    saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны для ${c} слоев.`;
+    drawLayer();
 }
 
 function setColor(el) {
@@ -740,8 +810,8 @@ function updateDataRectangles() {
     const endIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
     const startIndexChangeArr = rectanglesClone.findIndex(rect => rect.layer == layerNum);
     const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
-    
-    if (startIndex != -1 && endIndex != -1){
+
+    if (startIndex != -1 && endIndex != -1) {
         if (endIndexChangeArr > endIndex) {
             rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
         }
@@ -749,15 +819,14 @@ function updateDataRectangles() {
             rectanglesClone.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex))))
         }
         for (let i = startIndex; i <= endIndex; i++) {
-            console.log(rectangles[i], startIndex, endIndex)
             rectangles[i].color = rectangles[i].colorAuto
             rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
         }
-    }else{
+    } else {
         alert('Нельзя удалить весь слой');
         returnDataRectangles();
     }
-    
+
 
 
 }
@@ -767,7 +836,7 @@ function returnDataRectangles() {
     const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
     const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == layerNum);
     const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == layerNum);
-    if(endIndexChangeArr != -1 && startIndexChangeArr != -1){
+    if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
         if (endIndexChangeArr > endIndex) {
             rectangles.splice(endIndex, endIndexChangeArr - endIndex)
         }
@@ -775,9 +844,8 @@ function returnDataRectangles() {
             rectangles.splice(startIndexChangeArr, 0, JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex))))
         }
     }
-    
+
     for (let i = startIndex; i <= endIndex; i++) {
-        console.log(rectangles[i], startIndex, endIndex, startIndexChangeArr, endIndexChangeArr)
         rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
     }
 
@@ -927,10 +995,10 @@ const deleteConfirm = document.getElementById('deleteConfirm');
 const deleteCancel = document.getElementById('deleteCancel');
 
 deleteConfirm.addEventListener('click', () => {
-    if(selectedRectangles.length != 1){
-        selectedRectangles.length -= 1;
-    }
-    
+    // if (selectedRectangles.length != 1) {
+    //     selectedRectangles.length -= 1;
+    // }
+
     selectedRectangles.forEach(selected => {
         let indexDeleted = rectangles.indexOf(selected);
         rectangles.splice(indexDeleted, 1);
@@ -961,7 +1029,7 @@ function handleMouseDown(e) {
     selectionBox.style.height = '0px';
 }
 
-let arrDragOffset = []
+
 canvas.addEventListener('mousedown', function (evt) {
     // selectedRectangles = []
     const mousePos = getMousePos(canvas, evt);
@@ -976,8 +1044,11 @@ canvas.addEventListener('mousedown', function (evt) {
                     selectedRectangles = []
                 }
             }
+
             //Когда 1 выделен
-            selectedRectangles.push(rect);
+            if (!selectedRectangles.includes(selectedRectangle)) {
+                selectedRectangles.push(rect);
+            }
             selectedRectangle = rect;
             dragOffsetX = mousePos.x - rect.x;
             dragOffsetY = mousePos.y - rect.y;
@@ -986,21 +1057,23 @@ canvas.addEventListener('mousedown', function (evt) {
 
             } else if (evt.button === 1) {
                 evt.preventDefault();
-                selectedRectangles = [];
-                let dop = selectedRectangle.height;
-                selectedRectangle.height = selectedRectangle?.width;
-                selectedRectangle.width = dop;
 
-                if (arrText.indexOf(selectedRectangle.text) + 1 < arrText.length) {
-                    selectedRectangle.text = arrText[arrText.indexOf(selectedRectangle.text) + 1];
-                } else {
-                    selectedRectangle.text = arrText[0];
-                }
+                selectedRectangles.forEach(rect => {
+                    let dop = rect.height;
+                    rect.height = rect?.width;
+                    rect.width = dop;
+
+                    if (arrText.indexOf(rect.text) + 1 < arrText.length) {
+                        rect.text = arrText[arrText.indexOf(rect.text) + 1];
+                    } else {
+                        rect.text = arrText[0];
+                    }
+                });
+
 
                 drawLayer();
-            } else {
-
-                deleteQuestion.style.display = 'flex';
+            } else if (evt.button === 2) {
+                deleteRectangle();
             }
         }
     });
@@ -1011,6 +1084,63 @@ canvas.addEventListener('mousedown', function (evt) {
     }
     // console.log(selectedRectangles)
 });
+
+function deleteRectangle() {
+    if (selectedRectangles.length) {
+        textDeleted();
+        deleteQuestion.style.display = 'flex';
+    }
+}
+
+function turnRectRight() {
+
+    selectedRectangles.forEach(rect => {
+        let dop = rect.height;
+        rect.height = rect?.width;
+        rect.width = dop;
+
+        if (arrText.indexOf(rect.text) + 1 < arrText.length) {
+            rect.text = arrText[arrText.indexOf(rect.text) + 1];
+        } else {
+            rect.text = arrText[0];
+        }
+    });
+
+
+    drawLayer();
+}
+
+function turnRectLeft() {
+    selectedRectangles.forEach(rect => {
+        let dop = rect.height;
+        rect.height = rect?.width;
+        rect.width = dop;
+
+        if (arrText.indexOf(rect.text) - 1 > -1) {
+            rect.text = arrText[arrText.indexOf(rect.text) - 1];
+        } else {
+            rect.text = arrText[3];
+        }
+    });
+
+
+    drawLayer();
+}
+
+function textDeleted() {
+    let count = selectedRectangles.length;
+    let objectWord;
+
+    if (count === 1) {
+        objectWord = 'объект';
+    } else if (count >= 2 && count <= 4) {
+        objectWord = 'объекта';
+    } else {
+        objectWord = 'объектов';
+    }
+
+    deleteQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите удалить ${count} ${objectWord}?`;
+}
 
 function handleMouseMove(e) {
     if (!isSelecting) return;
@@ -1033,7 +1163,7 @@ function clampCoordinate(delta, center, halfSize) {
 }
 
 canvas.addEventListener('mousemove', function (evt) {
-    if (selectedRectangle) {
+    if (selectedRectangle && evt.which == 1) {
         const mousePos = getMousePos(canvas, evt);
         selectedRectangles = selectedRectangles.filter(rect => rect != selectedRectangle);
         // console.log(selectedRectangle)
@@ -1096,6 +1226,12 @@ document.addEventListener('keydown', evt => {
         } else if (evt.code === 'Equal') {
             scale = Math.min(scaleMax, scale + 0.1);;
             setCanvasScale(scale);
+        } else if (evt.code == 'Delete') {
+            deleteRectangle();
+        } else if (evt.code == 'ArrowRight') {
+            turnRectRight();
+        } else if (evt.code == 'ArrowLeft') {
+            turnRectLeft();
         }
     }
 });

@@ -110,12 +110,11 @@ canvas {
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f9f9f9;
+    /* background-color: #f9f9f9; */
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
     display: flex;
-    flex-wrap: wrap;
     flex-direction: column;
     flex-grow: 1;
 }
@@ -128,9 +127,9 @@ canvas {
     display: none;
     width: 100%;
     margin-top: 1rem;
-    background-color: #f0efef;
+    background-color: #f1f1f1;
     margin: 0;
-    
+    /* border-radius: 0 0 15px 15px; */
 }
 
 .btn:after {
@@ -151,7 +150,7 @@ canvas {
     display: block;
     padding: 0.5rem 1rem;
     cursor: pointer;
-    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
+    /* transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out; */
     text-decoration: none;
     color: #333;
     /* border: 0; */
@@ -160,15 +159,13 @@ canvas {
 }
 
 .tab>input[type="radio"]:hover+label {
-    cursor: default;
     color: #fff;
-    background-color: #5b9bfd;
+    background-color: #77a9e2;
 }
 
 .tab>input[type="radio"]:checked+label {
-    cursor: default;
     color: #fff;
-    background-color: #0d6efd;
+    background-color: #4A90E2;
 }
 
 
@@ -201,16 +198,36 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    background-color: #5b9bfd;
-    color:white
+    color: white
+}
+.content > button{
+    margin: 0 0 15px 15px;
 }
 
-button:hover {
-    background-color: #a4b4a8;
+.plus {
+    background-color: #4CAF50;
 }
 
-button:active {
-    background-color: #86978a;
+.repeat {
+    background-color: #3C4A63;
+    margin: 0 7px 15px 15px;
+}
+
+.repeatLabel {
+    display: flex;
+}
+
+
+.rotate {
+    background-color: #F39C12;
+}
+
+.plus:hover {
+    background-color: #218838;
+}
+
+.rotate:hover {
+    background-color: #EE7F12;
 }
 
 button#saveConfirm,
