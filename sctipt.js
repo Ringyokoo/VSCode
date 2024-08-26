@@ -303,8 +303,6 @@ function oddLayer(palletWidth, palletHeight) {
     centerY = Math.floor(palletHeight / 2);
     let numRectangles = findNumberOfRectangles(palletWidth, palletHeight);
 
-
-
     let matrixRectangles = createBaseMatrix(numRectangles.horizontal, numRectangles.vertical, 1);
 
     let matrixLenght = matrixRectangles.length;
@@ -387,13 +385,9 @@ function oddLayer(palletWidth, palletHeight) {
 
             matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
 
-
-
-
         }
         //Кладка по столбцам, рядам
         else {
-
 
             flagAddVert = true;
             matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
@@ -1044,7 +1038,10 @@ function drawLayer() {
     cleanCanvas();
     for (var i = 0; i < rectangles.length; i++) {
         rectangles[i].isLastlayer = false;
-        rectanglesClone[i].isLastlayer = false;
+        if(rectanglesClone[i]){
+            rectanglesClone[i].isLastlayer = false;
+        }
+        // rectanglesClone[i].isLastlayer = false;
 
         if (rectangles[i].layer == layerNum && startLayer == -1) {
             startLayer = i;
@@ -1056,7 +1053,10 @@ function drawLayer() {
 
     for (let i = startLayer; i < ((endLayer == -1) ? rectangles.length : endLayer); i++) {
         rectangles[i].isLastlayer = true;
-        rectanglesClone[i].isLastlayer = true;
+        if(rectanglesClone[i]){
+            rectanglesClone[i].isLastlayer = true;
+        }   
+        
     }
 
     rectangles.slice(0, ((endLayer == -1) ? rectangles.length : endLayer)).forEach(drawRectangle);
