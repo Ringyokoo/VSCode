@@ -7,7 +7,6 @@
 </head>
 
 <body>
-    <!-- Необычные случаи 700 700 450 200; 400 400 140 120 -->
     <div class="container">
 
         <div class="leftColumn">
@@ -20,9 +19,9 @@
                 <label for="rectWidth">Ширина мешка:</label>
                 <input type="number" id="rectWidth" placeholder="мм" required>
                 <label for="rectHeight">Длина мешка:</label>
-                <input type="number" id="rectHeight" placeholder="мм"  required>
+                <input type="number" id="rectHeight" placeholder="мм" required>
                 <label for="inentM">Минимальный промежуток:</label>
-                <input type="number" id="inentM" placeholder="мм"  required>
+                <input type="number" id="inentM" placeholder="мм" required>
                 <label for="minLayer">Количество слоев:</label>
                 <input type="number" id="minLayer" placeholder="кол-во" required>
                 <button type="submit" id="submit">Применить</button>
@@ -42,14 +41,11 @@
         </div>
 
         <!-- <ul>
-            <li>+Добавить инструкцию</li>
             <li>-Добавить координаты в контекст</li>
-            <li>+Добавить фокус на сохранение</li>
             <li>(?)Дорабоать кладку рядами/столбцами</li>
             <li>(?)Добавить в форму вопрос про кол-во мешков (Если нет параметра вычислять самостоятельно от массы +
                 добавить в
                 форму массу)</li>
-            <li>+Приятный интерфейс</li>
             <li>700 700 450 200 10</li>
             <li>600 600 140 120 10 ---</li>
             <li>600 600 145 20 10 Кладка рядами столбцами</li>
@@ -131,7 +127,6 @@
 
         let acc = document.getElementsByClassName("accordion");
 
-        // Функция для закрытия всех панелей
         function closeAllPanels() {
             for (let i = 0; i < acc.length; i++) {
                 acc[i].classList.remove("active");
@@ -141,7 +136,6 @@
             }
         }
 
-        // Инициализация: открыть первую панель
         function openFirstPanel() {
             acc[0].classList.add("active");
             let firstPanel = acc[0].nextElementSibling;
@@ -152,13 +146,14 @@
         // Добавление событий на клики для каждой панели
         for (let i = 0; i < acc.length; i++) {
             acc[i].addEventListener("click", function () {
-                closeAllPanels(); // Закрыть все панели
-                this.classList.toggle("active");
                 let panel = this.nextElementSibling;
                 if (panel.style.maxHeight) {
+                    this.classList.toggle("active");
                     panel.style.maxHeight = null;
                     panel.style.padding = 0;
                 } else {
+                    closeAllPanels();
+                    this.classList.toggle("active");
                     panel.style.maxHeight = (window.innerHeight - 170 > panel.scrollHeight) ? panel.scrollHeight + "px" : window.innerHeight - 170 + "px";
                     panel.style.padding = "20px";
                     tab.scrollTop = tab.scrollHeight;

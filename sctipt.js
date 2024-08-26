@@ -19,7 +19,7 @@ let spacingCenterX = 0;
 let spacingCenterY = 0;
 
 canvas.width = document.documentElement.clientWidth / 3 * 2 - 50;
-canvas.height = document.documentElement.clientHeight - 20;
+canvas.height = document.documentElement.clientHeight - 70;
 
 function float2int(value) {
     return value | 0; // Побитывая операция
@@ -173,7 +173,7 @@ function getCoord(arr) {
 
     for (let i = 0; i < arr.length; i++) {
         if (!arr1Layer?.at(-1)?.isLastlayer) {
-            rgbColor = `rgba(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.3)`;
+            rgbColor = `rgba(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.5)`;
         }
 
         for (let j = 0; j < arr[i].length; j++) {
@@ -450,7 +450,7 @@ function invertColor(rgbColor) {
     let invertedB = 255 - b;
 
     // Возвращаем инвертированный цвет
-    return `rgba(${invertedR}, ${invertedG}, ${invertedB}, 0.3)`;
+    return `rgba(${invertedR}, ${invertedG}, ${invertedB}, 0.5)`;
 }
 function checkTextF() {
     checkText.forEach(button => {
@@ -612,6 +612,131 @@ function getAlpha(rgba) {
     const alpha = Math.round(a * 255);
     return alpha;
 }
+function createPlus() {
+    const plusButton = document.createElement('button');
+    plusButton.type = 'button';
+    plusButton.classList.add('plus');
+    plusButton.title = 'Добавить прямоугольник';
+    plusButton.innerHTML = '+';
+    return plusButton;
+}
+
+function createRotate() {
+    const rotateButton = document.createElement('button');
+    rotateButton.type = 'button';
+    rotateButton.classList.add('rotate');
+    rotateButton.title = 'Повернуть на 180';
+    rotateButton.innerHTML = '↻';
+    return rotateButton;
+}
+
+function createRepeat(i, quantity) {
+    const repeatButton = document.createElement('button');
+    repeatButton.type = 'button';
+    repeatButton.onclick = repeatLayer;
+    repeatButton.classList.add('repeat');
+    repeatButton.title = `Начиная с ${i} до ${quantity} каждые N слоев. Если не указаны 'C' и 'До'`;
+    repeatButton.innerHTML = 'Повтор слоя каждые';
+    return repeatButton;
+}
+
+function createNumInput(quantity) {
+    const numberInput = document.createElement('input');
+    numberInput.type = 'number';
+    numberInput.min = '1';
+    numberInput.max = quantity;
+    numberInput.placeholder = 'N';
+    numberInput.style.width = '40px';
+    numberInput.style.height = '30px';
+    return numberInput;
+}
+
+function createContainerLabel(i, quantity) {
+    const repeatButton = createRepeat(i, quantity);
+    const numberInput = createNumInput(quantity);
+    const fromInput = createNumInput(quantity);
+    fromInput.placeholder = "С"
+    const toInput = createNumInput(quantity);
+    toInput.placeholder = "До"
+    const containerLabel = document.createElement('label');
+    containerLabel.classList.add('repeatLabel');
+    containerLabel.appendChild(repeatButton);
+    containerLabel.appendChild(numberInput);
+    containerLabel.appendChild(fromInput);
+    containerLabel.appendChild(toInput);
+    return containerLabel;
+}
+
+function createCopyButton() {
+    const copyButtonLayer = document.createElement('button');
+    copyButtonLayer.type = 'button';
+    copyButtonLayer.onclick = copyLayer;
+    copyButtonLayer.classList.add('copy');
+    copyButtonLayer.innerHTML = 'Копировать слой №';
+    return copyButtonLayer;
+}
+
+
+function createLayerLabel(quantity) {
+    const copyButtonLayer = createCopyButton();
+    const layerInput = createNumInput(quantity);
+    const containerLayerLabel = document.createElement('label');
+    containerLayerLabel.classList.add('layerLabel');
+    containerLayerLabel.appendChild(copyButtonLayer);
+    containerLayerLabel.appendChild(layerInput);
+    return containerLayerLabel;
+}
+
+function createCheckInput() {
+    const checkInput = document.createElement('input');
+    checkInput.type = 'checkbox';
+    checkInput.classList.add('checkText');
+    checkInput.setAttribute("checked", "");
+    return checkInput;
+}
+
+function createCheckLabel() {
+    const p = document.createElement('p');
+    p.classList.add('deleteTextLowLayer');
+
+    const checkLabel = document.createElement('label');
+    checkLabel.innerHTML = "Убрать стрелки с нижних слоев";
+    const checkInput = createCheckInput();
+    checkLabel.appendChild(checkInput);
+    p.appendChild(checkLabel);
+    return p;
+}
+
+function createDivContent(i, quantity) {
+    const plusButton = createPlus();
+    const rotateButton = createRotate();
+
+    const containerLabel = createContainerLabel(i, quantity);
+
+    const containerLayerLabel = createLayerLabel(quantity);
+
+    const p = createCheckLabel();
+
+    const div = document.createElement('div');
+    div.classList.add('content');
+    const rgbaString = rectangles[rectangles.findIndex(rect => rect.layer == i)].color;
+    div.innerHTML = `
+  <div class="color_wrapper">
+    <input class="color_picker" oninput="setColor(this)" type="color" value='${rgbaStringToHex(rgbaString)}' style= "background-color: ${rgbaStringToHex(rgbaString)}">
+    <input class="color_picker_alpha" oninput="setColor(this)" type="range" min="0" max="255" step="1" value="${getAlpha(rgbaString)}" />
+  </div>`;
+    if (i == quantity) {
+        div.style.display = 'block';
+    }
+
+    div.appendChild(plusButton);
+    div.appendChild(rotateButton);
+    div.appendChild(containerLayerLabel);
+    div.appendChild(p);
+    div.appendChild(containerLabel);
+    return div;
+}
+
 
 const tab = document.querySelector('.tab');
 const saveQuestion = document.getElementById('saveQuestion');
@@ -623,75 +748,6 @@ let pendingSwitch = null;
 function createButton(quantity) {
 
     for (let i = 1; i <= quantity; i++) {
-        const plusButton = document.createElement('button');
-        plusButton.type = 'button';
-        plusButton.classList.add('plus');
-        plusButton.title = 'Добавить прямоугольник';
-        plusButton.innerHTML = '+';
-
-        const rotateButton = document.createElement('button');
-        rotateButton.type = 'button';
-        rotateButton.classList.add('rotate');
-        rotateButton.title = 'Повернуть на 180';
-        rotateButton.innerHTML = '↻';
-
-        const repeatButton = document.createElement('button');
-        repeatButton.type = 'button';
-        repeatButton.onclick = repeatLayer;
-        repeatButton.classList.add('repeat');
-        repeatButton.title = `Начиная с ${i} до ${quantity} каждые N слоев`;
-        repeatButton.innerHTML = 'Повтор слоя каждые';
-
-        // Создание поля ввода числа
-        const numberInput = document.createElement('input');
-        numberInput.type = 'number';
-        numberInput.min = '1';
-        numberInput.max = quantity;
-        numberInput.placeholder = 'N';
-        numberInput.style.width = '40px';
-        numberInput.style.height = '30px';
-
-        // Объединение кнопки и поля ввода
-        const containerLabel = document.createElement('label');
-        containerLabel.classList.add('repeatLabel');
-        containerLabel.appendChild(repeatButton);
-        containerLabel.appendChild(numberInput);
-
-        const copyButtonLayer = document.createElement('button');
-        copyButtonLayer.type = 'button';
-        copyButtonLayer.onclick = copyLayer; // ------------------------------------------------
-        copyButtonLayer.classList.add('copy');
-        copyButtonLayer.innerHTML = 'Копировать слой №';
-
-        // Создание поля ввода числа
-        const layerInput = document.createElement('input');
-        layerInput.type = 'number';
-        layerInput.min = '1';
-        layerInput.max = quantity;
-        layerInput.placeholder = 'N';
-        layerInput.style.width = '40px';
-        layerInput.style.height = '30px';
-
-        // Объединение кнопки и поля ввода
-        const containerLayerLabel = document.createElement('label');
-        containerLayerLabel.classList.add('layerLabel');
-        containerLayerLabel.appendChild(copyButtonLayer);
-        containerLayerLabel.appendChild(layerInput);
-
-        const checkInput = document.createElement('input');
-        checkInput.type = 'checkbox';
-        checkInput.classList.add('checkText');
-        checkInput.setAttribute("checked", "");
-
-        const p = document.createElement('p');
-        p.classList.add('deleteTextLowLayer')
-
-        const checkLabel = document.createElement('label');
-        checkLabel.innerHTML = "Убрать стрелки с нижних слоев"
-        checkLabel.appendChild(checkInput);
-        p.appendChild(checkLabel);
-
-
         const button = document.createElement('input');
         button.setAttribute('type', 'radio');
         button.setAttribute("checked", "");
@@ -716,28 +772,13 @@ function createButton(quantity) {
         })
 
         tab.appendChild(button);
+
         const label = document.createElement('label');
         label.setAttribute("for", `tab-bth-${i}`);
         label.innerHTML = `Слой ${i}`
         tab.appendChild(label);
-        const div = document.createElement('div');
-        div.classList.add('content');
-        const rgbaString = rectangles[rectangles.findIndex(rect => rect.layer == i)].color;
-        div.innerHTML = `
-  <div class="color_wrapper">
-    <input class="color_picker" oninput="setColor(this)" type="color" value='${rgbaStringToHex(rgbaString)}' style= "background-color: ${rgbaStringToHex(rgbaString)}">
-    <input class="color_picker_alpha" oninput="setColor(this)" type="range" min="0" max="255" step="1" value="${getAlpha(rgbaString)}" />
-  </div>`;
-        if (i == quantity) {
-            div.style.display = 'block';
-        }
-        // const colorPickers = div.querySelectorAll('.color_picker');
-        // colorPickers.forEach(picker => setColor(picker));
-        div.appendChild(plusButton);
-        div.appendChild(rotateButton);
-        div.appendChild(containerLayerLabel);
-        div.appendChild(p);
-        div.appendChild(containerLabel);
+
+        const div = createDivContent(i, quantity);
 
         tab.appendChild(div);
     }
@@ -754,10 +795,29 @@ function displayNone() {
 
 }
 
+function assignment(whom, who) {
+    for (let j = 0; j < whom.length; j++) {
+        whom[j].x = who[j].x;
+        whom[j].y = who[j].y;
+        whom[j].width = who[j].width;
+        whom[j].height = who[j].height;
+        whom[j].xAuto = who[j].xAuto;
+        whom[j].yAuto = who[j].yAuto;
+        whom[j].widthAuto = who[j].widthAuto;
+        whom[j].heightAuto = who[j].heightAuto;
+        whom[j].text = who[j].text;
+        whom[j].column = who[j].column;
+        whom[j].row = who[j].row;
+        whom[j].textAuto = who[j].textAuto;
+
+    }
+}
+
 function copyLayer(evt) {
     const n = parseInt(evt.srcElement.nextElementSibling.value);
-    let layerThis = rectangles.filter(rect => rect.layer == n);
-    let layerOther = rectangles.filter(rect => rect.layer == layerNum);
+
+    let layerThis = rectangles.filter(rect => rect.layer == layerNum);
+    let layerOther = rectangles.filter(rect => rect.layer == n);
     if (layerOther.length > layerThis.length) {
         rectangles.splice(rectangles.indexOf(layerOther.at(layerThis.length - layerOther.length)), layerOther.length - layerThis.length);
         layerOther = rectangles.filter(rect => rect.layer == i);
@@ -768,32 +828,23 @@ function copyLayer(evt) {
             layerOther = rectangles.filter(rect => rect.layer == i);
         }
     }
-    for (let j = 0; j < layerOther.length; j++) {
-        layerOther[j].x = layerThis[j].x;
-        layerOther[j].y = layerThis[j].y;
-        layerOther[j].width = layerThis[j].width;
-        layerOther[j].height = layerThis[j].height;
-        layerOther[j].xAuto = layerThis[j].xAuto;
-        layerOther[j].yAuto = layerThis[j].yAuto;
-        layerOther[j].widthAuto = layerThis[j].widthAuto;
-        layerOther[j].heightAuto = layerThis[j].heightAuto;
-        layerOther[j].text = layerThis[j].text;
-        layerOther[j].column = layerThis[j].column;
-        layerOther[j].row = layerThis[j].row;
-        layerOther[j].textAuto = layerThis[j].textAuto;
 
-    }
+    assignment(layerThis, layerOther)
     drawLayer();
 }
-
+let unsaveLayers = [];
 function repeatLayer(evt) {
     const n = parseInt(evt.srcElement.nextElementSibling.value);
-    const maxLayer = rectangles.at(-1).layer;
+    let start = parseInt(evt.srcElement.nextElementSibling.nextElementSibling.value);
+    const end = parseInt(evt.srcElement.nextElementSibling.nextElementSibling.nextElementSibling.value);
+    start = (start) ? start : layerNum + n;
+    let maxLayer = rectangles.at(-1).layer;
+    maxLayer = (end) ? end : maxLayer;
     let layerThis = rectangles.filter(rect => rect.layer == layerNum);
     // let layerBigger = rectangles.filter(rect => rect.layer > layerNum);
-    let c = 0;
-    for (let i = layerNum + n; i <= maxLayer; i += n) {
-        c++;
+    unsaveLayers = [];
+    for (let i = start; i <= maxLayer; i += n) {
+        unsaveLayers.push(i);
         let layerBigger = rectangles.filter(rect => rect.layer == i);
         if (layerBigger.length > layerThis.length) {
             rectangles.splice(rectangles.indexOf(layerBigger.at(layerThis.length - layerBigger.length)), layerBigger.length - layerThis.length);
@@ -805,30 +856,20 @@ function repeatLayer(evt) {
                 layerBigger = rectangles.filter(rect => rect.layer == i);
             }
         }
-        for (let j = 0; j < layerBigger.length; j++) {
-            layerBigger[j].x = layerThis[j].x;
-            layerBigger[j].y = layerThis[j].y;
-            layerBigger[j].width = layerThis[j].width;
-            layerBigger[j].height = layerThis[j].height;
-            layerBigger[j].xAuto = layerThis[j].xAuto;
-            layerBigger[j].yAuto = layerThis[j].yAuto;
-            layerBigger[j].widthAuto = layerThis[j].widthAuto;
-            layerBigger[j].heightAuto = layerThis[j].heightAuto;
-            layerBigger[j].text = layerThis[j].text;
-            layerBigger[j].column = layerThis[j].column;
-            layerBigger[j].row = layerThis[j].row;
-            layerBigger[j].textAuto = layerThis[j].textAuto;
-
-        }
+        assignment(layerBigger, layerThis)
 
     }
-    let checked = document.querySelectorAll('.btn')[layerNum - 1 + n];
+    
+    let checked = (start == layerNum) ? document.querySelectorAll('.btn')[start] : document.querySelectorAll('.btn')[start - 1];
     checked.checked = true;
-    layerNum += n;
+    layerNum = (start == layerNum) ? start + 1: start;
     displayNone();
     let content = checked.nextElementSibling.nextElementSibling;
     content.style.display = 'block';
-    saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны для ${c} слоев.`;
+    saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны для ${unsaveLayers.length}: №${unsaveLayers.join(', ')} слоев.`;
+    if (unsaveLayers.length > 1) {
+        saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Сохранить все';
+    }
     drawLayer();
 }
 
@@ -881,48 +922,105 @@ function hasUnsavedChanges() {
     return false;
 }
 
+
 function updateDataRectangles() {
-    const startIndex = rectangles.findIndex(rect => rect.layer == layerNum);
-    const endIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
-    const startIndexChangeArr = rectanglesClone.findIndex(rect => rect.layer == layerNum);
-    const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
+    if (unsaveLayers.length > 1) {
+        for (let i = 0; i < unsaveLayers.length; i++) {
+            let num = unsaveLayers[i];
+            // layerNum = num
+            const startIndex = rectangles.findIndex(rect => rect.layer == num);
+            const endIndex = rectangles.findLastIndex(rect => rect.layer == num);
+            const startIndexChangeArr = rectanglesClone.findIndex(rect => rect.layer == num);
+            const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == num);
+            // console.log(rectangles[1], rectanglesClone[1])
+            if (startIndex != -1 && endIndex != -1) {
 
-    if (startIndex != -1 && endIndex != -1) {
+                if (endIndexChangeArr > endIndex) {
+                    rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
+                }
+                if (endIndexChangeArr < endIndex) {
+                    rectanglesClone.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex - endIndexChangeArr))));
+                }
+                for (let i = startIndex; i <= endIndex; i++) {
+                    rectangles[i].color = rectangles[i].colorAuto
+                    rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
+                }
 
-        if (endIndexChangeArr > endIndex) {
-            rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
+            }
         }
-        if (endIndexChangeArr < endIndex) {
-            rectanglesClone.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex - endIndexChangeArr))));
-        }
-        for (let i = startIndex; i <= endIndex; i++) {
-            rectangles[i].color = rectangles[i].colorAuto
-            rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
-        }
+    } else {
+        const startIndex = rectangles.findIndex(rect => rect.layer == layerNum);
+        const endIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
+        const startIndexChangeArr = rectanglesClone.findIndex(rect => rect.layer == layerNum);
+        const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
+        // console.log(layerNum)
+        if (startIndex != -1 && endIndex != -1) {
 
+            if (endIndexChangeArr > endIndex) {
+                rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
+            }
+            if (endIndexChangeArr < endIndex) {
+                rectanglesClone.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex - endIndexChangeArr))));
+            }
+            for (let i = startIndex; i <= endIndex; i++) {
+                rectangles[i].color = rectangles[i].colorAuto
+                rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
+            }
+
+        }
     }
 
 
+    saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Coхранить';
+    saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны.`;
+    unsaveLayers = [];
 
 }
 
 function returnDataRectangles() {
-    const startIndex = rectanglesClone.findIndex(rect => rect.layer == layerNum);
-    const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
-    const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == layerNum);
-    const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == layerNum);
-    if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
-        if (endIndexChangeArr > endIndex) {
-            rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+    if (unsaveLayers.length > 1) {
+        for (let i = 0; i < unsaveLayers.length; i++) {
+            let num = unsaveLayers[i];
+            // layerNum = num
+            const startIndex = rectanglesClone.findIndex(rect => rect.layer == num);
+            const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == num);
+            const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == num);
+            const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == num);
+            if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
+                if (endIndexChangeArr > endIndex) {
+                    rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+                }
+                if (endIndexChangeArr < endIndex) {
+                    rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex - endIndexChangeArr))));
+                }
+            }
+            // console.log(rectangles.length, rectanglesClone.length)
+            for (let i = startIndex; i <= endIndex; i++) {
+                rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
+            }
         }
-        if (endIndexChangeArr < endIndex) {
-            rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex- endIndexChangeArr))));
+    } else {
+        const startIndex = rectanglesClone.findIndex(rect => rect.layer == layerNum);
+        const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
+        const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == layerNum);
+        const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == layerNum);
+        if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
+            if (endIndexChangeArr > endIndex) {
+                rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+            }
+            if (endIndexChangeArr < endIndex) {
+                rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex - endIndexChangeArr))));
+            }
+        }
+        // console.log(rectangles.length, rectanglesClone.length)
+        for (let i = startIndex; i <= endIndex; i++) {
+            rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
         }
     }
-    console.log(rectangles.length, rectanglesClone.length)
-    for (let i = startIndex; i <= endIndex; i++) {
-        rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
-    }
+
+    saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Coхранить';
+    saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны.`;
+    unsaveLayers = [];
 
 }
 
@@ -943,10 +1041,10 @@ saveCancel.addEventListener('click', () => {
 function drawLayer() {
     let startLayer = -1;
     let endLayer = -1;
-
     cleanCanvas();
     for (var i = 0; i < rectangles.length; i++) {
         rectangles[i].isLastlayer = false;
+        rectanglesClone[i].isLastlayer = false;
 
         if (rectangles[i].layer == layerNum && startLayer == -1) {
             startLayer = i;
@@ -958,6 +1056,7 @@ function drawLayer() {
 
     for (let i = startLayer; i < ((endLayer == -1) ? rectangles.length : endLayer); i++) {
         rectangles[i].isLastlayer = true;
+        rectanglesClone[i].isLastlayer = true;
     }
 
     rectangles.slice(0, ((endLayer == -1) ? rectangles.length : endLayer)).forEach(drawRectangle);
@@ -975,7 +1074,7 @@ function drawPallet() {
 
 function drawRectangle(rect) {
     ctx.beginPath();
-    
+
 
     ctx.rect(centerX + rect.x - float2int(rect.width / 2), centerY + rect.y - float2int(rect.height / 2), rect.width, rect.height);
 
@@ -1029,7 +1128,7 @@ function drawArrow(rect) {
         // } else {
         //     ctx.fillStyle = 'black'
         // }
-        if(!rect.isLastlayer && bullCheckText){
+        if (!rect.isLastlayer && bullCheckText) {
             ctx.fillStyle = 'grey'
         }
 
