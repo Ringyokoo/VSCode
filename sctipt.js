@@ -19,7 +19,7 @@ let spacingCenterX = 0;
 let spacingCenterY = 0;
 
 canvas.width = document.documentElement.clientWidth / 3 * 2 - 50;
-canvas.height = document.documentElement.clientHeight - 70;
+canvas.height = document.documentElement.clientHeight - 20;
 
 function float2int(value) {
     return value | 0; // Побитывая операция
@@ -860,9 +860,9 @@ function repeatLayer(evt) {
 
     }
     
-    let checked = (start == layerNum) ? document.querySelectorAll('.btn')[start] : document.querySelectorAll('.btn')[start - 1];
+    let checked = (start == layerNum) ? document.querySelectorAll('.btn')[start + n - 1] : document.querySelectorAll('.btn')[start - 1];
     checked.checked = true;
-    layerNum = (start == layerNum) ? start + 1: start;
+    layerNum = (start == layerNum) ? start + n: start;
     displayNone();
     let content = checked.nextElementSibling.nextElementSibling;
     content.style.display = 'block';
