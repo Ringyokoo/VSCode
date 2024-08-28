@@ -548,7 +548,7 @@ form.addEventListener('submit', function (event) {
     level = 1;
     scale = 1;
     initialScale();
-   
+
     let child = tab.lastElementChild;
     while (child) {
         tab.removeChild(child);
@@ -629,6 +629,15 @@ function getAlpha(rgba) {
 //     plusButton.innerHTML = '+';
 //     return plusButton;
 // }
+function createReturnOriginal() {
+    const returnOriginal = document.createElement('button');
+    returnOriginal.type = 'button';
+    returnOriginal.classList.add('returnOriginal');
+    returnOriginal.onclick = returnDataRectangles;
+    returnOriginal.title = 'Вернуть исходный вид';
+    returnOriginal.innerHTML = 'Вернуть';
+    return returnOriginal;
+}
 
 function createRotate() {
     const rotateButton = document.createElement('button');
@@ -718,6 +727,7 @@ function createCheckLabel() {
 
 function createDivContent(i, quantity) {
     // const plusButton = createPlus();
+    const returnOriginal = createReturnOriginal();
     const rotateButton = createRotate();
 
     const containerLabel = createContainerLabel(i, quantity);
@@ -739,6 +749,7 @@ function createDivContent(i, quantity) {
     }
 
     // div.appendChild(plusButton);
+    div.appendChild(returnOriginal);
     div.appendChild(rotateButton);
     div.appendChild(containerLayerLabel);
     div.appendChild(p);
@@ -769,7 +780,7 @@ function createButton(quantity) {
                 pendingSwitch = i; // Запоминаем слой, на который нужно переключиться
                 // saveQuestion.style.display = 'flex'; //Cюда сохраняшку
                 // saveConfirm.focus()
-                updateDataRectangles();
+                // updateDataRectangles();
                 switchLayer();
             } else {
                 layerNum = i;
@@ -934,106 +945,108 @@ function hasUnsavedChanges() {
 }
 
 
-function updateDataRectangles() {
-    if (unsaveLayers.length > 1) {
-        for (let i = 0; i < unsaveLayers.length; i++) {
-            let num = unsaveLayers[i];
-            // layerNum = num
-            const startIndex = rectangles.findIndex(rect => rect.layer == num);
-            const endIndex = rectangles.findLastIndex(rect => rect.layer == num);
-            const startIndexChangeArr = rectanglesClone.findIndex(rect => rect.layer == num);
-            const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == num);
-            // console.log(rectangles[1], rectanglesClone[1])
-            if (startIndex != -1 && endIndex != -1) {
-
-                if (endIndexChangeArr > endIndex) {
-                    rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
-                }
-                if (endIndexChangeArr < endIndex) {
-                    rectanglesClone.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex - endIndexChangeArr))));
-                }
-                for (let i = startIndex; i <= endIndex; i++) {
-                    rectangles[i].color = rectangles[i].colorAuto
-                    rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
-                }
-
-            }
-        }
-    } else {
-        const startIndex = rectangles.findIndex(rect => rect.layer == layerNum);
-        const endIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
-        const startIndexChangeArr = rectanglesClone.findIndex(rect => rect.layer == layerNum);
-        const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
-        // console.log(layerNum)
-        if (startIndex != -1 && endIndex != -1) {
-
-            if (endIndexChangeArr > endIndex) {
-                rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
-            }
-            if (endIndexChangeArr < endIndex) {
-                rectanglesClone.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex - endIndexChangeArr))));
-            }
-            for (let i = startIndex; i <= endIndex; i++) {
-                rectangles[i].color = rectangles[i].colorAuto
-                rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
-            }
-
-        }
-    }
-
-
-    // saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Coхранить';
-    // saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны.`;
-    unsaveLayers = [];
-
-}
-
-// function returnDataRectangles() {
+// function updateDataRectangles() {
 //     if (unsaveLayers.length > 1) {
 //         for (let i = 0; i < unsaveLayers.length; i++) {
 //             let num = unsaveLayers[i];
 //             // layerNum = num
-//             const startIndex = rectanglesClone.findIndex(rect => rect.layer == num);
-//             const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == num);
-//             const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == num);
-//             const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == num);
-//             if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
+//             const startIndex = rectangles.findIndex(rect => rect.layer == num);
+//             const endIndex = rectangles.findLastIndex(rect => rect.layer == num);
+//             const startIndexChangeArr = rectanglesClone.findIndex(rect => rect.layer == num);
+//             const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == num);
+//             // console.log(rectangles[1], rectanglesClone[1])
+//             if (startIndex != -1 && endIndex != -1) {
+
 //                 if (endIndexChangeArr > endIndex) {
-//                     rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+//                     rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
 //                 }
 //                 if (endIndexChangeArr < endIndex) {
-//                     rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex - endIndexChangeArr))));
+//                     rectanglesClone.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex - endIndexChangeArr))));
 //                 }
-//             }
-//             // console.log(rectangles.length, rectanglesClone.length)
-//             for (let i = startIndex; i <= endIndex; i++) {
-//                 rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
+//                 for (let i = startIndex; i <= endIndex; i++) {
+//                     rectangles[i].color = rectangles[i].colorAuto
+//                     rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
+//                 }
+
 //             }
 //         }
 //     } else {
-//         const startIndex = rectanglesClone.findIndex(rect => rect.layer == layerNum);
-//         const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
-//         const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == layerNum);
-//         const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == layerNum);
-//         if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
+//         const startIndex = rectangles.findIndex(rect => rect.layer == layerNum);
+//         const endIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
+//         const startIndexChangeArr = rectanglesClone.findIndex(rect => rect.layer == layerNum);
+//         const endIndexChangeArr = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
+//         // console.log(layerNum)
+//         if (startIndex != -1 && endIndex != -1) {
+
 //             if (endIndexChangeArr > endIndex) {
-//                 rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+//                 rectanglesClone.splice(endIndex, endIndexChangeArr - endIndex)
 //             }
 //             if (endIndexChangeArr < endIndex) {
-//                 rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex - endIndexChangeArr))));
+//                 rectanglesClone.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectangles.slice(startIndex, endIndex - endIndexChangeArr))));
 //             }
-//         }
-//         // console.log(rectangles.length, rectanglesClone.length)
-//         for (let i = startIndex; i <= endIndex; i++) {
-//             rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
+//             for (let i = startIndex; i <= endIndex; i++) {
+//                 rectangles[i].color = rectangles[i].colorAuto
+//                 rectanglesClone[i] = JSON.parse(JSON.stringify(rectangles[i]));
+//             }
+
 //         }
 //     }
 
-//     saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Coхранить';
-//     saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны.`;
+
+//     // saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Coхранить';
+//     // saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны.`;
 //     unsaveLayers = [];
 
 // }
+
+function returnDataRectangles() {
+    // if (unsaveLayers.length > 1) {
+    //     for (let i = 0; i < unsaveLayers.length; i++) {
+    //         let num = unsaveLayers[i];
+    //         // layerNum = num
+    //         const startIndex = rectanglesClone.findIndex(rect => rect.layer == num);
+    //         const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == num);
+    //         const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == num);
+    //         const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == num);
+    //         if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
+    //             if (endIndexChangeArr > endIndex) {
+    //                 rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+    //             }
+    //             if (endIndexChangeArr < endIndex) {
+    //                 rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex - endIndexChangeArr))));
+    //             }
+    //         }
+    //         // console.log(rectangles.length, rectanglesClone.length)
+    //         for (let i = startIndex; i <= endIndex; i++) {
+    //             rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
+    //         }
+    //     }
+    // } else {
+    const startIndex = rectanglesClone.findIndex(rect => rect.layer == layerNum);
+    const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
+    // const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == layerNum);
+    // const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == layerNum);
+    // if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
+    //     if (endIndexChangeArr > endIndex) {
+    //         rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+    //     }
+    //     if (endIndexChangeArr < endIndex) {
+    //         rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex - endIndexChangeArr))));
+    //     }
+    // }
+    // console.log(rectangles.length, rectanglesClone.length)
+    for (let i = startIndex; i <= endIndex; i++) {
+        rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
+        
+    }
+    drawLayer();
+    // }
+
+    // saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Coхранить';
+    // saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны.`;
+    // unsaveLayers = [];
+
+}
 
 // saveConfirm.addEventListener('click', () => {
 
