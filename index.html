@@ -22,16 +22,20 @@
                 <input type="number" id="rectHeight" placeholder="мм" value="800" required>
                 <label for="inentM">Минимальный промежуток:</label>
                 <input type="number" id="inentM" placeholder="мм" value="10" required>
+                <label for="countBag">Кол-во мешков на слой:</label>
+                <input type="number" id="countBag" placeholder="кол-во" value="2">
                 <label for="minLayer">Количество слоев:</label>
                 <input type="number" id="minLayer" placeholder="кол-во" value="2" required>
+                <label for="permission"> Разрешить выход за границу паллета</label>
+                <input type="checkbox" id="permission"></input>
                 <button type="submit" id="submit">Применить</button>
 
             </form>
             <button class="accordion">Просмотр слоев</button>
-           
+
             <div class="tab">
             </div>
-            
+
         </div>
         <div class="canvasAndSelection">
             <canvas id="myCanvas"></canvas>
@@ -39,6 +43,12 @@
         </div>
 
         <!-- <ul>
+            <li>+Считать по-другому scale при flagOutside example 1200 1200 800 200 10 2</li>
+            <li>Работать с заданным кол-вом мешков на слое. Выводить если вдруг что ошибку в findNumbers</li>
+            <li>Количество пакетов в слое одинаковое для всех слоев</li>
+            <li>Сохранение в файл</li>
+            <li>номер блока и его название в форму добавить</li>
+            <li>Передача по modbus</li>
             <li>700 700 450 200 10</li>
             <li>600 600 140 120 10 ---</li>
             <li>600 600 145 20 10 Кладка рядами столбцами</li>
@@ -103,9 +113,10 @@
     <script>
         let colorPickers = document.querySelectorAll('.color_picker');
         let rotateButtons = document.querySelectorAll('.rotate');
-        // let plusButtons = document.querySelectorAll('.plus');
         let checkText = document.querySelectorAll('.checkText');
         setColorPiker();
+        
+        // console.log(flagOutside)
         function setColorPiker() {
             colorPickers.forEach(picker => setColor(picker));
         }
@@ -117,9 +128,7 @@
             setColorPiker();
             rotateButtons = document.querySelectorAll('.rotate');
             rotateButtonsF();
-            // plusButtons = document.querySelectorAll('.plus');
-            // plusButtonsF();
-
+            
             acc[1].click();
         });
 
@@ -165,7 +174,7 @@
 
         // Открыть первую панель при загрузке страницы
         openFirstPanel();
-        
+
 
 
 

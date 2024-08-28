@@ -272,11 +272,19 @@ function findDopRectangles(palletWidth, palletHeight, lengthRect, widthRect) {
 function findNumberOfRectangles(palletWidth, palletHeight) {
     // let dopRectangles = {};
     let numRectangles = {};
-
     let numHorizontal = Math.floor((palletWidth - inent) / (rectWidth + inent));
     let lengthRect = numHorizontal * (rectWidth + inent) + inent;
     let numVertical = Math.floor((palletHeight - inent) / (rectHeight + inent));
     let widthRect = numVertical * (rectHeight + inent) + inent;
+    // console.log(flagOutside)
+    if (flagOutside) {
+
+        numHorizontal = Math.floor((palletWidth - inent) / (rectWidth + inent)) + 1;
+        lengthRect = numHorizontal * (rectWidth * 2 + inent) + inent;
+        numVertical = Math.floor((palletHeight - inent) / (rectHeight + inent)) + 1;
+        widthRect = numVertical * (rectHeight * 2 + inent) + inent;
+    }
+
 
     let [dopHoriz, dopVert] = findDopRectangles(palletWidth, palletHeight, lengthRect, widthRect)
 
@@ -285,7 +293,7 @@ function findNumberOfRectangles(palletWidth, palletHeight) {
     } else {
         return alert('Не подходящие параметры!')
     }
-
+    //---------------------------------------------Сюда добавить ошибку в случае если пакетов задали больше возможного разместить----------------------------------------------------
     return numRectangles;
 
 }
@@ -330,7 +338,7 @@ function oddLayer(palletWidth, palletHeight) {
             matrixRectangles.push(Array(countDopHorizHoriz).fill(1));
             matrixRectangles[matrixRectangles.length - 1].push(0);
 
-            // Создайте копию массива, чтобы не изменять оригинал
+            // Создаем копию массива, чтобы не изменять оригинал
             const reversedDopArr = additionalRows.map(arr => [...arr].reverse());
             if (reversedDopArr.length !== 0) {
                 matrixRectangles.push(...reversedDopArr);
@@ -425,7 +433,6 @@ function rotateRectangles(rectangles, centerX, centerY) {
         let newX = -rect.x;
         let newY = -rect.y;
 
-
         // Присваиваем новые значения прямоугольника
         rect.x = newX;
         rect.y = newY;
@@ -502,7 +509,13 @@ function rotateButtonsF() {
 function initialScale() {
     let palletWidthValue = parseInt(document.getElementById('palletWidth').value);
     let palletHeightValue = parseInt(document.getElementById('palletHeight').value);
-    scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue) * scale).toFixed(1), (parseInt(canvas.height) / palletHeightValue * scale).toFixed(1));
+    console.log(flagOutside);
+    if (flagOutside) {
+        scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue + rectWidth) * scale).toFixed(1), (parseInt(canvas.height) / (palletHeightValue + rectHeight) * scale).toFixed(1));
+    } else {
+        scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue) * scale).toFixed(1), (parseInt(canvas.height) / palletHeightValue * scale).toFixed(1));
+    }
+
 
     scaleMax = (palletWidthValue * scaleMax < canvas.width && palletHeightValue * scaleMax < canvas.height) ? scaleMax : scaleMax - 0.1;
     if (scaleMax == 0) {
@@ -526,14 +539,16 @@ function gettingDataForm() {
 let scale = 1;
 let scaleMax = 1;
 let rectanglesClone = [];
+let flagOutside = false;
 form.addEventListener('submit', function (event) {
     event.preventDefault();
+    flagOutside = document.querySelector('#permission').checked;
     rectangles = [];
     rectanglesClone = [];
     level = 1;
     scale = 1;
     initialScale();
-
+   
     let child = tab.lastElementChild;
     while (child) {
         tab.removeChild(child);
@@ -855,10 +870,10 @@ function repeatLayer(evt) {
         assignment(layerBigger, layerThis)
 
     }
-    
+
     let checked = (start == layerNum) ? document.querySelectorAll('.btn')[start + n - 1] : document.querySelectorAll('.btn')[start - 1];
     checked.checked = true;
-    layerNum = (start == layerNum) ? start + n: start;
+    layerNum = (start == layerNum) ? start + n : start;
     displayNone();
     let content = checked.nextElementSibling.nextElementSibling;
     content.style.display = 'block';
@@ -1040,7 +1055,7 @@ function drawLayer() {
     cleanCanvas();
     for (var i = 0; i < rectangles.length; i++) {
         rectangles[i].isLastlayer = false;
-        if(rectanglesClone[i]){
+        if (rectanglesClone[i]) {
             rectanglesClone[i].isLastlayer = false;
         }
         // rectanglesClone[i].isLastlayer = false;
@@ -1055,10 +1070,10 @@ function drawLayer() {
 
     for (let i = startLayer; i < ((endLayer == -1) ? rectangles.length : endLayer); i++) {
         rectangles[i].isLastlayer = true;
-        if(rectanglesClone[i]){
+        if (rectanglesClone[i]) {
             rectanglesClone[i].isLastlayer = true;
-        }   
-        
+        }
+
     }
 
     rectangles.slice(0, ((endLayer == -1) ? rectangles.length : endLayer)).forEach(drawRectangle);
@@ -1113,16 +1128,20 @@ function drawNumbers(rect) {
             text += ' Угол 0°';
         } else if (rect.text == arrText[1]) {
             text += ' Угол 90°'
-        }  else if (rect.text == arrText[2]) {
+        } else if (rect.text == arrText[2]) {
             text += ' Угол 180°'
         } else {
             text += ' Угол 270°'
         }
+
+        text += '\n№ ' + (rectangles.filter(rectangle => rectangle.layer == layerNum).indexOf(rect) + 1);
+
         const lines = text.split('\n');
+
         lines.forEach((line, index) => {
-            ctx.fillText(line, centerX + rect.x, centerY + rect.y + ((index) * 15 / scale) );
+            ctx.fillText(line, centerX + rect.x, centerY + rect.y + ((index - 1) * 16 / scale));
         });
-        
+
     }
 }
 // checkText = document.querySelectorAll('.checkText');
@@ -1241,49 +1260,29 @@ canvas.addEventListener('mousedown', function (evt) {
     rectangles.forEach(rect => {
         if (isInsideRect(mousePos, rect) && rect.isLastlayer) {
             //Когда несколько выделяется
-            if (selectedRectangles.length) {
-                selectedRectangle = rect;
-                dragOffsetX = mousePos.x - rect.x;
-                dragOffsetY = mousePos.y - rect.y;
-                if (!selectedRectangles.includes(selectedRectangle)) {
-                    selectedRectangles = []
-                }
-            }
-
-            //Когда 1 выделен
-            if (!selectedRectangles.includes(selectedRectangle)) {
-                selectedRectangles.push(rect);
-            }
             selectedRectangle = rect;
             dragOffsetX = mousePos.x - rect.x;
             dragOffsetY = mousePos.y - rect.y;
-            if (evt.button === 0) {
+            if (!selectedRectangles.length) {
+                selectedRectangles.push(rect);
+            }
+            if (!selectedRectangles.includes(selectedRectangle)) {
+                selectedRectangles = [];
+                selectedRectangles.push(rect);
+            }
 
-
-            } else if (evt.button === 2) {
-                evt.preventDefault();
-
-                selectedRectangles.forEach(rect => {
-                    let dop = rect.height;
-                    rect.height = rect?.width;
-                    rect.width = dop;
-
-                    if (arrText.indexOf(rect.text) + 1 < arrText.length) {
-                        rect.text = arrText[arrText.indexOf(rect.text) + 1];
-                    } else {
-                        rect.text = arrText[0];
-                    }
-                });
-
-
-                drawLayer();
-            } 
         }
+
     });
+
     if (!selectedRectangle) {
 
         handleMouseDown(evt)
 
+    } else if (evt.button === 2) {
+        evt.preventDefault();
+
+        turnRectRight();
     }
     // console.log(selectedRectangles)
 });
@@ -1359,6 +1358,10 @@ function handleMouseMove(e) {
 }
 
 function clampCoordinate(delta, center, halfSize) {
+    if (flagOutside) {
+        halfSize = 0;
+
+    }
     if (delta > 0) {
         return Math.min(delta, center - halfSize);
     } else {
@@ -1381,6 +1384,7 @@ canvas.addEventListener('mousemove', function (evt) {
         const deltaY = mousePos.y - dragOffsetY;
         selectedRectangle.x = float2int(clampCoordinate(deltaX, centerX, halfWidth));
         selectedRectangle.y = float2int(clampCoordinate(deltaY, centerY, halfHeight));
+
         for (let i = 0; i < selectedRectangles.length; i++) {
 
             selectedRectangles[i].x = float2int(clampCoordinate(mousePos.x - (dragOffsetX + selectedRectangle.xAuto - selectedRectangles[i].xAuto), centerX, selectedRectangles[i].width / 2));
