@@ -13,17 +13,17 @@
             <button class="accordion">Форма</button>
             <form id="canvasForm" class="resizable-form">
                 <label for="palletWidth">Ширина паллета:</label>
-                <input type="number" id="palletWidth" placeholder="мм" required>
+                <input type="number" id="palletWidth" placeholder="мм" value="1200" required>
                 <label for="palletHeight">Длина паллета:</label>
-                <input type="number" id="palletHeight" placeholder="мм" required>
+                <input type="number" id="palletHeight" placeholder="мм" value="1200" required>
                 <label for="rectWidth">Ширина мешка:</label>
-                <input type="number" id="rectWidth" placeholder="мм" required>
+                <input type="number" id="rectWidth" placeholder="мм" value="200" required>
                 <label for="rectHeight">Длина мешка:</label>
-                <input type="number" id="rectHeight" placeholder="мм" required>
+                <input type="number" id="rectHeight" placeholder="мм" value="800" required>
                 <label for="inentM">Минимальный промежуток:</label>
-                <input type="number" id="inentM" placeholder="мм" required>
+                <input type="number" id="inentM" placeholder="мм" value="10" required>
                 <label for="minLayer">Количество слоев:</label>
-                <input type="number" id="minLayer" placeholder="кол-во" required>
+                <input type="number" id="minLayer" placeholder="кол-во" value="2" required>
                 <button type="submit" id="submit">Применить</button>
 
             </form>
@@ -48,7 +48,7 @@
         </ul> -->
     </div>
 
-    <div id="saveQuestion" class="modal">
+    <!-- <div id="saveQuestion" class="modal">
         <div class="modal-content">
             <p>Вы уверены, что хотите переключить слой? Изменения будут потеряны.</p>
             <button id="saveConfirm">Сохранить</button>
@@ -62,7 +62,7 @@
             <button id="deleteConfirm">Удалить</button>
             <button id="deleteCancel">Отмена</button>
         </div>
-    </div>
+    </div> -->
     <button id="infoButton">i</button>
 
     <div id="controlsModal" class="modal">
@@ -75,18 +75,18 @@
             </div>
             <div class="control">
                 <span class="action">Поворот вправо:</span>
-                <span class="key">СКМ</span>
+                <span class="key">ПКМ</span>
                 <span class="key">→</span>
             </div>
             <div class="control">
                 <span class="action">Поворот влево:</span>
                 <span class="key">←</span>
             </div>
-            <div class="control">
+            <!-- <div class="control">
                 <span class="action">Удаление:</span>
                 <span class="key">ПКМ</span>
                 <span class="key">Delete</span>
-            </div>
+            </div> -->
             <div class="control">
                 <span class="action">Увеличить масштаб:</span>
                 <span class="key">=</span>
@@ -103,7 +103,7 @@
     <script>
         let colorPickers = document.querySelectorAll('.color_picker');
         let rotateButtons = document.querySelectorAll('.rotate');
-        let plusButtons = document.querySelectorAll('.plus');
+        // let plusButtons = document.querySelectorAll('.plus');
         let checkText = document.querySelectorAll('.checkText');
         setColorPiker();
         function setColorPiker() {
@@ -117,13 +117,13 @@
             setColorPiker();
             rotateButtons = document.querySelectorAll('.rotate');
             rotateButtonsF();
-            plusButtons = document.querySelectorAll('.plus');
-            plusButtonsF();
+            // plusButtons = document.querySelectorAll('.plus');
+            // plusButtonsF();
 
             acc[1].click();
         });
 
-        plusButtonsF();
+        // plusButtonsF();
         rotateButtonsF();
         checkTextF();
 

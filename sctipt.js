@@ -455,41 +455,41 @@ function checkTextF() {
 }
 
 
-function plusButtonsF() {
-    plusButtons.forEach(button => {
-        button.addEventListener('click', evt => {
-            let lastRectangleLayerIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
-            let lastRectangleLayer = rectangles[lastRectangleLayerIndex];
+// function plusButtonsF() {
+//     plusButtons.forEach(button => {
+//         button.addEventListener('click', evt => {
+//             let lastRectangleLayerIndex = rectangles.findLastIndex(rect => rect.layer == layerNum);
+//             let lastRectangleLayer = rectangles[lastRectangleLayerIndex];
 
-            // При добавлении нового прямоугольника возвращать цвет прошлого.
-            lastRectangleLayer.color = rectangles[lastRectangleLayerIndex - 1].color;
+//             // При добавлении нового прямоугольника возвращать цвет прошлого.
+//             lastRectangleLayer.color = rectangles[lastRectangleLayerIndex - 1].color;
 
 
-            const item = {
-                x: lastRectangleLayer.x + 10,
-                y: lastRectangleLayer.y + 10,
-                width: lastRectangleLayer.width,
-                height: lastRectangleLayer.height,
-                isLastlayer: true,
-                color: invertColor(lastRectangleLayer.color),
-                text: lastRectangleLayer.text,
-                column: lastRectangleLayer.column,
-                row: lastRectangleLayer.row,
-                layer: lastRectangleLayer.layer,
-                xAuto: lastRectangleLayer.x + 10,
-                yAuto: lastRectangleLayer.y + 10,
-                widthAuto: lastRectangleLayer.widthAuto,
-                heightAuto: lastRectangleLayer.heightAuto,
-                textAuto: lastRectangleLayer.textAuto,
-                colorAuto: lastRectangleLayer.colorAuto
-            };
+//             const item = {
+//                 x: lastRectangleLayer.x + 10,
+//                 y: lastRectangleLayer.y + 10,
+//                 width: lastRectangleLayer.width,
+//                 height: lastRectangleLayer.height,
+//                 isLastlayer: true,
+//                 color: invertColor(lastRectangleLayer.color),
+//                 text: lastRectangleLayer.text,
+//                 column: lastRectangleLayer.column,
+//                 row: lastRectangleLayer.row,
+//                 layer: lastRectangleLayer.layer,
+//                 xAuto: lastRectangleLayer.x + 10,
+//                 yAuto: lastRectangleLayer.y + 10,
+//                 widthAuto: lastRectangleLayer.widthAuto,
+//                 heightAuto: lastRectangleLayer.heightAuto,
+//                 textAuto: lastRectangleLayer.textAuto,
+//                 colorAuto: lastRectangleLayer.colorAuto
+//             };
 
-            rectangles.splice(lastRectangleLayerIndex + 1, 0, item);
+//             rectangles.splice(lastRectangleLayerIndex + 1, 0, item);
 
-            drawLayer();
-        });
-    });
-}
+//             drawLayer();
+//         });
+//     });
+// }
 
 function rotateButtonsF() {
     rotateButtons.forEach(button => {
@@ -606,14 +606,14 @@ function getAlpha(rgba) {
     const alpha = Math.round(a * 255);
     return alpha;
 }
-function createPlus() {
-    const plusButton = document.createElement('button');
-    plusButton.type = 'button';
-    plusButton.classList.add('plus');
-    plusButton.title = 'Добавить прямоугольник';
-    plusButton.innerHTML = '+';
-    return plusButton;
-}
+// function createPlus() {
+//     const plusButton = document.createElement('button');
+//     plusButton.type = 'button';
+//     plusButton.classList.add('plus');
+//     plusButton.title = 'Добавить прямоугольник';
+//     plusButton.innerHTML = '+';
+//     return plusButton;
+// }
 
 function createRotate() {
     const rotateButton = document.createElement('button');
@@ -702,7 +702,7 @@ function createCheckLabel() {
 }
 
 function createDivContent(i, quantity) {
-    const plusButton = createPlus();
+    // const plusButton = createPlus();
     const rotateButton = createRotate();
 
     const containerLabel = createContainerLabel(i, quantity);
@@ -723,7 +723,7 @@ function createDivContent(i, quantity) {
         div.style.display = 'block';
     }
 
-    div.appendChild(plusButton);
+    // div.appendChild(plusButton);
     div.appendChild(rotateButton);
     div.appendChild(containerLayerLabel);
     div.appendChild(p);
@@ -733,9 +733,9 @@ function createDivContent(i, quantity) {
 
 
 const tab = document.querySelector('.tab');
-const saveQuestion = document.getElementById('saveQuestion');
-const saveConfirm = document.getElementById('saveConfirm');
-const saveCancel = document.getElementById('saveCancel');
+// const saveQuestion = document.getElementById('saveQuestion');
+// const saveConfirm = document.getElementById('saveConfirm');
+// const saveCancel = document.getElementById('saveCancel');
 
 let pendingSwitch = null;
 
@@ -752,8 +752,10 @@ function createButton(quantity) {
 
             if (hasUnsavedChanges()) {
                 pendingSwitch = i; // Запоминаем слой, на который нужно переключиться
-                saveQuestion.style.display = 'flex';
-                saveConfirm.focus()
+                // saveQuestion.style.display = 'flex'; //Cюда сохраняшку
+                // saveConfirm.focus()
+                updateDataRectangles();
+                switchLayer();
             } else {
                 layerNum = i;
                 selectedRectangles = [];
@@ -860,10 +862,10 @@ function repeatLayer(evt) {
     displayNone();
     let content = checked.nextElementSibling.nextElementSibling;
     content.style.display = 'block';
-    saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны для ${unsaveLayers.length}: №${unsaveLayers.join(', ')} слоев.`;
-    if (unsaveLayers.length > 1) {
-        saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Сохранить все';
-    }
+    // saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны для ${unsaveLayers.length}: №${unsaveLayers.join(', ')} слоев.`;
+    // if (unsaveLayers.length > 1) {
+    //     saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Сохранить все';
+    // }
     drawLayer();
 }
 
@@ -965,72 +967,72 @@ function updateDataRectangles() {
     }
 
 
-    saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Coхранить';
-    saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны.`;
+    // saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Coхранить';
+    // saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны.`;
     unsaveLayers = [];
 
 }
 
-function returnDataRectangles() {
-    if (unsaveLayers.length > 1) {
-        for (let i = 0; i < unsaveLayers.length; i++) {
-            let num = unsaveLayers[i];
-            // layerNum = num
-            const startIndex = rectanglesClone.findIndex(rect => rect.layer == num);
-            const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == num);
-            const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == num);
-            const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == num);
-            if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
-                if (endIndexChangeArr > endIndex) {
-                    rectangles.splice(endIndex, endIndexChangeArr - endIndex)
-                }
-                if (endIndexChangeArr < endIndex) {
-                    rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex - endIndexChangeArr))));
-                }
-            }
-            // console.log(rectangles.length, rectanglesClone.length)
-            for (let i = startIndex; i <= endIndex; i++) {
-                rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
-            }
-        }
-    } else {
-        const startIndex = rectanglesClone.findIndex(rect => rect.layer == layerNum);
-        const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
-        const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == layerNum);
-        const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == layerNum);
-        if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
-            if (endIndexChangeArr > endIndex) {
-                rectangles.splice(endIndex, endIndexChangeArr - endIndex)
-            }
-            if (endIndexChangeArr < endIndex) {
-                rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex - endIndexChangeArr))));
-            }
-        }
-        // console.log(rectangles.length, rectanglesClone.length)
-        for (let i = startIndex; i <= endIndex; i++) {
-            rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
-        }
-    }
+// function returnDataRectangles() {
+//     if (unsaveLayers.length > 1) {
+//         for (let i = 0; i < unsaveLayers.length; i++) {
+//             let num = unsaveLayers[i];
+//             // layerNum = num
+//             const startIndex = rectanglesClone.findIndex(rect => rect.layer == num);
+//             const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == num);
+//             const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == num);
+//             const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == num);
+//             if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
+//                 if (endIndexChangeArr > endIndex) {
+//                     rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+//                 }
+//                 if (endIndexChangeArr < endIndex) {
+//                     rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex - endIndexChangeArr))));
+//                 }
+//             }
+//             // console.log(rectangles.length, rectanglesClone.length)
+//             for (let i = startIndex; i <= endIndex; i++) {
+//                 rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
+//             }
+//         }
+//     } else {
+//         const startIndex = rectanglesClone.findIndex(rect => rect.layer == layerNum);
+//         const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
+//         const startIndexChangeArr = rectangles.findIndex(rect => rect.layer == layerNum);
+//         const endIndexChangeArr = rectangles.findLastIndex(rect => rect.layer == layerNum);
+//         if (endIndexChangeArr != -1 && startIndexChangeArr != -1) {
+//             if (endIndexChangeArr > endIndex) {
+//                 rectangles.splice(endIndex, endIndexChangeArr - endIndex)
+//             }
+//             if (endIndexChangeArr < endIndex) {
+//                 rectangles.splice(startIndexChangeArr, 0, ...JSON.parse(JSON.stringify(rectanglesClone.slice(startIndex, endIndex - endIndexChangeArr))));
+//             }
+//         }
+//         // console.log(rectangles.length, rectanglesClone.length)
+//         for (let i = startIndex; i <= endIndex; i++) {
+//             rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
+//         }
+//     }
 
-    saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Coхранить';
-    saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны.`;
-    unsaveLayers = [];
+//     saveQuestion.childNodes[1].childNodes[1].nextElementSibling.innerHTML = 'Coхранить';
+//     saveQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите переключить слой? Изменения будут потеряны.`;
+//     unsaveLayers = [];
 
-}
+// }
 
-saveConfirm.addEventListener('click', () => {
+// saveConfirm.addEventListener('click', () => {
 
-    updateDataRectangles();
-    saveQuestion.style.display = 'none'; // Закрываем модальное окно
-    switchLayer()
+//     updateDataRectangles();
+//     saveQuestion.style.display = 'none'; // Закрываем модальное окно
+//     switchLayer()
 
-});
+// });
 
-saveCancel.addEventListener('click', () => {
-    returnDataRectangles();
-    saveQuestion.style.display = 'none'; // Закрываем модальное окно
-    switchLayer()
-});
+// saveCancel.addEventListener('click', () => {
+//     returnDataRectangles();
+//     saveQuestion.style.display = 'none'; // Закрываем модальное окно
+//     switchLayer()
+// });
 
 function drawLayer() {
     let startLayer = -1;
@@ -1106,8 +1108,21 @@ function drawNumbers(rect) {
         ctx.fillStyle = 'black'
         // }
 
-        let text = (rect.x).toString() + ', ' + (-rect.y).toString();
-        ctx.fillText(text, centerX + rect.x, centerY + rect.y);
+        let text = 'x: ' + (rect.x).toString() + '\n y: ' + (-rect.y).toString() + '\n';
+        if (rect.text == arrText[0]) {
+            text += ' Угол 0°';
+        } else if (rect.text == arrText[1]) {
+            text += ' Угол 90°'
+        }  else if (rect.text == arrText[2]) {
+            text += ' Угол 180°'
+        } else {
+            text += ' Угол 270°'
+        }
+        const lines = text.split('\n');
+        lines.forEach((line, index) => {
+            ctx.fillText(line, centerX + rect.x, centerY + rect.y + ((index) * 15 / scale) );
+        });
+        
     }
 }
 // checkText = document.querySelectorAll('.checkText');
@@ -1178,35 +1193,35 @@ document.addEventListener('contextmenu', function (event) {
     event.preventDefault();
 });
 
-const deleteQuestion = document.getElementById('deleteQuestion');
-const deleteConfirm = document.getElementById('deleteConfirm');
-const deleteCancel = document.getElementById('deleteCancel');
+// const deleteQuestion = document.getElementById('deleteQuestion');
+// const deleteConfirm = document.getElementById('deleteConfirm');
+// const deleteCancel = document.getElementById('deleteCancel');
 
-deleteConfirm.addEventListener('click', () => {
-    if (selectedRectangles.length == rectangles.filter(rect => rect.layer == layerNum).length) {
-        deleteCancel.click();
-        return alert('Нельзя удалить слой!');
+// deleteConfirm.addEventListener('click', () => {
+//     if (selectedRectangles.length == rectangles.filter(rect => rect.layer == layerNum).length) {
+//         deleteCancel.click();
+//         return alert('Нельзя удалить слой!');
 
-    }
+//     }
 
-    selectedRectangles.forEach(selected => {
-        let indexDeleted = rectangles.indexOf(selected);
-        rectangles.splice(indexDeleted, 1);
-    });
+//     selectedRectangles.forEach(selected => {
+//         let indexDeleted = rectangles.indexOf(selected);
+//         rectangles.splice(indexDeleted, 1);
+//     });
 
-    deleteQuestion.style.display = 'none'; // Закрываем модальное окно
-    selectedRectangles = [];
-    selectedRectangle = null;
-    drawLayer();
+//     deleteQuestion.style.display = 'none'; // Закрываем модальное окно
+//     selectedRectangles = [];
+//     selectedRectangle = null;
+//     drawLayer();
 
-});
+// });
 
-deleteCancel.addEventListener('click', () => {
-    deleteQuestion.style.display = 'none'; // Закрываем модальное окно
-    selectedRectangle = null;
-    selectedRectangles = [];
-    drawLayer();
-});
+// deleteCancel.addEventListener('click', () => {
+//     deleteQuestion.style.display = 'none'; // Закрываем модальное окно
+//     selectedRectangle = null;
+//     selectedRectangles = [];
+//     drawLayer();
+// });
 
 function handleMouseDown(e) {
     startX = e.offsetX;
@@ -1245,7 +1260,7 @@ canvas.addEventListener('mousedown', function (evt) {
             if (evt.button === 0) {
 
 
-            } else if (evt.button === 1) {
+            } else if (evt.button === 2) {
                 evt.preventDefault();
 
                 selectedRectangles.forEach(rect => {
@@ -1262,9 +1277,7 @@ canvas.addEventListener('mousedown', function (evt) {
 
 
                 drawLayer();
-            } else if (evt.button === 2) {
-                deleteRectangle();
-            }
+            } 
         }
     });
     if (!selectedRectangle) {
@@ -1275,13 +1288,13 @@ canvas.addEventListener('mousedown', function (evt) {
     // console.log(selectedRectangles)
 });
 
-function deleteRectangle() {
-    if (selectedRectangles.length) {
-        textDeleted();
-        deleteQuestion.style.display = 'flex';
-        deleteConfirm.focus()
-    }
-}
+// function deleteRectangle() {
+//     if (selectedRectangles.length) {
+//         textDeleted();
+//         deleteQuestion.style.display = 'flex';
+//         deleteConfirm.focus()
+//     }
+// }
 
 function turnRectRight() {
 
@@ -1318,20 +1331,20 @@ function turnRectLeft() {
     drawLayer();
 }
 
-function textDeleted() {
-    let count = selectedRectangles.length;
-    let objectWord;
+// function textDeleted() {
+//     let count = selectedRectangles.length;
+//     let objectWord;
 
-    if (count === 1) {
-        objectWord = 'объект';
-    } else if (count >= 2 && count <= 4) {
-        objectWord = 'объекта';
-    } else {
-        objectWord = 'объектов';
-    }
+//     if (count === 1) {
+//         objectWord = 'объект';
+//     } else if (count >= 2 && count <= 4) {
+//         objectWord = 'объекта';
+//     } else {
+//         objectWord = 'объектов';
+//     }
 
-    deleteQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите удалить ${count} ${objectWord}?`;
-}
+//     deleteQuestion.childNodes[1].childNodes[1].innerHTML = `Вы уверены, что хотите удалить ${count} ${objectWord}?`;
+// }
 
 function handleMouseMove(e) {
     if (!isSelecting) return;
