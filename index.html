@@ -23,7 +23,7 @@
                 <label for="inentM">Минимальный промежуток:</label>
                 <input type="number" id="inentM" placeholder="мм" value="10" required>
                 <label for="countBag">Кол-во мешков на слой:</label>
-                <input type="number" id="countBag" placeholder="кол-во"  max="25">
+                <input type="number" id="countBag" placeholder="кол-во" max="25">
                 <label for="minLayer">Количество слоев:</label>
                 <input type="number" id="minLayer" placeholder="кол-во" value="2" required>
                 <label for="permission"> Разрешить выход за границу паллета</label>
@@ -44,7 +44,7 @@
 
         <!-- <ul>
             <li>+Считать по-другому scale при flagOutside example 1200 1200 800 200 10 2</li>
-            <li>Добавить кнопку для возвращения слоя в исходный вид</li>
+            <li>+Добавить кнопку для возвращения слоя в исходный вид</li>
             <li>Работать с заданным кол-вом мешков на слое. Выводить если вдруг что ошибку в findNumbers</li>
             <li>Количество пакетов в слое одинаковое для всех слоев</li>
             <li>Сохранение в файл</li>
@@ -74,7 +74,12 @@
             <button id="deleteCancel">Отмена</button>
         </div>
     </div> -->
-    <button id="infoButton">i</button>
+    <div class="forButton">
+        <button id="infoButton">i</button>
+        <button id="saveToTXTButton">t</button>
+        <button id="modbusButton">m</button>
+    </div>
+
 
     <div id="controlsModal" class="modal">
         <div class="modal-content-inst">
@@ -116,7 +121,7 @@
         let rotateButtons = document.querySelectorAll('.rotate');
         let checkText = document.querySelectorAll('.checkText');
         setColorPiker();
-        
+
         // console.log(flagOutside)
         function setColorPiker() {
             colorPickers.forEach(picker => setColor(picker));
@@ -129,7 +134,7 @@
             setColorPiker();
             rotateButtons = document.querySelectorAll('.rotate');
             rotateButtonsF();
-            
+
             acc[1].click();
         });
 

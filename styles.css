@@ -48,16 +48,6 @@ canvas {
 
 }
 
-#infoButton {
-    position: absolute;
-    right: 0;
-    top: 0;
-    margin: 0;
-    font-size: 15px;
-    font-family: Georgia, serif;
-    background-color: #6976CB;
-    font-weight: 800;
-}
 
 .accordion {
     font-size: 15px;
@@ -373,6 +363,16 @@ button#deleteCancel:hover {
     max-width: 400px;
     border-radius: 10px;
 }
+#infoButton {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 0;
+    font-size: 15px;
+    font-family: Georgia, serif;
+    background-color: #6976CB;
+    font-weight: 800;
+}
 
 button#infoButton {
     font-size: 18px;
@@ -389,6 +389,49 @@ button#infoButton:hover {
     background-color: #0056b3;
 }
 
+#saveToTXTButton {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    margin: 0;
+    font-size: 18px;
+    padding: 10px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    font-family: Georgia, serif;
+    background-color: #6976CB;
+    font-weight: 800;
+}
+
+
+button#saveToTXTButton:hover {
+    background-color: #0056b3;
+}
+
+#modbusButton {
+    position: absolute;
+    right: 0;
+    top: 100px;
+    margin: 0;
+    font-size: 18px;
+    padding: 10px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    font-family: Georgia, serif;
+    background-color: #d63122;
+    font-weight: 800;
+}
+
+
+button#modbusButton:hover {
+    background-color: #0056b3;
+}
 
 .modal-content-inst h2 {
     font-size: 24px;
