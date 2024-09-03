@@ -151,13 +151,57 @@ function centering(arr) {
         rect.yAuto += gapYAxis;
     });
 }
-
+function removeEmptyOrZeroMatrices(arr) {
+    return arr.filter(subArray =>
+        subArray.length > 0 && subArray.some(value => value !== 0)
+    );
+}
 // Основная функция
 function getCoord(arr) {
     let coordinateX = 0;
     let coordinateY = 0;
     let arr1Layer = [];
     let text = arrText[2];
+
+    //Изменение матрицы, возможно надо делать не тут, но пока пусть лежит
+    let countInMatrix1 = 0;
+    let countInMatrix2 = 0;
+    arr.map(cell => cell.forEach(c => {
+        countInMatrix1 += (c == 1) ? 1 : 0;
+        countInMatrix2 += (c == 2) ? 1 : 0;
+    }));
+
+
+    if (countBags < countInMatrix1 + countInMatrix2) {
+
+        arr.map((cell, index1) => {
+            for (let index2 = cell.length - 1; index2 >= 0; index2--) {
+                if (cell[index2] == 2 && countInMatrix1 + countInMatrix2 > countBags) {
+                    arr[index1].splice(index2, 1);
+                    countInMatrix2--;
+                    for(let i = index1; i < arr.length; i++){
+                        if(arr[i][index2] == 0){
+                            arr[i].splice(index2, 1)
+                        }
+                    }
+                }
+            }
+        });
+
+        arr.map((cell, index1) => {
+            for (let index2 = cell.length - 1; index2 >= 0; index2--) {
+                if (cell[index2] == 1 && countInMatrix1 + countInMatrix2 > countBags) {
+                    arr[index1].splice(index2, 1);
+                    countInMatrix1--;
+                }
+            }
+        });
+
+
+    }
+    arr = removeEmptyOrZeroMatrices(arr);
+    console.log(arr)
+    // ввеерх Изменение матрицы, возможно надо делать не тут, но пока пусть лежит. Надо исправлять тут, так как матрица изначально формируется исходя из размеров
 
     for (let i = 0; i < arr.length; i++) {
         if (!arr1Layer?.at(-1)?.isLastlayer) {
@@ -197,6 +241,14 @@ function getCoord(arr) {
             }
         }
     }
+    // console.log(arr)
+    // if (countBags < arr1Layer.length) {
+    //     arr1Layer.splice(countBags, arr1Layer.length - countBags); //Убирать допы, так как они ебать мешают, но не тут, так как тут уже из готового делается. Работа с матрицами получается.
+
+    // } else if (countBags > arr1Layer.length) {
+    //     alert('Ко-во мешков на слой больше возможного, поставьте <= ' + arr1Layer.length);
+    //     // -----------------------Прервать выполнение--------------------------------
+    // }
 
     if (flagAddVert) {
         updateElementPositions(arr1Layer, 'width', 'row', 'x');
@@ -205,7 +257,7 @@ function getCoord(arr) {
         updateElementPositions(arr1Layer, 'height', 'column', 'y');
     }
 
-    centering(arr1Layer);
+    centering(arr1Layer); //Переделать для 3 штук, чтобы оно перестраивалось
 
     rectangles.push(...arr1Layer);
     rectanglesClone.push(...arr1Layer.map(obj => JSON.parse(JSON.stringify(obj))));
@@ -264,7 +316,7 @@ function findNumberOfRectangles(palletWidth, palletHeight) {
     let lengthRect = numHorizontal * (rectWidth + inent) + inent;
     let numVertical = Math.floor((palletHeight - inent) / (rectHeight + inent));
     let widthRect = numVertical * (rectHeight + inent) + inent;
-    // console.log(flagOutside)
+
     if (flagOutside) {
 
         numHorizontal = Math.floor((palletWidth - inent) / (rectWidth + inent)) + 1;
@@ -273,7 +325,6 @@ function findNumberOfRectangles(palletWidth, palletHeight) {
         widthRect = numVertical * (rectHeight * 2 + inent) + inent;
     }
 
-
     let [dopHoriz, dopVert] = findDopRectangles(palletWidth, palletHeight, lengthRect, widthRect)
 
     if (numHorizontal > 0 && numVertical > 0) {
@@ -281,7 +332,7 @@ function findNumberOfRectangles(palletWidth, palletHeight) {
     } else {
         return alert('Не подходящие параметры!')
     }
-    //---------------------------------------------Сюда добавить ошибку в случае если пакетов задали больше возможного разместить----------------------------------------------------
+    //----------------------Сюда добавить ошибку в случае если пакетов задали больше возможного разместить----------------------------------------------------
     return numRectangles;
 
 }
@@ -298,6 +349,7 @@ function oddLayer(palletWidth, palletHeight) { // сюда всатвка кол
     centerX = Math.floor(palletWidth / 2);
     centerY = Math.floor(palletHeight / 2);
     let numRectangles = findNumberOfRectangles(palletWidth, palletHeight); // сюда всатвка кол-во мешков
+
     // console.log(numRectangles.horizontal * numRectangles.vertical);
     // if (countBags && countBags <= numRectangles){
     //     numRectangles = countBags;
@@ -309,17 +361,17 @@ function oddLayer(palletWidth, palletHeight) { // сюда всатвка кол
     // console.log(countBags)
 
     let matrixRectangles = createBaseMatrix(numRectangles.horizontal, numRectangles.vertical, 1);
-    
+
 
     let matrixLenght = matrixRectangles.length;
     //Сделать кладку основанную на кол-ве мешков из формы
     // Для дополнительных горизонтальных (если одинаковое кол-во столбцов обычных и дополнительных (+1)) распределение по столбцам
     if (numRectangles.dopHoriz.horizontal) {
         //Кладка квадратом
-        if (numRectangles.dopHoriz.vertical == 1 && numRectangles.horizontal == 1 && (numRectangles.dopHoriz.horizontal > 2 || numRectangles.vertical > 2) && numRectangles.dopHoriz.horizontal * 4 > numRectangles.vertical - 4) {
+        if (numRectangles.dopHoriz.vertical == 1 && numRectangles.horizontal == 1 && (numRectangles.dopHoriz.horizontal > 2 || numRectangles.vertical > 2) && (numRectangles.dopHoriz.horizontal * 4 > numRectangles.vertical - 4) && (countBags == numRectangles.dopHoriz.horizontal * 4 || !countBags)) {
             layingSquareHoriz = true;
             countDopHorizHoriz = numRectangles.dopHoriz.horizontal; // поменять название
-            // console.log(countDopHorizHoriz)
+
             const rowsToRemove = numRectangles.vertical - countDopHorizHoriz;
             for (let k = 0; k < rowsToRemove; k++) {
                 matrixRectangles.forEach(row => row.pop());
@@ -367,7 +419,7 @@ function oddLayer(palletWidth, palletHeight) { // сюда всатвка кол
     // Для дополнительных вертикальных (если одинаковое кол-во столбцов обычных и дополнительных (+1)) распределение по рядам
     if (numRectangles.dopVert.vertical) {
         //Кладка квадратом
-        if (numRectangles.dopVert.horizontal == 1 && numRectangles.vertical == 1 && (numRectangles.dopVert.vertical > 2 || numRectangles.horizontal > 2) && numRectangles.dopVert.vertical * 4 > numRectangles.horizontal - 4) {
+        if (numRectangles.dopVert.horizontal == 1 && numRectangles.vertical == 1 && (numRectangles.dopVert.vertical > 2 || numRectangles.horizontal > 2) && (numRectangles.dopVert.vertical * 4 > numRectangles.horizontal - 4) && (countBags == numRectangles.dopVert.vertical * 4 || !countBags)) {
             layingSquareVert = true;
             let differenceValues = numRectangles.dopVert.vertical; // поменять название
             let dopArr = Array(differenceValues).fill(2);
@@ -387,7 +439,6 @@ function oddLayer(palletWidth, palletHeight) { // сюда всатвка кол
                 matrixRectangles[k].splice(matrixRectangles[k].length - numRectangles.dopVert.horizontal, numRectangles.dopVert.horizontal, ...Array(numRectangles.dopVert.horizontal).fill(2));
             }
             dopArr = matrixRectangles[0].slice().reverse()
-            // console.log(matrixRectangles[0].slice().reverse())
             matrixRectangles.splice(matrixRectangles.length, 0, dopArr);
 
             matrixRectangles = matrixRectangles[0].map((_, colIndex) => matrixRectangles.map(row => row[colIndex]));
@@ -418,12 +469,10 @@ function oddLayer(palletWidth, palletHeight) { // сюда всатвка кол
         }
 
         // newArr = newArr[0].map((_, colIndex) => newArr.map(row => row[colIndex]));
-        // console.log(newArr)
+
     }
-    // console.log(matrixRectangles);
-    let countInMatrix = 0;
-    matrixRectangles.map(cell => cell.map(c => countInMatrix += (c)? 1 : 0)); // сюда блять надооооо
-    console.log(countInMatrix);
+
+
     getCoord(matrixRectangles);
 
 }

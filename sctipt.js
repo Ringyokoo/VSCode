@@ -1,6 +1,6 @@
 "use strict";
 const form = document.getElementById('canvasForm');
-
+const tab = document.querySelector('.tab');
 let level = 1;
 let layerNum = 0;
 
@@ -20,6 +20,7 @@ let scaleMax = 1;
 let rectanglesClone = [];
 let flagOutside = false;
 let countBags = 0;
+
 form.addEventListener('submit', function (event) {
     event.preventDefault();
     flagOutside = document.querySelector('#permission').checked;
@@ -202,7 +203,7 @@ function createDivContent(i, quantity) {
 }
 
 
-const tab = document.querySelector('.tab');
+
 
 let pendingSwitch = null;
 
