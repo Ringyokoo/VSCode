@@ -81,6 +81,17 @@
         <button id="modbusButton">m</button>
     </div>
 
+    <div class="forSaveTxt">
+        <label for="fileNameInput">Введите название файла:</label>
+        <input type="text" id="fileNameInput" placeholder="bags_per_pallet.txt">
+        <p>Предварительный просмотр содержимого файла:</p>
+        <pre id="fileContentPreview"></pre>
+        <div class="buttonsTxt">
+            <button id="saveButtonTxt">Сохранить</button>
+            <button id="cancelButtonTxt">Отмена</button>
+        </div>
+    </div>
+
 
     <div id="controlsModal" class="modal">
         <div class="modal-content-inst">
@@ -120,7 +131,7 @@
     <script src="drawingCanvas.js"></script>
     <script src="interactionWithLayer.js"></script>
     <script src="sctipt.js"></script>
-    
+
     <script>
         let colorPickers = document.querySelectorAll('.color_picker');
         let rotateButtons = document.querySelectorAll('.rotate');
@@ -185,11 +196,9 @@
 
         // Открыть первую панель при загрузке страницы
         openFirstPanel();
-
-
-
-
     </script>
+
+    <script src="saveToTxtFile.js"></script>
 </body>
 
 </html>

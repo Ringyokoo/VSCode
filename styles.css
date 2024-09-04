@@ -286,24 +286,28 @@ button {
 }
 
 button#saveConfirm,
-button#deleteConfirm {
+button#deleteConfirm,
+#saveButtonTxt {
     background-color: #4CAF50;
     color: white;
 }
 
 button#saveConfirm:hover,
-button#deleteConfirm:hover {
+button#deleteConfirm:hover,
+#saveButtonTxt:hover {
     background-color: #218838;
 }
 
 button#saveCancel,
-button#deleteCancel {
+button#deleteCancel,
+#cancelButtonTxt {
     background-color: #f44336;
     color: white;
 }
 
 button#saveCancel:hover,
-button#deleteCancel:hover {
+button#deleteCancel:hover,
+#cancelButtonTxt:hover {
     background-color: #b9362c;
     color: white;
 }
@@ -481,4 +485,21 @@ button#modbusButton:hover {
     color: #000;
     text-decoration: none;
     cursor: pointer;
+}
+
+.forSaveTxt{
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    padding: 20px;
+    background-color: white;
+    border: 3px solid #6976CB;
+    border-radius: 10px;
+}
+
+#fileContentPreview{
+    background-color: #F9F9F9 ;
+    max-height: 70vh;
+    overflow-y: scroll;
 }

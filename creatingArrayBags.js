@@ -172,7 +172,7 @@ function getCoord(arr) {
     }));
 
 
-    if (countBags < countInMatrix1 + countInMatrix2) {
+    if (countBags < countInMatrix1 + countInMatrix2 && countBags !== null) {
 
         arr.map((cell, index1) => {
             for (let index2 = cell.length - 1; index2 >= 0; index2--) {
@@ -244,11 +244,14 @@ function getCoord(arr) {
     // console.log(arr)
     // if (countBags < arr1Layer.length) {
     //     arr1Layer.splice(countBags, arr1Layer.length - countBags); //Убирать допы, так как они ебать мешают, но не тут, так как тут уже из готового делается. Работа с матрицами получается.
-
-    // } else if (countBags > arr1Layer.length) {
-    //     alert('Ко-во мешков на слой больше возможного, поставьте <= ' + arr1Layer.length);
-    //     // -----------------------Прервать выполнение--------------------------------
     // }
+     if (countBags > arr1Layer.length && level == 1) {
+        alert('Ко-во мешков на слой больше возможного, поставьте <= ' + arr1Layer.length);
+        countBag.value = arr1Layer.length;
+        // -----------------------Прервать выполнение--------------------------------
+    }else if(countBags == 0){
+        countBag.value = arr1Layer.length;
+    }
 
     if (flagAddVert) {
         updateElementPositions(arr1Layer, 'width', 'row', 'x');
