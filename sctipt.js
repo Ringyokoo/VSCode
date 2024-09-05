@@ -11,7 +11,7 @@ function gettingDataForm() {
     inent = Number(document.getElementById('inentM').value);
     rectWidth = parseInt(document.getElementById('rectWidth').value);
     rectHeight = parseInt(document.getElementById('rectHeight').value);
-    rectWidth = parseInt(document.getElementById('rectWidth').value);
+    // rectWidth = parseInt(document.getElementById('rectWidth').value);
 }
 
 
@@ -25,7 +25,7 @@ form.addEventListener('submit', function (event) {
     event.preventDefault();
     flagOutside = document.querySelector('#permission').checked;
     countBags = document.querySelector("#countBag").value;
-    // console.log(countBags)
+ 
     rectangles = [];
     rectanglesClone = [];
     level = 1;
@@ -291,6 +291,60 @@ function getRandomInt(max) {
 //Отключение контекстного меню
 document.addEventListener('contextmenu', function (event) {
     event.preventDefault();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const modbusDisplayElement = document.querySelector('.forSaveModbus');
+    
+    // Открытие модального окна при нажатии на кнопку
+    document.getElementById('modbusButton').addEventListener('click', (event) => {
+        event.stopPropagation(); // Остановить всплытие события
+        modbusDisplayElement.style.display = "flex";
+    });
+    
+    // Закрытие модального окна при нажатии на кнопку "Cancel"
+    document.getElementById('cancelButtonMod').addEventListener('click', (event) => {
+        event.stopPropagation(); // Остановить всплытие события
+        modbusDisplayElement.style.display = "none";
+    });
+
+    // Обработка сохранения и закрытие модального окна
+    document.getElementById('saveButtonMod').addEventListener('click', (event) => {
+        event.stopPropagation(); // Остановить всплытие события
+        const data = {
+            numSaveToBock: document.getElementById('numberBlock').value,
+            palletWidth: document.getElementById('palletWidth').value,
+            palletHeight: document.getElementById('palletHeight').value,
+            minLayer: document.getElementById('minLayer').value,
+            countBag: document.getElementById('countBag').value,
+            rectWidth: document.getElementById('rectWidth').value,
+            rectHeight: document.getElementById('rectHeight').value,
+            rectangles: JSON.stringify(rectangles), // Assuming rectangles is a global variable
+            NameBlock: document.getElementById('nameBlock').value,
+            host: document.getElementById('host').value,
+            port: document.getElementById('port').value,
+        };
+
+        fetch('/send-modbus', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.text())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+
+        modbusDisplayElement.style.display = "none";
+    });
+
+    // Закрытие модального окна при клике вне его
+    document.addEventListener('click', (event) => {
+        if (!modbusDisplayElement.contains(event.target) && event.target.id !== 'modbusButton') {
+            modbusDisplayElement.style.display = "none";
+        }
+    });
 });
 
 

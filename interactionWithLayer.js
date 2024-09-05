@@ -38,9 +38,12 @@ function rotateButtonsF() {
 function initialScale() {
     let palletWidthValue = parseInt(document.getElementById('palletWidth').value);
     let palletHeightValue = parseInt(document.getElementById('palletHeight').value);
-    // console.log(flagOutside);
+    let rectWidth = parseInt(document.getElementById('rectWidth').value);
+    let rectHeight = parseInt(document.getElementById('rectHeight').value);
+    
     if (flagOutside) {
         scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue + rectWidth) * scale).toFixed(1), (parseInt(canvas.height) / (palletHeightValue + rectHeight) * scale).toFixed(1));
+       
     } else {
         scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue) * scale).toFixed(1), (parseInt(canvas.height) / palletHeightValue * scale).toFixed(1));
     }
@@ -262,7 +265,7 @@ canvas.addEventListener('mousedown', function (evt) {
 
         turnRectRight();
     }
-    // console.log(selectedRectangles)
+  
 });
 
 

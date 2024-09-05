@@ -47,6 +47,9 @@ canvas {
     padding-top: 10px;
 
 }
+#permission{
+    width: 25px;
+}
 
 
 .accordion {
@@ -287,27 +290,32 @@ button {
 
 button#saveConfirm,
 button#deleteConfirm,
-#saveButtonTxt {
+#saveButtonTxt,
+#saveButtonTxt:hover,
+#saveButtonMod {
     background-color: #4CAF50;
     color: white;
 }
 
 button#saveConfirm:hover,
 button#deleteConfirm:hover,
-#saveButtonTxt:hover {
+#saveButtonTxt:hover,
+#saveButtonMod:hover {
     background-color: #218838;
 }
 
 button#saveCancel,
 button#deleteCancel,
-#cancelButtonTxt {
+#cancelButtonTxt,
+#cancelButtonMod {
     background-color: #f44336;
     color: white;
 }
 
 button#saveCancel:hover,
 button#deleteCancel:hover,
-#cancelButtonTxt:hover {
+#cancelButtonTxt:hover,
+#cancelButtonMod:hover {
     background-color: #b9362c;
     color: white;
 }
@@ -367,44 +375,44 @@ button#deleteCancel:hover,
     max-width: 400px;
     border-radius: 10px;
 }
-#infoButton {
+
+.forButton{
     position: absolute;
     right: 0;
-    top: 0;
-    margin: 0;
-    font-size: 15px;
-    font-family: Georgia, serif;
-    background-color: #6976CB;
-    font-weight: 800;
+    top: 7px;
+    display: flex;
+    flex-direction: column;
 }
 
 button#infoButton {
-    font-size: 18px;
-    padding: 10px;
+    font-size: 16px;
+    padding: 5px;
+    margin: 0 5px 10px 0;
     background-color: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin: 10px;
+    font-weight: 800;
+    font-family: Georgia, serif;
 }
+
+
 
 button#infoButton:hover {
     background-color: #0056b3;
 }
 
 #saveToTXTButton {
-    position: absolute;
-    right: 0;
-    top: 50px;
-    margin: 0;
-    font-size: 18px;
-    padding: 10px;
+    margin: 0 5px 10px 0;
+    
+    font-size: 13px;
+    padding: 7px;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin: 10px;
+   
     font-family: Georgia, serif;
     background-color: #6976CB;
     font-weight: 800;
@@ -412,29 +420,21 @@ button#infoButton:hover {
 
 
 button#saveToTXTButton:hover {
-    background-color: #0056b3;
+    background-color: #4a538f;
 }
 
 #modbusButton {
-    position: absolute;
-    right: 0;
-    top: 100px;
-    margin: 0;
-    font-size: 18px;
-    padding: 10px;
-    color: white;
+    padding: 6px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin: 10px;
-    font-family: Georgia, serif;
     background-color: #d63122;
-    font-weight: 800;
+    margin: 0 5px 10px 0;
 }
 
 
 button#modbusButton:hover {
-    background-color: #0056b3;
+    background-color: #8c2017;
 }
 
 .modal-content-inst h2 {
@@ -491,7 +491,7 @@ button#modbusButton:hover {
     display: none;
     position: absolute;
     top: 20px;
-    right: 40px;
+    right: 50px;
     padding: 20px;
     background-color: white;
     border: 3px solid #6976CB;
@@ -502,4 +502,17 @@ button#modbusButton:hover {
     background-color: #F9F9F9 ;
     max-height: 70vh;
     overflow-y: scroll;
+}
+
+
+.forSaveModbus{
+    display: none;
+    position: absolute;
+    top: 40px;
+    right: 50px;
+    padding: 20px;
+    background-color: white;
+    border: 3px solid #d63122;
+    border-radius: 10px;
+    flex-direction: column;
 }

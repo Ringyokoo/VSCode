@@ -1,6 +1,11 @@
+let saveDialogVisible = false;
+
 document.getElementById('saveToTXTButton').addEventListener('click', function (event) {
     event.stopPropagation();
-    showSaveDialog();
+    if (!saveDialogVisible) {
+        showSaveDialog();
+        saveDialogVisible = true;
+    }
 });
 
 function showSaveDialog() {
@@ -13,11 +18,15 @@ function showSaveDialog() {
     // Отображение содержимого файла в элементе <pre>
     document.getElementById('fileContentPreview').textContent = textToSave;
 
-    // Добавление обработчиков для кнопок "Сохранить" и "Отмена"
-    document.getElementById('cancelButtonTxt').addEventListener('click', hideSaveDialog);
-    document.getElementById('saveButtonTxt').addEventListener('click', function () {
+    // Добавление обработчика для кнопки "Сохранить"
+    const saveButton = document.getElementById('saveButtonTxt');
+    saveButton.onclick = function () {
         saveToFile(textToSave);
-    });
+    };
+
+    // Добавление обработчика для кнопки "Отмена"
+    const cancelButton = document.getElementById('cancelButtonTxt');
+    cancelButton.onclick = hideSaveDialog;
 
     // Добавляем обработчик клика по документу для закрытия окна при клике вне его
     document.addEventListener('click', handleClickOutside);
@@ -52,6 +61,11 @@ function generateTextToSave() {
 function hideSaveDialog() {
     document.querySelector(".forSaveTxt").style.display = 'none';
     document.removeEventListener('click', handleClickOutside);
+    saveDialogVisible = false; // Сброс состояния флага
+
+    // Убираем обработчики кликов с кнопок "Сохранить" и "Отмена"
+    document.getElementById('saveButtonTxt').onclick = null;
+    document.getElementById('cancelButtonTxt').onclick = null;
 }
 
 function handleClickOutside(event) {

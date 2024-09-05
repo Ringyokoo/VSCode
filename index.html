@@ -4,6 +4,7 @@
 <head>
     <title>Bags per pallet</title>
     <link href="styles.css" rel="stylesheet" />
+    <link rel="icon" href="favicon.ico">
 </head>
 
 <body>
@@ -13,19 +14,19 @@
             <button class="accordion">Форма</button>
             <form id="canvasForm" class="resizable-form">
                 <label for="palletWidth">Ширина паллета:</label>
-                <input type="number" id="palletWidth" placeholder="мм" value="1200" required>
+                <input type="number" id="palletWidth" placeholder="мм"  min="0" required>
                 <label for="palletHeight">Длина паллета:</label>
-                <input type="number" id="palletHeight" placeholder="мм" value="1200" required>
+                <input type="number" id="palletHeight" placeholder="мм"  min="0" required>
                 <label for="rectWidth">Ширина мешка:</label>
-                <input type="number" id="rectWidth" placeholder="мм" value="200" required>
+                <input type="number" id="rectWidth" placeholder="мм"  min="0" required>
                 <label for="rectHeight">Длина мешка:</label>
-                <input type="number" id="rectHeight" placeholder="мм" value="800" required>
+                <input type="number" id="rectHeight" placeholder="мм"  min="0" required>
                 <label for="inentM">Минимальный промежуток:</label>
-                <input type="number" id="inentM" placeholder="мм" value="10" required>
+                <input type="number" id="inentM" placeholder="мм"   min="0" required>
                 <label for="countBag">Кол-во мешков на слой:</label>
-                <input type="number" id="countBag" placeholder="кол-во" max="25">
+                <input type="number" id="countBag" placeholder="кол-во" max="25" min="0">
                 <label for="minLayer">Количество слоев:</label>
-                <input type="number" id="minLayer" placeholder="кол-во" value="2" required>
+                <input type="number" id="minLayer" placeholder="кол-во"  min="0" required>
                 <label for="permission"> Разрешить выход за границу паллета</label>
                 <input type="checkbox" id="permission"></input>
                 <button type="submit" id="submit">Применить</button>
@@ -76,9 +77,9 @@
         </div>
     </div> -->
     <div class="forButton">
-        <button id="infoButton">i</button>
-        <button id="saveToTXTButton">t</button>
-        <button id="modbusButton">m</button>
+        <button id="infoButton" title="Инструкция">i</button>
+        <button id="saveToTXTButton" title="Сохранить txt">txt</button>
+        <button id="modbusButton" title="modbus"><img src="modbusIcon.png" alt="" style="width: 25px;"></button>
     </div>
 
     <div class="forSaveTxt">
@@ -89,6 +90,21 @@
         <div class="buttonsTxt">
             <button id="saveButtonTxt">Сохранить</button>
             <button id="cancelButtonTxt">Отмена</button>
+        </div>
+    </div>
+
+    <div class="forSaveModbus">
+        <label for="numberBlock">Введите № блока:</label>
+        <input type="number" id="numberBlock" value="1" min="0">
+        <label for="nameBlock">Введите название блока:</label>
+        <input type="text" id="nameBlock" placeholder="modpoll1">
+        <label for="host">Host:</label>
+        <input type="text" id="host" placeholder="127.0.0.1">
+        <label for="port">Port:</label>
+        <input type="number" id="port" value="502">
+        <div class="buttonsMod">
+            <button id="saveButtonMod">Сохранить</button>
+            <button id="cancelButtonMod">Отмена</button>
         </div>
     </div>
 
@@ -199,6 +215,7 @@
     </script>
 
     <script src="saveToTxtFile.js"></script>
+    <!-- <script src="modbusClient.js"></script> -->
 </body>
 
 </html>

@@ -30,7 +30,7 @@ function updateElementPositions(arr1Layer, widthOrHeightProp, rowOrColumnProp, p
 
     // Отфильтруйте и отсортируйте элементы
     const filteredAndSortedElements = filterAndSortElements(arr1Layer, rectWidth, rowOrColumnProp);
-    // console.log(filteredAndSortedElements)
+    
 
     if (filteredAndSortedElements.length === 0) return; // Если нет элементов для обработки
 
@@ -200,7 +200,7 @@ function getCoord(arr) {
 
     }
     arr = removeEmptyOrZeroMatrices(arr);
-    console.log(arr)
+  
     // ввеерх Изменение матрицы, возможно надо делать не тут, но пока пусть лежит. Надо исправлять тут, так как матрица изначально формируется исходя из размеров
 
     for (let i = 0; i < arr.length; i++) {
@@ -241,7 +241,7 @@ function getCoord(arr) {
             }
         }
     }
-    // console.log(arr)
+
     // if (countBags < arr1Layer.length) {
     //     arr1Layer.splice(countBags, arr1Layer.length - countBags); //Убирать допы, так как они ебать мешают, но не тут, так как тут уже из готового делается. Работа с матрицами получается.
     // }
@@ -353,15 +353,15 @@ function oddLayer(palletWidth, palletHeight) { // сюда всатвка кол
     centerY = Math.floor(palletHeight / 2);
     let numRectangles = findNumberOfRectangles(palletWidth, palletHeight); // сюда всатвка кол-во мешков
 
-    // console.log(numRectangles.horizontal * numRectangles.vertical);
+    
     // if (countBags && countBags <= numRectangles){
     //     numRectangles = countBags;
-    //     console.log('34567890-')
+    //    
     // }else if(countBags){
     //     alert(`Кол-во мешков больше возможного, максимум = ${numRectangles}`);
     //     countBag.value = numRectangles;
     // }
-    // console.log(countBags)
+    // 
 
     let matrixRectangles = createBaseMatrix(numRectangles.horizontal, numRectangles.vertical, 1);
 

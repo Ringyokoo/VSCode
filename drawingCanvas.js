@@ -92,7 +92,7 @@ function drawNumbers(rect) {
     }
 }
 // checkText = document.querySelectorAll('.checkText');
-// console.log(checkText)
+// 
 function drawArrow(rect) {
 
     ctx.font = `${24 / scale}px arial`;
