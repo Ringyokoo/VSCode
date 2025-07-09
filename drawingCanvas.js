@@ -5,6 +5,7 @@ function drawLayer() {
     let startLayer = -1;
     let endLayer = -1;
     cleanCanvas();
+    
     for (var i = 0; i < rectangles.length; i++) {
         rectangles[i].isLastlayer = false;
         if (rectanglesClone[i]) {
@@ -102,6 +103,7 @@ function drawArrow(rect) {
         bullCheckText = !checkText[rect.layer]?.checked
     } catch (e) {
         console.log('Ошибка ' + e.name + ":" + e.message);
+        showNotification('Ошибка ' + e.name + ":" + e.message, 'error'); 
     }
 
     if (rect.isLastlayer || bullCheckText) {

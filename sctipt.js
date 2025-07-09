@@ -4,8 +4,9 @@ const tab = document.querySelector('.tab');
 let level = 1;
 let layerNum = 0;
 
-canvas.width = document.documentElement.clientWidth / 3 * 2 - 50;
-canvas.height = document.documentElement.clientHeight - 20;
+canvas.width = document.getElementsByClassName('canvasAndSelection')[0].clientWidth - 10;
+// console.log(document.getElementsByClassName('forButton')[0].clientHeight)
+canvas.height = document.documentElement.clientHeight - 20 - document.getElementsByClassName('forButton')[0].clientHeight;
 
 function gettingDataForm() {
     inent = Number(document.getElementById('inentM').value);
@@ -25,7 +26,7 @@ form.addEventListener('submit', function (event) {
     event.preventDefault();
     flagOutside = document.querySelector('#permission').checked;
     countBags = document.querySelector("#countBag").value;
- 
+
     rectangles = [];
     rectanglesClone = [];
     level = 1;
@@ -38,14 +39,14 @@ form.addEventListener('submit', function (event) {
         child = tab.lastElementChild;
     }
 
-    const palletWidth = parseInt(document.getElementById('palletWidth').value);
-    const palletHeight = parseInt(document.getElementById('palletHeight').value);
+    let palletWidth = parseInt(document.getElementById('palletWidth').value);
+    let palletHeight = parseInt(document.getElementById('palletHeight').value);
     cleanCanvas();
 
-    let layer = parseInt(document.getElementById('minLayer').value);
+    const layer = parseInt(document.getElementById('minLayer').value);
 
     gettingDataForm();
-    if (palletWidth && palletHeight && rectWidth && rectHeight && inent && layer) {
+    if (palletWidth && palletHeight && rectWidth && rectHeight && layer) {
 
         // Показ всех слоев одновременно
         for (let i = 0; i < layer; i++) {
@@ -68,7 +69,19 @@ form.addEventListener('submit', function (event) {
 
         createButton(layer);
         layerNum = layer;
+        // console.log(rectangles);
         drawLayer();
+        if (flagSameLayer) {
+            // console.log(layer, layerNum)
+            for (let i = 2; i <= layer; i += 2) {
+                layerNum = i;
+                // console.log(rectangles, centerX, centerY);
+                rotateRectangles(rectangles, centerX, centerY);
+                rotateRectangles(rectanglesClone, centerX, centerY);
+            }
+            layerNum = layer;
+
+        }
     }
 });
 
@@ -94,13 +107,32 @@ function createRotate() {
 }
 
 function createRepeat(i, quantity) {
-    const repeatButton = document.createElement('button');
-    repeatButton.type = 'button';
-    repeatButton.onclick = repeatLayer;
-    repeatButton.classList.add('repeat');
-    repeatButton.title = `Начиная с ${i} до ${quantity} каждые N слоев. Если не указаны 'C' и 'До'`;
-    repeatButton.innerHTML = 'Повтор слоя каждые';
-    return repeatButton;
+    const divRepeat = document.createElement('div');
+    divRepeat.classList.add('repeatDiv');
+    const pRepeat = document.createElement('p');
+    pRepeat.innerHTML = "Повторить этот слой для всех";
+    const divRepeatButton = document.createElement('div');
+    const evenButton = document.createElement('button');
+    evenButton.type = 'button';
+    evenButton.classList.add('evenButton');
+    evenButton.innerHTML = 'Четных';
+    evenButton.onclick = repeatEvenLayer;
+    const oddButton = document.createElement('button');
+    oddButton.type = 'button';
+    oddButton.classList.add('oddButton');
+    oddButton.innerHTML = 'Нечетных';
+    oddButton.onclick = repeatOddLayer;
+    divRepeat.appendChild(pRepeat);
+    divRepeatButton.appendChild(evenButton);
+    divRepeatButton.appendChild(oddButton);
+    divRepeat.appendChild(divRepeatButton);
+    // const repeatButton = document.createElement('button');
+    // repeatButton.type = 'button';
+    // repeatButton.onclick = repeatLayer;
+    // repeatButton.classList.add('repeat');
+    // repeatButton.title = `Начиная с ${i} до ${quantity} каждые N слоев. Если не указаны 'C' и 'До'`;
+    // repeatButton.innerHTML = 'Повторить этот слой для всех';
+    return divRepeat;
 }
 
 function createNumInput(quantity) {
@@ -116,18 +148,19 @@ function createNumInput(quantity) {
 
 function createContainerLabel(i, quantity) {
     const repeatButton = createRepeat(i, quantity);
-    const numberInput = createNumInput(quantity);
-    const fromInput = createNumInput(quantity);
-    fromInput.placeholder = "С"
-    const toInput = createNumInput(quantity);
-    toInput.placeholder = "До"
-    const containerLabel = document.createElement('label');
-    containerLabel.classList.add('repeatLabel');
-    containerLabel.appendChild(repeatButton);
-    containerLabel.appendChild(numberInput);
-    containerLabel.appendChild(fromInput);
-    containerLabel.appendChild(toInput);
-    return containerLabel;
+    return repeatButton;
+    // const numberInput = createNumInput(quantity);
+    // const fromInput = createNumInput(quantity);
+    // fromInput.placeholder = "С"
+    // const toInput = createNumInput(quantity);
+    // toInput.placeholder = "До"
+    // const containerLabel = document.createElement('label');
+    // containerLabel.classList.add('repeatLabel');
+    // containerLabel.appendChild(repeatButton);
+    // containerLabel.appendChild(numberInput);
+    // containerLabel.appendChild(fromInput);
+    // containerLabel.appendChild(toInput);
+    // return containerLabel;
 }
 
 function createCopyButton() {
@@ -159,15 +192,17 @@ function createCheckInput() {
 }
 
 function createCheckLabel() {
+    const checkDiv = document.createElement('div');
     const p = document.createElement('p');
-    p.classList.add('deleteTextLowLayer');
+    checkDiv.classList.add('deleteTextLowLayer');
 
-    const checkLabel = document.createElement('label');
-    checkLabel.innerHTML = "Убрать стрелки с нижних слоев";
+    // const checkLabel = document.createElement('label');
+    p.innerHTML = "Убрать стрелки с нижних слоев";
     const checkInput = createCheckInput();
-    checkLabel.appendChild(checkInput);
-    p.appendChild(checkLabel);
-    return p;
+
+    checkDiv.appendChild(p);
+    checkDiv.appendChild(checkInput);
+    return checkDiv;
 }
 
 function createDivContent(i, quantity) {
@@ -206,48 +241,86 @@ function createDivContent(i, quantity) {
 
 
 let pendingSwitch = null;
+let tabButtons = [];        // массив radio-кнопок
+let currentLayerIndex = 0;  // индекс текущего активного слоя (0-based)
 
 function createButton(quantity) {
+    tabButtons = []; // очищаем список кнопок
 
     for (let i = 1; i <= quantity; i++) {
         const button = document.createElement('input');
         button.setAttribute('type', 'radio');
-        button.setAttribute("checked", "");
         button.name = "tab-bth";
         button.id = `tab-bth-${i}`;
         button.classList.add('btn');
-        button.addEventListener('click', () => {
 
-            if (hasUnsavedChanges()) {
-                pendingSwitch = i; // Запоминаем слой, на который нужно переключиться
-                // saveQuestion.style.display = 'flex'; //Cюда сохраняшку
-                // saveConfirm.focus()
-                // updateDataRectangles();
-                switchLayer();
-            } else {
-                layerNum = i;
-                selectedRectangles = [];
-                selectedRectangle = null
-                drawLayer();
-            }
-            displayNone();
-            let content = button.nextElementSibling.nextElementSibling;
-            content.style.display = 'block'
-        })
+        tabButtons.push(button); // сохраняем кнопку
+
+        button.addEventListener('click', () => handleTabClick(i, button));
 
         tab.appendChild(button);
 
         const label = document.createElement('label');
         label.setAttribute("for", `tab-bth-${i}`);
-        label.innerHTML = `Слой ${i}`
+        label.innerHTML = `Слой ${i}`;
         tab.appendChild(label);
 
         const div = createDivContent(i, quantity);
-
         tab.appendChild(div);
     }
 
+    // Открыть последний слой по умолчанию
+    currentLayerIndex = quantity - 1;
+    const lastButton = tabButtons[currentLayerIndex];
+    handleTabClick(quantity, lastButton);
+    lastButton.checked = true;
+    //     lastButton.focus();
+    //     window.addEventListener('DOMContentLoaded', () => {
+    //     // document.body.focus(); // Устанавливаем фокус на body
+    // });
+
 }
+
+
+function handleTabClick(i, button) {
+    currentLayerIndex = i - 1; // обновляем индекс слоя
+    if (hasUnsavedChanges()) {
+        pendingSwitch = i;
+        switchLayer();
+    } else {
+        layerNum = i;
+        selectedRectangles = [];
+        selectedRectangle = null;
+        drawLayer();
+    }
+
+    displayNone();
+    const content = button.nextElementSibling.nextElementSibling;
+    content.style.display = 'block';
+}
+
+
+document.addEventListener('keydown', evt => {
+    if (document.activeElement.tagName !== 'INPUT') {
+        if (evt.code === 'ArrowUp') {
+            if (currentLayerIndex > 0) {
+                currentLayerIndex--;
+                const button = tabButtons[currentLayerIndex];
+                button.checked = true;
+                handleTabClick(currentLayerIndex + 1, button);
+            }
+        } else if (evt.code === 'ArrowDown') {
+            if (currentLayerIndex < tabButtons.length - 1) {
+                currentLayerIndex++;
+                const button = tabButtons[currentLayerIndex];
+                button.checked = true;
+                handleTabClick(currentLayerIndex + 1, button);
+            }
+        }
+    }
+});
+
+
 
 function displayNone() {
     let coll = document.getElementsByClassName("btn");
@@ -295,13 +368,13 @@ document.addEventListener('contextmenu', function (event) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const modbusDisplayElement = document.querySelector('.forSaveModbus');
-    
+
     // Открытие модального окна при нажатии на кнопку
-    document.getElementById('modbusButton').addEventListener('click', (event) => {
-        event.stopPropagation(); // Остановить всплытие события
-        modbusDisplayElement.style.display = "flex";
-    });
-    
+    // document.getElementById('modbusButton').addEventListener('click', (event) => {
+    //     event.stopPropagation(); // Остановить всплытие события
+    //     modbusDisplayElement.style.display = "flex";
+    // });
+
     // Закрытие модального окна при нажатии на кнопку "Cancel"
     document.getElementById('cancelButtonMod').addEventListener('click', (event) => {
         event.stopPropagation(); // Остановить всплытие события
@@ -312,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('saveButtonMod').addEventListener('click', (event) => {
         event.stopPropagation(); // Остановить всплытие события
         const data = {
-            numSaveToBock: document.getElementById('numberBlock').value,
+            // numSaveToBock: document.getElementById('numberBlock').value,
             palletWidth: document.getElementById('palletWidth').value,
             palletHeight: document.getElementById('palletHeight').value,
             minLayer: document.getElementById('minLayer').value,
@@ -325,28 +398,60 @@ document.addEventListener('DOMContentLoaded', () => {
             port: document.getElementById('port').value,
         };
 
-        fetch('/send-modbus', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.text())
-        .then(data => console.log(data))
-        .catch(error => console.error('Error:', error));
+        sendToModbus(data);
 
         modbusDisplayElement.style.display = "none";
     });
 
     // Закрытие модального окна при клике вне его
-    document.addEventListener('click', (event) => {
-        if (!modbusDisplayElement.contains(event.target) && event.target.id !== 'modbusButton') {
-            modbusDisplayElement.style.display = "none";
-        }
-    });
+    // document.addEventListener('click', (event) => {
+    //     if (!modbusDisplayElement.contains(event.target) && event.target.id !== 'modbusButton') {
+    //         modbusDisplayElement.style.display = "none";
+    //     }
+    // });
+
 });
 
 
 // Инициализация при загрузке
 form.dispatchEvent(new Event('submit'));
+
+
+function showNotification(message, type = 'success', duration = 3000) {
+    const container = document.getElementById('notification-container');
+
+    const notif = document.createElement('div');
+    notif.className = `notification ${type}`;
+    notif.textContent = message;
+
+    container.appendChild(notif);
+
+    setTimeout(() => notif.classList.add('show'), 10);
+
+    setTimeout(() => {
+        notif.classList.remove('show');
+        setTimeout(() => container.removeChild(notif), 300);
+    }, duration);
+}
+
+async function sendToModbus(Palett) {
+    try {
+        const response = await fetch('/send-modbus', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Palett)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            console.log('Вызов showNotification с текстом:', result.message);
+            showNotification(result.message, 'success');
+        } else {
+            console.log('Ошибка showNotification с текстом:', result.message);
+            showNotification(result.message, 'error', 5000);
+        }
+
+    } catch (err) {
+        showNotification('Сетевая ошибка: ' + err.message, 'error', 5000);
+    }
+}

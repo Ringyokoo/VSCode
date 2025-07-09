@@ -29,13 +29,13 @@ function showSaveDialog() {
     cancelButton.onclick = hideSaveDialog;
 
     // Добавляем обработчик клика по документу для закрытия окна при клике вне его
-    document.addEventListener('click', handleClickOutside);
+    // document.addEventListener('click', handleClickOutside);
 }
 
 function generateTextToSave() {
     let textToSave =
-        `Ширина паллета: ${palletWidth.value}
-Длина паллета: ${palletHeight.value}
+        `Ширина паллета: ${palletWidth}
+Длина паллета: ${palletHeight}
 Ширина мешка: ${rectWidth}
 Длина мешка: ${rectHeight}
 Минимальный промежуток: ${inentM.value}
@@ -60,7 +60,7 @@ function generateTextToSave() {
 
 function hideSaveDialog() {
     document.querySelector(".forSaveTxt").style.display = 'none';
-    document.removeEventListener('click', handleClickOutside);
+    // document.removeEventListener('click', handleClickOutside);
     saveDialogVisible = false; // Сброс состояния флага
 
     // Убираем обработчики кликов с кнопок "Сохранить" и "Отмена"
@@ -68,14 +68,14 @@ function hideSaveDialog() {
     document.getElementById('cancelButtonTxt').onclick = null;
 }
 
-function handleClickOutside(event) {
-    const forSaveTxt = document.querySelector(".forSaveTxt");
-    const saveToTXTButton = document.getElementById('saveToTXTButton');
+// function handleClickOutside(event) {
+//     const forSaveTxt = document.querySelector(".forSaveTxt");
+//     const saveToTXTButton = document.getElementById('saveToTXTButton');
 
-    if (!forSaveTxt.contains(event.target) && event.target !== saveToTXTButton) {
-        hideSaveDialog();
-    }
-}
+//     if (!forSaveTxt.contains(event.target) && event.target !== saveToTXTButton) {
+//         hideSaveDialog();
+//     }
+// }
 
 function saveToFile(textToSave) {
     // Получаем название файла от пользователя

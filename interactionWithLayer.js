@@ -40,10 +40,10 @@ function initialScale() {
     let palletHeightValue = parseInt(document.getElementById('palletHeight').value);
     let rectWidth = parseInt(document.getElementById('rectWidth').value);
     let rectHeight = parseInt(document.getElementById('rectHeight').value);
-    
+
     if (flagOutside) {
         scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue + rectWidth) * scale).toFixed(1), (parseInt(canvas.height) / (palletHeightValue + rectHeight) * scale).toFixed(1));
-       
+
     } else {
         scaleMax = Math.min((parseInt(canvas.width) / (palletWidthValue) * scale).toFixed(1), (parseInt(canvas.height) / palletHeightValue * scale).toFixed(1));
     }
@@ -129,6 +129,43 @@ function copyLayer(evt) {
     assignment(layerThis, layerOther)
     drawLayer();
 }
+
+function repeatOddLayer() {
+    let changeLayerStr = '';
+    const layer = parseInt(document.getElementById('minLayer').value);
+    let layerThis = rectangles.filter(rect => rect.layer == layerNum);
+    for (let i = 1; i <= (layer % 2 != 0 ? layer : layer - 1); i += 2) {
+
+        if (i == layerNum) continue;
+        if (changeLayerStr != '') changeLayerStr += ', ';
+        changeLayerStr += i;
+        let layerOther = rectangles.filter(rect => rect.layer == i);
+        assignment(layerOther, layerThis)
+        drawLayer();
+    }
+    if (changeLayerStr) {
+        showNotification('Изменены слои: ' + changeLayerStr, 'success');
+    }
+}
+
+function repeatEvenLayer() {
+    let changeLayerStr = '';
+    const layer = parseInt(document.getElementById('minLayer').value);
+    let layerThis = rectangles.filter(rect => rect.layer == layerNum);
+    for (let i = 2; i <= (layer % 2 == 0 ? layer : layer - 1); i += 2) {
+
+        if (i == layerNum) continue;
+        if (changeLayerStr != '') changeLayerStr += ', ';
+        changeLayerStr += i;
+        let layerOther = rectangles.filter(rect => rect.layer == i);
+        assignment(layerOther, layerThis)
+        drawLayer();
+    }
+    if (changeLayerStr) {
+        showNotification('Изменены слои: ' + changeLayerStr, 'success');
+    }
+
+}
 let unsaveLayers = [];
 function repeatLayer(evt) {
     const n = parseInt(evt.srcElement.nextElementSibling.value);
@@ -196,16 +233,16 @@ function changeColor(color) {
 }
 
 function returnDataRectangles() {
-    
+
     const startIndex = rectanglesClone.findIndex(rect => rect.layer == layerNum);
     const endIndex = rectanglesClone.findLastIndex(rect => rect.layer == layerNum);
-    
+
     for (let i = startIndex; i <= endIndex; i++) {
         rectangles[i] = JSON.parse(JSON.stringify(rectanglesClone[i]));
-        
+        // console.log(rectanglesClone);
     }
     drawLayer();
-    
+
 }
 
 function getMousePos(canvas, evt) {
@@ -265,7 +302,7 @@ canvas.addEventListener('mousedown', function (evt) {
 
         turnRectRight();
     }
-  
+
 });
 
 
@@ -305,6 +342,26 @@ function turnRectLeft() {
     drawLayer();
 }
 
+// function changeLayer(str) {
+//     console.log( document.getElementsByName(`tab-bth`))
+//     if (str == 'down') {
+//         if (layerNum < layer) {
+//             let i = layerNum + 1;
+//             // pendingSwitch = ++layerNum;
+//             // console.log(i, document.getElementsByName(`tab-bth`)[i])
+//             // handleTabClick(i, document.getElementsByName(`tab-bth`)[i]);
+//         }
+
+//     } else {
+//         if (layerNum > 1) {
+//             let i = layerNum - 1;
+//             // pendingSwitch = ++layerNum;
+//             // console.log(i, document.getElementsByName(`tab-bth`)[i])
+//             // handleTabClick(i, document.getElementsByName(`tab-bth`)[i]);
+//         }
+//     }
+// }
+
 
 function handleMouseMove(e) {
     if (!isSelecting) return;
@@ -334,7 +391,7 @@ canvas.addEventListener('mousemove', function (evt) {
     if (selectedRectangle && evt.which == 1) {
         const mousePos = getMousePos(canvas, evt);
         selectedRectangles = selectedRectangles.filter(rect => rect != selectedRectangle);
-       
+
         const halfWidth = float2int(selectedRectangle.width / 2);
         const halfHeight = float2int(selectedRectangle.height / 2);
         const deltaX = mousePos.x - dragOffsetX;
@@ -387,13 +444,28 @@ document.addEventListener('keydown', evt => {
         } else if (evt.code === 'Equal') {
             scale = Math.min(scaleMax, scale + 0.1);;
             setCanvasScale(scale);
-        } else if (evt.code == 'Delete') {
-            deleteRectangle();
+            // } else if (evt.code == 'Delete') {
+            //     deleteRectangle();
         } else if (evt.code == 'ArrowRight') {
             turnRectRight();
         } else if (evt.code == 'ArrowLeft') {
             turnRectLeft();
         }
+        // } else if (evt.code == 'ArrowUp') {
+        //     if (currentLayerIndex > 0) {
+        //         currentLayerIndex--;
+        //         const button = tabButtons[currentLayerIndex];
+        //         button.checked = true;
+        //         handleTabClick(currentLayerIndex + 1, button);
+        //     }
+        // } else if (evt.code == 'ArrowDown') {
+        //     if (currentLayerIndex < tabButtons.length - 1) {
+        //         currentLayerIndex++;
+        //         const button = tabButtons[currentLayerIndex];
+        //         button.checked = true;
+        //         handleTabClick(currentLayerIndex + 1, button);
+        //     }
+        // }
     }
 });
 
@@ -450,31 +522,96 @@ function handleDocumentMouseUp(e) {
     }
 }
 
-// Get modal element
-var modal = document.getElementById("controlsModal");
+// // Get modal element
+// var modal = document.getElementById("controlsModal");
 
-// Get the button that opens the modal
-var btn = document.getElementById("infoButton");
+// // Get the button that opens the modal
+// var btn = document.getElementById("infoButton");
 
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
+// // Get the <span> element that closes the modal
+// var span = document.getElementsByClassName("close")[0];
 
-// When the user clicks the button, open the modal 
-btn.onclick = function () {
-    modal.style.display = "block";
-}
+// // When the user clicks the button, open the modal 
+// btn.onclick = function () {
+//     modal.style.display = "block";
+// }
 
-// When the user clicks on <span> (x), close the modal
-span.onclick = function () {
-    modal.style.display = "none";
-}
+// // When the user clicks on <span> (x), close the modal
+// span.onclick = function () {
+//     modal.style.display = "none";
+// }
 
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function (event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
+// // When the user clicks anywhere outside of the modal, close it
+// window.onclick = function (event) {
+//     if (event.target == modal) {
+//         modal.style.display = "none";
+//     }
+// }
+
+document.querySelectorAll('.open-modal').forEach(button => {
+    const modalSelector = button.dataset.target;
+    const modal = document.querySelector(modalSelector);
+
+    // Открытие модального окна
+    button.addEventListener('click', () => {
+        modal.style.display = 'block';
+    });
+
+    // Закрытие при клике на крестик
+    modal.querySelector('.close').addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Закрытие при клике вне окна
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+});
+
 
 
 document.addEventListener('mouseup', handleDocumentMouseUp); // Handle mouseup for the entire document
+
+
+
+let acc = document.getElementsByClassName("accordion");
+
+function closeAllPanels() {
+    for (let i = 0; i < acc.length; i++) {
+        acc[i].classList.remove("active");
+        let panel = acc[i].nextElementSibling;
+        panel.style.maxHeight = null;
+        // panel.style.padding = 0;
+    }
+}
+
+function openFirstPanel() {
+    acc[0].classList.add("active");
+    let firstPanel = acc[0].nextElementSibling;
+    firstPanel.style.maxHeight = firstPanel.scrollHeight + "px";
+    // firstPanel.style.padding = "20px";
+}
+
+// Добавление событий на клики для каждой панели
+function handleAccordionClick(event) {
+    let panel = this.nextElementSibling;
+    if (panel.style.maxHeight) {
+        this.classList.toggle("active");
+        panel.style.maxHeight = null;
+        // panel.style.padding = 0;
+    } else {
+        closeAllPanels();
+        this.classList.toggle("active");
+        panel.style.maxHeight = window.innerHeight - this.clientHeight * 2 - 50 + "px";
+        // panel.style.padding = "10px";
+        tab.scrollTop = tab.scrollHeight;
+    }
+}
+
+function initAccordionEvents() {
+    for (let i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", handleAccordionClick);
+    }
+}

@@ -33,10 +33,12 @@ app.post('/send-modbus', async (req, res) => {
 
     try {
         await modbusClient.writeData(Palett);
-        res.send('Data sent');
+        res.json({ success: true, message: 'Данные успешно отправлены в Modbus' });
+
     } catch (err) {
         console.error('Ошибка при отправке данных:', err.message);
-        res.status(500).send('Error sending data');
+        res.status(500).json({ success: false, message: 'Ошибка при отправке данных в Modbus' });
+
     }
 });
 
