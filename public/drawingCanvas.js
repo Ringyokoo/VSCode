@@ -50,8 +50,10 @@ function drawRectangle(rect) {
 
     ctx.fillStyle = selectedRectangles.includes(rect) || selectedRectangle == rect ? 'rgba(255, 0, 0, 0.5)' : rect.color;
     ctx.fill();
-    if (!rect.isLastlayer) {
+    if (!rect.isLastlayer && checkText[rect.layer]?.checked) {
         ctx.strokeStyle = rect.color;
+    }else if (!rect.isLastlayer && !checkText[rect.layer]?.checked) {
+        ctx.strokeStyle = 'white';
     } else {
         ctx.strokeStyle = 'black'
     }
@@ -112,7 +114,7 @@ function drawArrow(rect) {
         //     ctx.fillStyle = 'black'
         // }
         if (!rect.isLastlayer && bullCheckText) {
-            ctx.fillStyle = 'grey'
+            ctx.fillStyle = 'white'
         }
 
         let widthPlus = centerX + rect.x - Math.floor(rect.width / 2) + 15 / scale;

@@ -69,3 +69,7 @@ app.listen(port, hostname, () => {
     input: process.stdin, output: process.stdout
   }).question('Нажмите Enter для выхода...', () => process.exit(1));
 });
+
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});

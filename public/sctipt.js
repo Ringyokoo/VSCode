@@ -197,7 +197,7 @@ function createCheckLabel() {
     checkDiv.classList.add('deleteTextLowLayer');
 
     // const checkLabel = document.createElement('label');
-    p.innerHTML = "Убрать стрелки с нижних слоев";
+    p.innerHTML = "Убрать стрелки и обводку с нижних слоев";
     const checkInput = createCheckInput();
 
     checkDiv.appendChild(p);
@@ -274,6 +274,7 @@ function createButton(quantity) {
     const lastButton = tabButtons[currentLayerIndex];
     handleTabClick(quantity, lastButton);
     lastButton.checked = true;
+    lastButton.scrollIntoView(true)
     //     lastButton.focus();
     //     window.addEventListener('DOMContentLoaded', () => {
     //     // document.body.focus(); // Устанавливаем фокус на body
@@ -297,6 +298,7 @@ function handleTabClick(i, button) {
     displayNone();
     const content = button.nextElementSibling.nextElementSibling;
     content.style.display = 'block';
+
 }
 
 
@@ -444,10 +446,10 @@ async function sendToModbus(Palett) {
 
         const result = await response.json();
         if (result.success) {
-            console.log('Вызов showNotification с текстом:', result.message);
+            // console.log('Вызов showNotification с текстом:', result.message);
             showNotification(result.message, 'success');
         } else {
-            console.log('Ошибка showNotification с текстом:', result.message);
+            // console.log('Ошибка showNotification с текстом:', result.message);
             showNotification(result.message, 'error', 5000);
         }
 
@@ -455,3 +457,19 @@ async function sendToModbus(Palett) {
         showNotification('Сетевая ошибка: ' + err.message, 'error', 5000);
     }
 }
+
+// let serverIsAlive = true;
+
+// setInterval(async () => {
+//   try {
+//     const res = await fetch('/ping', { cache: 'no-store' });
+//     if (!res.ok) throw new Error('не ответил');
+//     serverIsAlive = true;
+//   } catch (e) {
+//     if (serverIsAlive) {
+//       serverIsAlive = false;
+//       console.log('Сервер недоступен. Закрываю окно...');
+//       window.close(); // Работает только если вкладка открыта программно
+//     }
+//   }
+// }, 3000); // Проверка каждые 3 секунды

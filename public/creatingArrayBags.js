@@ -365,32 +365,7 @@ function findNumberOfRectangles(palletWidth, palletHeight) {
 
     let countRecWithDop = numHorizontal * numVertical + dopHoriz?.horizontal * dopHoriz?.vertical + dopVert?.horizontal * dopVert?.vertical;
     let countRecWithDop2 = numH2 * numV2 + dopHoriz2?.horizontal * dopHoriz2?.vertical + dopVert2?.horizontal * dopVert2?.vertical;
-    // console.log(countRecWithDop, countRecWithDop2, Number(countBags));
-
-
-    // if (countRecWithDop == countRecWithDop2) {
-    //     if (!dopHoriz && !dopVert && (dopHoriz2 || dopVert2)) {
-    //         changeNum()
-    //         flagSameLayer = true;
-
-    //     } else {
-    //         flagSameLayer = false;
-    //     }
-    //     // else if (level % 2 != 0) {
-    //     //     changeWidthHeight();
-    //     // }
-    //     // } else if (Number(countBags) == countRecWithDop2) {
-    //     //     // console.log('Im here')
-    //     //     flagSameLayer = true;
-    //     //     changeNum()
-
-    //     // } 
-    // } else if (countRecWithDop < countRecWithDop2) { //&& Number(countBags) != countRecWithDop
-    //     changeNum()
-    //     flagSameLayer = true;
-    // } else {
-    //     flagSameLayer = false;
-    // }
+    
     if (countRecWithDop < countRecWithDop2 && (!countBags || countBags > countRecWithDop2 && countBags > countRecWithDop)) {
         changeNum()
         flagSameLayer = true;
@@ -400,7 +375,7 @@ function findNumberOfRectangles(palletWidth, palletHeight) {
     if (countBags) {
         // console.log(Number(countBags), dopHoriz2?.horizontal * dopHoriz2?.vertical + dopVert2?.horizontal * dopVert2?.vertical, numH2 * numV2)
         //----------------------------Удаление блоков дополнительных-------------------------------------------------------
-        if (Number(countBags) == countRecWithDop2) { // Если заданное кол-во блоков соотвествует измененному состоянию
+        if (Number(countBags) == countRecWithDop2 && Number(countBags) != countRecWithDop2) { // Если заданное кол-во блоков соотвествует измененному состоянию
             console.log(1111);
             flagSameLayer = true;
             changeNum()
@@ -409,12 +384,12 @@ function findNumberOfRectangles(palletWidth, palletHeight) {
             flagSameLayer = true;
             changeNum();
             dopVert2.horizontal = dopVert2.vertical = dopHoriz2.horizontal = dopHoriz2.vertical = 0;
-        } else if (Number(countBags) == countRecWithDop2 - dopHoriz2?.horizontal * dopHoriz2?.vertical) {
+        } else if (Number(countBags) == countRecWithDop2 - dopHoriz2?.horizontal * dopHoriz2?.vertical && dopHoriz2?.horizontal * dopHoriz2?.vertical != 0) {
             console.log(3333);
             flagSameLayer = true;
             changeNum();
             dopHoriz2.horizontal = dopHoriz2.vertical = 0;
-        } else if (Number(countBags) == countRecWithDop2 - dopVert2?.horizontal * dopVert2?.vertical) {
+        } else if (Number(countBags) == countRecWithDop2 - dopVert2?.horizontal * dopVert2?.vertical && dopVert2?.horizontal * dopVert2?.vertical != 0) {
             console.log(4444);
             flagSameLayer = true;
             changeNum();

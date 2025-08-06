@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документация</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            overflow-y: auto;
+        }
+
+        aside {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background: #f5f5f5;
+            padding: 1rem;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        aside ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        aside li.topic-item {
+            margin-bottom: 1rem;
+        }
+
+        aside a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            padding: 0.25rem 0;
+            cursor: pointer;
+        }
+
+        aside a.topic-link {
+            font-weight: bold;
+        }
+
+        aside ul.submenu {
+            margin: 0.5rem 0 0 1rem;
+            padding: 0;
+        }
+
+        aside ul.submenu li {
+            margin-bottom: 0.25rem;
+        }
+
+        aside a:hover {
+            text-decoration: underline;
+        }
+
+        p a {
+            cursor: pointer;
+            text-decoration: underline;
+            color: #007bff;
+        }
+
+        main {
+            margin-left: 250px;
+            padding: 2rem;
+            flex: 1;
+        }
+
+        .topic {
+            margin-bottom: 3rem;
+        }
+
+        .topic h2 {
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 0.5rem;
+        }
+
+        .subtopic {
+            margin: 1.5rem 0;
+        }
+
+        .subtopic h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .media {
+            max-width: 40%;
+            height: auto;
+            object-fit: contain;
+            margin: 0.5rem 0;
+        }
+
+        .big {
+            max-width: 100%;
+        }
+
+        .near {
+            display: flex;
+            grid-gap: 40px;
+            align-items: center;
+        }
+
+        .small {
+            max-width: 25%;
+        }
+    </style>
+</head>
+
+<body>
+    <aside>
+        <ul>
+            <li class="topic-item">
+                <a class="topic-link" data-target="beginning">Начало работы</a>
+                <ul class="submenu">
+                    <li><a data-target="install">Установка</a></li>
+                    <li><a data-target="notes">Важные замечания</a></li>
+                </ul>
+            </li>
+            <li class="topic-item">
+                <a class="topic-link" data-target="terminal">Работа с терминалом</a>
+                <ul class="submenu">
+                    <li><a data-target="server">Ошибка запуска сервера</a></li>
+                    <li><a data-target="connect">Ошибка подключения</a></li>
+                    <li><a data-target="exception">Ошибка при отправке данных</a></li>
+                    <li><a data-target="endWork">Закончить работу</a></li>
+                </ul>
+            </li>
+            <!-- <li class="topic-item">
+        <a class="topic-link" data-target="form">Форма</a>
+        <ul class="submenu">
+          
+          <li><a data-target="fill">Заполнение</a></li>
+        </ul>
+      </li> -->
+            <li class="topic-item">
+                <a class="topic-link" data-target="usage">Использование</a>
+                <ul class="submenu">
+                    <li><a data-target="basic">Основные функции</a></li>
+                    <li><a data-target="advanced">Расширенные функции</a></li>
+                </ul>
+            </li>
+            <li class="topic-item">
+                <a class="topic-link" data-target="buttons">Кнопки</a>
+                <ul class="submenu">
+                    <li><a data-target="save">Сохранение</a></li>
+                    <li><a data-target="load">Загрузка</a></li>
+                    <li><a data-target="send">Отправка</a></li>
+                </ul>
+            </li>
+        </ul>
+    </aside>
+    <main>
+        <section class="topic" id="beginning">
+            <h2>Начало работы</h2>
+            <div class="subtopic" id="install">
+                <h3>Установка</h3>
+                <div class="near">
+                    <img src="img/start1.png" alt="Установка" class="media big">
+                    <div>
+                        <p>Для запуска программы вам понадобятся: </p>
+                        <ul>
+                            <li>файл modbus-server.exe</li>
+                            <li>папка public</li>
+                        </ul>
+                        <p>Они должны находиться в одной папке. Если вы скачали их в архиве — обязательно
+                            разархивируйте.
+                        </p>
+
+                    </div>
+
+                </div>
+                <p>Далее:</p>
+                <ol>
+                    <li>Запустите файл <strong>modbus-server.exe</strong></li>
+
+                    <li>
+                        <p>Откроется чёрное окно с надписью:</p>
+                        <p>Server running at <code>http://localhost:3000/</code></p>
+                        <p>Не закрывайте это окно!</p>
+                    </li>
+
+
+
+                    <!-- <img src="img/start2.png" alt="cmd" class="media"> -->
+                    <li>Программа откроется в браузере автоматически. Если нет — откройте <a
+                            href="http://localhost:3000/">http://localhost:3000</a> вручную.</li>
+                </ol>
+                <img src="img/start3.png" alt="cmd" class="media big">
+                <p>Если что-то не работает — переходите к разделу <a class="topic-link" data-target="terminal">Работа с
+                        терминалом</a>.</p>
+            </div>
+            <div class="subtopic" id="notes">
+                <h3>Важные замечания</h3>
+                <!-- <p>Ключевые моменты при работе с формой.</p> -->
+                <p>Некоторые поля в форме можно не заполнять. </p>
+                <ul>
+                    <li>Если поле “Кол-во мешков на слой” оставить пустым, программа подставит максимум.</li>
+                    <li>Если не указать “Расстояние между мешками” — оно будет равно 0.</li>
+                </ul>
+                <p>Используйте <strong>Tab</strong> для перехода между полями и <strong>Enter</strong> для применения.
+                </p>
+
+                <p>В форме отправки по Modbus поля “Название” и “Host” можно не заполнять. Тогда будут использоваться
+                    значения по умолчанию: <strong>modpoll1</strong> и <strong>127.0.0.1</strong>.</p>
+                <div class="near">
+                    <img src="img/form2.gif" alt="Замечания" class="media">
+                    <img src="img/form3.png" alt="Замечания" class="media">
+                </div>
+
+
+            </div>
+
+        </section>
+        <section class="topic" id="terminal">
+            <h2>Работа с терминалом</h2>
+            <p>Терминал показывает ошибки и логи. Вот основные из них</p>
+            <div class="subtopic" id="server">
+
+                <h3>Ошибка запуска сервера: listen EADDRINUSE: address already in use ::1:3000</h3>
+                <img src="img/terminal1.png" alt="Терминал" class="media">
+                <p><strong>Причина:</strong> порт 3000 уже используется.</p>
+                <p><strong>Решение:</strong> возможно, вы не закрыли прошлую сессию. Закройте её и перезапустите.</p>
+            </div>
+            <div class="subtopic" id="connect">
+                <h3>Ошибка подключения: connect ECONNREFUSED 127.0.0.1:502 / Подключение к Modbus-серверу не установлено
+                </h3>
+                <img src="img/terminal2.png" alt="Терминал" class="media">
+                <p><strong>Причина:</strong> программа не может подключиться к Modbus-серверу.</p>
+                <p><strong>Проверьте:</strong></p>
+                <ul>
+                    <li>запущен ли сервер</li>
+                    <li>правильны ли хост и порт</li>
+                    <i>Пример настройки приведён ниже на скриншоте.</i>
+                </ul>
+                <img src="img/terminal3.png" alt="Терминал" class="media">
+            </div>
+
+            <div class="subtopic" id="exception">
+                <h3>Ошибка при отправке данных: Modbus exception 2: Illegal data address (register not supported by
+                    device)
+                </h3>
+                <img src="img/terminal5.png" alt="Терминал" class="media big">
+                <p><strong>Причина:</strong> Modbus Slave неправильно настроен.</p>
+                <p><strong>Решение:</strong> проверьте параметры конфигурации — они приведены ниже.</p>
+                <img src="img/terminal4.png" alt="Терминал" class="media">
+            </div>
+
+            <div class="subtopic" id="endWork">
+                <h3>Закончить работу</h3>
+                <p>Чтобы остановить программу:</p>
+                <ol>
+                    <li>
+                        <p>Нажмите <strong>Ctrl+C</strong> в терминале или закройте его крестиком.</p>
+                    </li>
+                    <li>
+                        <p>Закройте вкладку в браузере.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+        <!-- <section class="topic" id="form">
+      <h2>Форма</h2>
+      
+      <div class="subtopic" id="fill">
+        <h3>Заполнение</h3>
+        <p>Как правильно заполнить поле.</p>
+        <img src="gifs/fill.gif" alt="Заполнение" class="media">
+      </div>
+    </section> -->
+        <section class="topic" id="usage">
+            <h2>Использование</h2>
+
+            <div class="subtopic" id="basic">
+                <h3>Основные функции</h3>
+                <h4>Основные блоки:</h4>
+                <div class="near">
+                    <img src="img/func8.png" alt="Основные функции" class="media">
+                    <div>
+                        <p><strong>1. Форма данных</strong> — здесь вводятся размеры. Подробнее см. <a
+                                data-target="notes">Важные замечания</a>.</p>
+                        <p><strong>2. Просмотр слоёв</strong> — переключение между слоями с помощью клавиш ↑ и ↓. Также
+                            можно выбрать слой вручную. Подробнее см. <a data-target="advanced">Расширенные функции</a>.
+                        </p>
+                        <p><strong>3. Работа с пакетами</strong> — перемещение, поворот и другие действия. См. <a
+                                data-target="basic">Основные функции</a>.</p>
+                        <p><strong>4. Кнопки</strong> — "Инструкция", "Сохранить", "Загрузить", "Отправить". Подробнее
+                            см. <a class="topic-link" data-target="buttons">Кнопки</a>.</p>
+                    </div>
+                </div>
+
+                <h4>Выделение и перемещение</h4>
+                <div class="near">
+                    <img src="img/func3.gif" alt="Выделение и перемещение" class="media">
+                    <ul>
+                        <li>Чтобы выделить несколько объектов — зажмите левую кнопку мыши и потяните.</li>
+                        <li>Чтобы переместить объект или группу — зажмите ЛКМ и перетащите их в нужное место.</li>
+                    </ul>
+                </div>
+
+                <h4>Поворот</h4>
+                <div class="near">
+                    <img src="img/func2.gif" alt="Поворот" class="media">
+                    <ul>
+                        <li>Для поворота группы — используйте стрелки ← и → на клавиатуре.</li>
+                        <li>Для поворота одного объекта — щёлкните по нему правой кнопкой мыши.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="subtopic" id="advanced">
+                <h3>Расширенные функции</h3>
+
+                <h4>Блоки слоя</h4>
+                <div class="near">
+                    <img src="img/func9.png" alt="Расширенные функции" class="media">
+                    <div>
+                        <p><strong>1. Цвет и прозрачность:</strong> для настройки прозрачности используйте ползунок, а
+                            для выбора цвета — кликните на квадрат с текущим цветом. См. <a class="topic-link"
+                                data-target="workColor">Работа с цветом</a>.</p>
+                        <p><strong>2. В исходный вид:</strong> кнопка возвращает слой к состоянию до всех изменений. См.
+                            <a class="topic-link" data-target="baseView">В исходный вид</a>.</p>
+                        <p><strong>3. Поворот слоя:</strong> стрелка поворачивает весь слой на 180°.</p>
+                        <p><strong>4. Копирование слоя:</strong> введите номер слоя и нажмите “Копировать слой №”. См.
+                            <a class="topic-link" data-target="copyLayerId">Копировать слой</a>.</p>
+                        <p><strong>5. Скрытие стрелок и рамок:</strong> отключает отображение стрелок и границ текущего
+                            слоя, чтобы можно было лучше видеть нижележащие элементы. Их отображение будет в белом
+                            цвете.</p>
+                        <p><strong>6. Повтор слоя:</strong> кнопки "Чётные" и "Нечётные" дублируют текущий слой на
+                            соответствующие позиции. См. <a class="topic-link" data-target="repeatLayerId">Повторить
+                                этот слой</a>.</p>
+                    </div>
+                </div>
+
+                <h4 id="workColor">Работа с цветом</h4>
+                <div class="near">
+                    <img src="img/func7.gif" alt="Цвет и прозрачность" class="media">
+                    <ul>
+                        <li>Чтобы сделать заливку прозрачной — сдвиньте ползунок влево.</li>
+                        <li>Чтобы изменить цвет — нажмите на цветной квадрат и выберите новый цвет в палитре. Изменения
+                            отображаются сразу.</li>
+                    </ul>
+                </div>
+
+                <h4 id="baseView">В исходный вид</h4>
+                <div class="near">
+                    <img src="img/func1.gif" alt="Возврат к исходному виду" class="media">
+                    <p>Нажмите кнопку “В исходный вид”, чтобы отменить все изменения слоя и вернуть его к исходному
+                        состоянию (как при загрузке или создании).</p>
+                </div>
+
+                <h4 id="copyLayerId">Копировать слой</h4>
+                <div class="near">
+                    <img src="img/func4.gif" alt="Копирование слоя" class="media">
+                    <p>Введите номер нужного слоя и нажмите “Копировать слой №”, чтобы дублировать его содержимое.</p>
+                </div>
+
+                <h4 id="repeatLayerId">Повторить этот слой</h4>
+                <div class="near">
+                    <img src="img/func5.gif" alt="Повтор слоя" class="media">
+                    <div>
+                        <p>Нажмите “Чётные” или “Нечётные”, чтобы скопировать текущий слой на все чётные или нечётные
+                            позиции соответственно.</p>
+                        <p>В правом верхнем углу появится уведомление о том, какие слои были изменены.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="topic" id="buttons">
+            <h2>Кнопки</h2>
+            <p>Все окна которые открываются при нажатии на кнопку, можно закрыть кликнув в любом месте на экране.</p>
+            <div class="subtopic" id="save">
+                <h3>Сохранение</h3>
+                <div class="near">
+                    <img src="img/but1.png" alt="Кнопка сохранения" class="media small">
+                    <div>
+                        <ul>
+                            <li>
+                                <p>Нажмите кнопку “Сохранить”.</p>
+                            </li>
+                            <li>
+                                <p>Откроется окно предпросмотра — введите название файла и подтвердите.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="subtopic" id="load">
+                <h3>Загрузка</h3>
+                <div class="near">
+                    <img src="img/but2.png" alt="Кнопка загрузки" class="media">
+                    <div>
+                        <ul>
+                            <li>
+                                <p>Выберите .txt или .mbs файл.</p>
+                            </li>
+
+                            <li>
+                                <p>После загрузки вы увидите файл в интерфейсе или предупреждение об ошибке в правом
+                                    вверхнем углу.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="subtopic" id="send">
+                <h3>Отправка</h3>
+                <div class="near">
+                    <img src="img/form3.png" alt="Замечания" class="media">
+                    <div>
+                        <ul>
+                            <li>
+                                <p>Открывается форма для ввода данных.</p>
+                            </li>
+
+                            <li>
+                                <p>Можно отправить без ввода — подставятся значения по умолчанию.</p>
+                            </li>
+
+                            <li>
+                                <p>После отправки появится сообщение об успехе или ошибке.</p>
+                            </li>
+                            <i>Для подробностей смотрите <a class="topic-link" data-target="terminal">работа с
+                                    терминалом</a>.</i>
+
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', e => {
+                const target = e.target.dataset.target;
+                const el = document.getElementById(target);
+                if (el) {
+                    const topPos = el.getBoundingClientRect().top + window.pageYOffset - 20;
+                    window.scrollTo({ top: topPos, behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

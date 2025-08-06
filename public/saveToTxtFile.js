@@ -1,19 +1,17 @@
-let saveDialogVisible = false;
+// let saveDialogVisible = false;
 
 document.getElementById('saveToTXTButton').addEventListener('click', function (event) {
     event.stopPropagation();
-    if (!saveDialogVisible) {
-        showSaveDialog();
-        saveDialogVisible = true;
-    }
+    showSaveDialog();
+    // saveDialogVisible = true;
 });
 
 function showSaveDialog() {
     const forSaveTxt = document.querySelector(".forSaveTxt");
-    forSaveTxt.style.display = 'block';
+    // forSaveTxt.style.display = 'block';
 
     // Генерация текста для сохранения
-    const textToSave = generateTextToSave();
+    let textToSave = generateTextToSave();
 
     // Отображение содержимого файла в элементе <pre>
     document.getElementById('fileContentPreview').textContent = textToSave;
@@ -33,15 +31,16 @@ function showSaveDialog() {
 }
 
 function generateTextToSave() {
+    // console.log(document.getElementById('palletWidth'))
     let textToSave =
-        `Ширина паллета: ${palletWidth}
-Длина паллета: ${palletHeight}
-Ширина мешка: ${rectWidth}
-Длина мешка: ${rectHeight}
-Минимальный промежуток: ${inentM.value}
-Кол-во мешков на слой: ${countBag.value}
-Количество слоев: ${minLayer.value}
-Разрешить выход за границу паллета: ${permission.checked}`;
+        `Ширина паллета: ${document.getElementById('palletWidth').value}
+Длина паллета: ${document.getElementById('palletHeight').value}
+Ширина мешка: ${document.getElementById('rectWidth').value}
+Длина мешка: ${document.getElementById('rectHeight').value}
+Минимальный промежуток: ${document.getElementById('inentM').value}
+Кол-во мешков на слой: ${document.getElementById('countBag').value}
+Количество слоев: ${document.getElementById('minLayer').value}
+Разрешить выход за границу паллета: ${document.getElementById('permission').checked}`;
 
     rectangles.forEach((rect, index) => {
         let angle = (rect.text == arrText[0]) ? '0°' :
@@ -61,7 +60,7 @@ function generateTextToSave() {
 function hideSaveDialog() {
     document.querySelector(".forSaveTxt").style.display = 'none';
     // document.removeEventListener('click', handleClickOutside);
-    saveDialogVisible = false; // Сброс состояния флага
+    // saveDialogVisible = false; // Сброс состояния флага
 
     // Убираем обработчики кликов с кнопок "Сохранить" и "Отмена"
     document.getElementById('saveButtonTxt').onclick = null;

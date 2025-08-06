@@ -9,7 +9,7 @@ input.addEventListener('change', async function (e) {
     const file = e.target.files[0];
     const nextElement = this.nextElementSibling;
     if (!file) return;
-    
+
     // nextElement.innerHTML = file.name;
     showNotification('Выбран файл: ' + file.name, 'success', 5000);
     const fileName = file.name.toLowerCase();
@@ -21,10 +21,11 @@ input.addEventListener('change', async function (e) {
         const arrayBuffer = await file.arrayBuffer();
         parseMbs(arrayBuffer); // ⬅️ вызываем MBS парсер
     } else {
-        alert("Неподдерживаемый формат файла");
+        showNotification("Неподдерживаемый формат файла", 'error', 5000);
     }
 });
 function parseMbs(arrayBuffer) {
+    cleanCanvas();
     const buf = new DataView(arrayBuffer);
     const base = 600046;
     const widthPalet = buf.getUint16(base, true);
@@ -124,12 +125,14 @@ function parseMbs(arrayBuffer) {
 
 
 function parseTextToData(text) {
-     const lines = text.split('\n').map(line => line.trim());
+    cleanCanvas();
+    const lines = text.split('\n').map(line => line.trim());
 
     function findValue(prefix) {
         const line = lines.find(l => l.startsWith(prefix));
-        if (!line ) {
-            console.warn(`Не найдена строка: ${prefix}`);
+
+        if (!line) {
+            showNotification(`Не найдена строка: ${prefix}`, "error", 5000);
             return null;
         }
         return line.replace(prefix, '').trim();
@@ -155,8 +158,14 @@ function parseTextToData(text) {
     const angleMap = { '0°': 0, '90°': 1, '180°': 2, '270°': 3 };
     let comLayer = 1;
     let rgbColor = `rgba(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.5)`;
+    if (!lines.length) {
+        console.log('Файл пуст');
+    }
+    let flagRec = false;
     for (let i = 0; i < lines.length; i++) {
+
         if (lines[i].startsWith('Прямоугольник')) {
+            flagRec = true;
             // currentIndex++; // Пропускаем "Прямоугольник N:"
             const x = +lines[i + 1].replace('Координата X:', '').trim();
             const y = -parseFloat(lines[i + 2].replace('Координата Y:', '').trim()); // Было -rect.y при сохранении
@@ -166,12 +175,12 @@ function parseTextToData(text) {
             let heightAuto = height;
             const angleStr = lines[i + 3].replace('Угол:', '').trim();
             const angleIndex = angleMap[angleStr] ?? 0;
-             if (angleIndex == 1 || angleIndex == 3) {
+            if (angleIndex == 1 || angleIndex == 3) {
                 [width, height] = [height, width];
                 [widthAuto, heightAuto] = [heightAuto, widthAuto];
             }
             const layer = +lines[i + 4].replace('Слой:', '').trim();
-            if (comLayer != layer){
+            if (comLayer != layer) {
                 rgbColor = `rgba(${getRandomInt(255)}, ${getRandomInt(255)}, ${getRandomInt(255)}, 0.5)`;
                 comLayer = layer;
             }
@@ -190,12 +199,16 @@ function parseTextToData(text) {
                 colorAuto: rgbColor
             };
             rectangles.push(rect);
-        } 
+        }
+
+    }
+    if (!flagRec) {
+        showNotification('Файл не содержит прямоугольников', "error", 5000);
     }
 
     rectanglesClone = [...rectangles.map(obj => JSON.parse(JSON.stringify(obj)))];
 
-    palletWidth =  document.getElementById('palletWidth').value;
+    palletWidth = document.getElementById('palletWidth').value;
     palletHeight = document.getElementById('palletHeight').value;
     scale = 1;
 

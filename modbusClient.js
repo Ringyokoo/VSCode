@@ -28,11 +28,12 @@ async function writeData(Palett) {
     try {
         await modbusClient.connectTCP(host, { port: port });
         console.log('Подключено к Modbus-серверу на', host, port);
-        
+
         // console.log("Получено от клиента:", JSON.stringify(Palett.palett, null, 2));
         // Дальнейшая логика отправки данных
     } catch (err) {
         console.error('Ошибка подключения:', err.message);
+        throw err;
     }
 
     if (modbusClient.isOpen) {
@@ -47,7 +48,7 @@ async function writeData(Palett) {
         whp[7] = Palett.HeightPaket;
         whp[8] = Palett.WidthPaket;
         whp[9] = Palett.HeightLayer;
-        
+
         try {
 
             // Запись регистров
@@ -57,13 +58,15 @@ async function writeData(Palett) {
                 let wh = new Array(100).fill(0);
                 let i = 0;
 
+
+
                 Palett.palett.forEach(rect => {
                     if (rect.layer == j) {
                         let angle = (rect.text == arrText[0]) ? 0 :
                             (rect.text == arrText[1]) ? 90 :
                                 (rect.text == arrText[2]) ? 180 : 270;
                         // console.log("SEND:", rect.x, rect.y, rect.angle);
-       
+
                         wh[i++] = toUInt16(rect.x);
                         wh[i++] = toUInt16(-rect.y);
                         wh[i++] = rect.layer;
@@ -77,11 +80,17 @@ async function writeData(Palett) {
                 await modbusClient.writeRegisters(j * 100, wh);
                 if (j == Palett.nLayers) {
                     wh = new Array(100).fill(0);
-                    for(let l = j+1; l < 42; l++) {
+                    for (let l = j + 1; l < 42; l++) {
                         await modbusClient.writeRegisters(l * 100, wh);
                     }
                 }
                 // console.log(`Данные для слоя ${j + 1} успешно отправлены`, j * 100, wh);
+            }
+            if (Palett.nLayers == 0) {
+                wh = new Array(100).fill(0);
+                for (let l = 1; l < 42; l++) {
+                    await modbusClient.writeRegisters(l * 100, wh);
+                }
             }
 
             if (Palett.NameBlock) {
@@ -97,11 +106,13 @@ async function writeData(Palett) {
             console.log('Данные отправлены');
         } catch (err) {
             console.error('Ошибка при отправке данных:', err.message);
+            throw err;
         } finally {
             modbusClient.close(() => console.log('Соединение закрыто'));
         }
     } else {
         console.log('Подключение к Modbus-серверу не установлено');
+        throw err;
     }
 
     // sendToModbus(Palett);

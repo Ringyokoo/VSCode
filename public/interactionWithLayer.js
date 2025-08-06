@@ -51,7 +51,8 @@ function initialScale() {
 
     scaleMax = (palletWidthValue * scaleMax < canvas.width && palletHeightValue * scaleMax < canvas.height) ? scaleMax : scaleMax - 0.1;
     if (scaleMax == 0) {
-        alert('Error')
+        showNotification('Что-то пошло не так! Попробуйте ещё раз с другими параметрами', 'error', 5000);
+        // alert('Error')
     }
     scale = scaleMax;
     spacingCenterX = float2int((parseInt(canvas.width) - palletWidthValue * scale) / 2);
@@ -604,7 +605,9 @@ function handleAccordionClick(event) {
     } else {
         closeAllPanels();
         this.classList.toggle("active");
-        panel.style.maxHeight = window.innerHeight - this.clientHeight * 2 - 50 + "px";
+        panel.style.maxHeight = document.getElementsByClassName('leftColumn')[0].clientHeight - acc[0].clientHeight * 2 + "px";
+        // console.log(document.getElementsByClassName('leftColumn')[0].clientHeight - acc[0].clientHeight * 2);
+        // console.log(window.innerHeight - this.clientHeight * 2 - 50)
         // panel.style.padding = "10px";
         tab.scrollTop = tab.scrollHeight;
     }
