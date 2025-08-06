@@ -1,4 +1,3 @@
 @echo off
-C:\Users\chapl\Desktop\VSCode
-node server.js
+modbus-server.exe
 pause

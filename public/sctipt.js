@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('saveButtonMod').addEventListener('click', (event) => {
         event.stopPropagation(); // Остановить всплытие события
         const data = {
-            // numSaveToBock: document.getElementById('numberBlock').value,
+            numSaveToBock: document.getElementById('numberBlock').value,
             palletWidth: document.getElementById('palletWidth').value,
             palletHeight: document.getElementById('palletHeight').value,
             minLayer: document.getElementById('minLayer').value,

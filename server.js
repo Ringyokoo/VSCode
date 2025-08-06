@@ -2,15 +2,29 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const modbusClient = require('./modbusClient.js');
-
+const { exec } = require('child_process');
 
 const app = express();
 const port = 3000;
 const hostname = 'localhost';
 
-// Middleware to parse JSON bodies
+// 1) Определяем базовую папку для статичных файлов:
+//    - при разработке: process.cwd() (где вы запускаете `node server.js` из папки проекта)
+//    - в собранном exe: path.dirname(process.execPath)
+const baseDir = process.pkg
+  ? path.dirname(process.execPath)
+  : process.cwd();
+
+// 2) JSON-парсер
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '/')));
+
+// 3) Статика
+app.use(express.static(path.join(baseDir, 'public')));
+
+// 4) Фолл-бек на index.html (если надо)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(baseDir, 'public', 'index.html'));
+});
 
 app.post('/send-modbus', async (req, res) => {
     const data = req.body;
@@ -42,10 +56,16 @@ app.post('/send-modbus', async (req, res) => {
     }
 });
 
-app.listen(port, hostname, async () => {
-    console.log(`Server running at http://${hostname}:${port}/`);
-    // Динамический импорт библиотеки open
-    const open = await import('open');
-    // Открыть браузер автоматически
-    open.default(`http://${hostname}:${port}`);
+// 6) Запуск
+app.listen(port, hostname, () => {
+  const url = `http://${hostname}:${port}/`;
+  console.log(`Server running at ${url}`);
+  if (process.platform === 'win32') exec(`start ${url}`);
+  else if (process.platform === 'darwin') exec(`open ${url}`);
+  else exec(`xdg-open ${url}`);
+}).on('error', err => {
+  console.error('Ошибка запуска сервера:', err.message);
+  require('readline').createInterface({
+    input: process.stdin, output: process.stdout
+  }).question('Нажмите Enter для выхода...', () => process.exit(1));
 });
